@@ -1,6 +1,6 @@
 {
-  "name": "template-ts-parcel-v2",
-  "version": "1.0.0",
+  "name": "game-wip-vsd",
+  "version": "0.0.1",
   "description": "",
   "scripts": {
     "start": "parcel serve ./index.html",
