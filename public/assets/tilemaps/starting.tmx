@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="35" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="27" nextobjectid="72">
+<map version="1.11" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="35" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="27" nextobjectid="72">
  <editorsettings>
   <export target="E:/dev/repository/pkmn_custom/public/assets/tilemaps/level1.json" format="json"/>
  </editorsettings>
