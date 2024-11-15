@@ -50,14 +50,7 @@
   </data>
  </layer>
  <objectgroup id="27" name="Objects">
-  <object id="72" name="Player" type="player-start" x="575.5" y="498.5">
-   <point/>
-  </object>
-  <object id="73" name="camera" x="575" y="509">
-   <properties>
-    <property name="camera" type="bool" value="true"/>
-    <property name="zoom" type="float" value="6"/>
-   </properties>
+  <object id="72" name="Player" type="player" x="575.5" y="498.5">
    <point/>
   </object>
  </objectgroup>
