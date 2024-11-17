@@ -1,5 +1,4 @@
-import { DefaultLoader, ImageSource, Loader } from "excalibur";
-import { Player } from "./player";
+import { DefaultLoader, ImageSource } from "excalibur";
 import sword from "./images/sword.png"; // for parcelv2 this is configured in the .parcelrc
 import player from "/public/assets/player.png"; // for parcelv2 this is configured in the .parcelrc
 import tile11 from "/public/assets/tilesets/tile11.png";

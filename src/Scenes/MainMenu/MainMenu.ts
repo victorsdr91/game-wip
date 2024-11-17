@@ -1,4 +1,4 @@
-import { Engine, Scene, SceneActivationContext } from "excalibur";
+import { Engine, Scene } from "excalibur";
 import { StartButton } from "./ui/StartButton";
 import { loader } from "../../resources";
 
