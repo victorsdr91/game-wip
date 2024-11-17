@@ -1,7 +1,13 @@
-import { Actor, vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector } from "excalibur";
+import { Actor, vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Graphic, Sprite } from "excalibur";
 import { Resources } from "./resources";
 
 type PlayerAnimations = {
+  idle: {
+    left: Sprite;
+    up: Sprite;
+    right: Sprite;
+    down: Sprite;
+  }
   walk: {
     left: Animation;
     up: Animation;
@@ -18,18 +24,19 @@ type PlayerAnimations = {
 
 export class Player extends Actor {
   private speed: number = 16; // pixels/sec
-  private multiplier: number = 2;
+  private multiplier: number = 3;
   private playerSpeed = this.speed*this.multiplier;
   private playerFrameSpeed: 200; // ms
   private health: number = 100;
   private spriteSheet: SpriteSheet;
   private animations: PlayerAnimations;
+  private direction: string = "down";
 
   constructor(pos: Vector) {
     super({
       pos: pos,
-      width: 24,
-      height: 31,
+      width: 20,
+      height: 30,
       collisionType: CollisionType.Active
     });
 
@@ -42,17 +49,23 @@ export class Player extends Actor {
       grid: {
           rows: 23,
           columns: 11,
-          spriteWidth: 24,
-          spriteHeight: 31
+          spriteWidth: 32,
+          spriteHeight: 32
       },
       spacing: {
           // Optionally specify the offset from the top left of sheet to start parsing
-          originOffset: { x: 3, y: 2 },
+          originOffset: { x: 1, y: 1 },
           // Optionally specify the margin between each sprite
-          margin: { x: 10, y: 2}
+          margin: { x: 1, y: 1}
       }
     });
     this.animations = {
+      idle: {
+        up: this.spriteSheet.getSprite(0,0),
+        down: this.spriteSheet.getSprite(0,1),
+        left: this.spriteSheet.getSprite(0,2),
+        right: this.spriteSheet.getSprite(0,3)
+      },
       walk: {
         up: Animation.fromSpriteSheet(this.spriteSheet, range(0, 2), this.playerFrameSpeed),
         down: Animation.fromSpriteSheet(this.spriteSheet, range(11, 13), this.playerFrameSpeed),
@@ -71,25 +84,44 @@ export class Player extends Actor {
 
   onPreUpdate(engine: Engine, elapsedMs: number): void {
     this.vel = Vector.Zero;
+    this.multiplier=3;
+    this.playerSpeed = this.speed*this.multiplier;
+    var walkMode = "idle";
 
-    this.graphics.add(this.spriteSheet.getSprite(0,0));
+    this.graphics.use(this.animations[walkMode][this.direction]);
+    walkMode = this.walkMode(engine);
+    
     if (engine.input.keyboard.isHeld(Keys.ArrowRight)) {
-        this.vel = vec(this.playerSpeed, 0);
-        this.graphics.use(this.animations.walk.right);
+      this.direction = "right";
+      this.vel = vec(this.playerSpeed, 0);
+      this.graphics.use(this.animations[walkMode][this.direction]);
     }
     if (engine.input.keyboard.isHeld(Keys.ArrowLeft)) {
-        this.vel = vec(-this.playerSpeed, 0);
-        this.graphics.use(this.animations.walk.left);
+      this.direction = "left";
+      this.vel = vec(-this.playerSpeed, 0);
+      this.graphics.use(this.animations[walkMode][this.direction]);
     }
     if (engine.input.keyboard.isHeld(Keys.ArrowUp)) {
-        this.vel = vec(0, -this.playerSpeed);
-        this.graphics.use(this.animations.walk.up);
+      this.direction = "up";
+      this.vel = vec(0, -this.playerSpeed);
+      this.graphics.use(this.animations[walkMode][this.direction]);
     }
     if (engine.input.keyboard.isHeld(Keys.ArrowDown)) {
-        this.vel = vec(0, this.playerSpeed);
-        this.graphics.use(this.animations.walk.down);
+      this.direction = "down";
+      this.vel = vec(0, this.playerSpeed);
+      this.graphics.use(this.animations[walkMode][this.direction]);
     }
+    
+      
+}
 
+private walkMode(engine: Engine): string {
+  if(engine.input.keyboard.isHeld(Keys.A)) {
+    this.multiplier=6;
+    this.playerSpeed = this.speed*this.multiplier;
+    return "run";
+  }
+  return "walk";
 }
 
   getSpeed() {

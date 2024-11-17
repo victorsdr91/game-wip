@@ -16,6 +16,7 @@ export const Resources = {
   Level1Map: new TiledResource(
     starting, 
     {
+      useMapBackgroundColor: true,
       pathMap: [
         {
           path: '../tilesets/buildings.tsx',

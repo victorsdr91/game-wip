@@ -1,27 +1,36 @@
-import { Engine, Vector } from "excalibur";
+import { Engine, Scene, Vector } from "excalibur";
 import { loader } from "./resources";
 import { Level1 } from "./Scenes/Level1/level1";
-import { Player } from "./player";
-import { Resources } from "./resources";
+import { MainMenu } from "./Scenes/MainMenu/MainMenu";
+
+interface playerInfoType {
+  nickname: string;
+  position: Vector;
+  zIndex: number;
+}
 
 class Game extends Engine {
   constructor() {
-    super({width: 800, height: 600});
+    super({width: 1024, height: 768});
   }
-  initialize() {
-    this.addScene('level1', Level1);
-    const player = new Player(new Vector(575.5, 498.5));
-    
-    player.z = 4;
-    this.currentScene.add(player);
-    this.currentScene.camera.strategy.lockToActor(player);
-    this.currentScene.camera.zoom = 1.5;
-    this.start(loader).then(() => {
-      Resources.Level1Map.addToScene(this.currentScene);
-    });
+  initialize(scene: Scene)  {
+    this.addScene('mainmenu', new MainMenu());
+    this.addScene('worldScene', scene);
 
+    this.start(loader).then(() => {
+      this.goToScene('mainmenu').then(() => {
+        console.log(this.currentSceneName);
+      });
+      
+    });
   }
 }
 
 export const game = new Game();
-game.initialize();
+const playerInfo = {
+  nickname: "TrianMARC",
+  position: new Vector(575, 498),
+  zIndex: 4,
+};
+game.showDebug(true);
+game.initialize(new Level1(playerInfo));
