@@ -1,5 +1,5 @@
 import { DefaultLoader, ImageSource } from "excalibur";
-import sword from "./images/sword.png"; // for parcelv2 this is configured in the .parcelrc
+import titleback from "/public/assets/images/titleback.webp";  // for parcelv2 this is configured in the .parcelrc
 import player from "/public/assets/player.png"; // for parcelv2 this is configured in the .parcelrc
 import tile11 from "/public/assets/tilesets/tile11.png";
 import tile111 from "/public/assets/tilesets/tile111.png";
@@ -10,7 +10,7 @@ import starting from "/public/assets/tilemaps/starting.tmx";
 import { TiledResource, TilesetResource } from "@excaliburjs/plugin-tiled";
 
 export const Resources = {
-  Sword: new ImageSource(sword),
+  TitleBackground: new ImageSource(titleback),
   Player: new ImageSource(player),
   Level1Map: new TiledResource(
     starting, 

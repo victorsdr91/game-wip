@@ -1,4 +1,4 @@
-import { Engine, Scene, Vector } from "excalibur";
+import { DisplayMode, Engine, Scene, Vector } from "excalibur";
 import { loader } from "./resources";
 import { Level1 } from "./Scenes/Level1/level1";
 import { MainMenu } from "./Scenes/MainMenu/MainMenu";
@@ -11,7 +11,11 @@ interface playerInfoType {
 
 class Game extends Engine {
   constructor() {
-    super({width: 1024, height: 768});
+    super({
+      width: 1366,
+      height: 768,
+      displayMode: DisplayMode.FillScreen
+    });
   }
   initialize(scene: Scene)  {
     this.addScene('mainmenu', new MainMenu());

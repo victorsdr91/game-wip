@@ -1,10 +1,10 @@
 import { Scene } from "excalibur";
-import { PlayerInfoType } from "./contract";
+import { playerInfoType } from "./contract";
 import { Player } from "../../player";
 import { Resources } from "../../resources";
 
 export class Level1 extends Scene {
-    private _playerInfo: PlayerInfoType;
+    private _playerInfo: playerInfoType;
     private player: Player;
     
     constructor (playerInfo) {
