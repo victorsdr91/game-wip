@@ -14,7 +14,7 @@ class Game extends Engine {
     super({
       width: 1366,
       height: 768,
-      displayMode: DisplayMode.FillScreen
+      displayMode: DisplayMode.FitScreen
     });
   }
   initialize(scene: Scene)  {

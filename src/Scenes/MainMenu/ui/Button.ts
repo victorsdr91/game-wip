@@ -1,26 +1,29 @@
-import { Color, Font, ScreenElement, Text } from "excalibur";
+import { ScreenElement } from "excalibur";
+import { MainMenuResources } from "../resources";
 
 export class Button extends ScreenElement {
     private callBack: () => void;
-    private value: string;
 
-    constructor(callBack: () => void, value: string, position: {x: number, y: number}) {
+    constructor(callBack: () => void, position: {x: number, y: number}) {
       super(position);
       this.callBack = callBack;
-      this.value = value;
     }
     onInitialize() {
-        const text = new Text({ text: this.value, font: new Font({size: 25, color: Color.White})});
+        const buttonSprite = MainMenuResources.Button.toSprite();
+        const buttonHoverSprite = MainMenuResources.ButtonHover.toSprite();
+        this.graphics.add("button", buttonSprite);
+        this.graphics.add("button-hover", buttonHoverSprite);
 
-        this.graphics.add(text);
+        this.graphics.use("button");
+
         this.on('pointerup', () => {
             this.callBack();
         });
         this.on('pointerenter', () => {
-          text.opacity = 0.4;
+          this.graphics.use("button-hover");
         });
         this.on('pointerleave', () => {
-          text.opacity = 1;
+          this.graphics.use("button");
         });
     }
   }

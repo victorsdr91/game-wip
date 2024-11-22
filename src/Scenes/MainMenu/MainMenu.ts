@@ -2,10 +2,12 @@ import { Engine, Scene } from "excalibur";
 import { Button } from "./ui/Button";
 import { GameText } from "./ui/GameText";
 import { Background } from "./ui/Background";
+import { mainMenuLoader } from "./resources";
 
 export class MainMenu extends Scene {
     private fullScreenButton: Button;
-    private windowedButton: Button;
+    private fullScreenButtonText: GameText;
+    private windowedButtonText: GameText;
 
     /**
      * Start-up logic, called once
@@ -14,56 +16,62 @@ export class MainMenu extends Scene {
         const startAction = () => { engine.goToScene('worldScene') };
         const startButton = new Button(
             startAction,
-            "Start", {
+            {
                 x: 350,
                 y: 350,
             }
         );
+        const startButtonText = new GameText("START", 26, { x:400, y:365});
         const exitButton = new Button(
             () => {},
-            "Exit",
             {
                 x: 350,
-                y: 380,
+                y: 400,
             }
         );
+        const exitButtonText = new GameText("EXIT", 26, { x:410, y:415});
 
         this.fullScreenButton = new Button(
-            () => { engine.screen.goFullScreen() },
-            "Full-Screen mode",
+            () => {this.setFullScreen(engine)},
             {
                 x: 350,
-                y: 450,
+                y: 500,
             }
         );
+        this.fullScreenButtonText = new GameText("FULL SCREEN", 24, { x:360, y:515});
 
-        this.windowedButton = new Button(
-            () => { engine.screen.exitFullScreen() },
-            "Window mode",
-            {
-                x: 350,
-                y: 450,
-            }
-        );
-        const title = new GameText("GAME WIP", 36, {x: 350, y: 150});
-        const description = new GameText("by Victor Sanchez", 20, {x: 350, y: 180});
+        this.windowedButtonText = new GameText("WINDOW", 26, { x:385, y:515});
         this.add(new Background({x: 0, y: 0}));
-        this.add(title);
-        this.add(description);
-        this.add(startButton);
-        this.add(exitButton);
-        this.add(this.fullScreenButton);
+        
+        engine.start(mainMenuLoader).then(() => {
+            this.add(new Background({x: 0, y: 0}));
+            this.add(startButton);
+            this.add(exitButton);
+            this.add(this.fullScreenButton);
+            this.add(startButtonText);
+            this.add(exitButtonText);
+            this.add(this.fullScreenButtonText);
+            
+        });
     }
 
     public onPreUpdate(engine: Engine, delta: number): void {
         if(engine.screen.isFullScreen) {
-            this.remove(this.fullScreenButton);
-            this.add(this.windowedButton);
-        } else {
-            this.remove(this.windowedButton);
-            this.add(this.fullScreenButton);
+            this.remove(this.fullScreenButtonText);
+            this.add(this.windowedButtonText);
+        } else if(this.windowedButtonText.isInitialized) {
+            this.remove(this.windowedButtonText);
+            this.add(this.fullScreenButtonText);
         }
         
+    }
+
+    private setFullScreen(engine: Engine) {
+        if(engine.screen.isFullScreen) {
+            engine.screen.exitFullScreen();
+        } else {
+            engine.screen.goFullScreen();
+        }
     }
 
 }

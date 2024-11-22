@@ -10,7 +10,7 @@ export class GameText extends ScreenElement {
       this.size = size;
     }
     onInitialize() {
-        const text = new Text({ text: this.text, font: new Font({size: this.size, color: Color.White})});
+        const text = new Text({ text: this.text, font: new Font({size: this.size, color: Color.Gray, strokeColor: Color.DarkGray})});
         this.graphics.add(text);
     }
   }
