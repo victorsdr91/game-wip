@@ -2,7 +2,7 @@ import { DisplayMode, Engine, Scene, Vector } from "excalibur";
 import { loader } from "./resources";
 import { Level } from "./scenes/Level1/Level";
 import { MainMenu } from "./scenes/MainMenu/MainMenu";
-import { playerInfoType, worldInfoType } from "./scenes/Level1/contract";
+import { npcType, NPCTypes, playerInfoType, worldInfoType } from "./scenes/Level1/contract";
 
 class Game extends Engine {
   constructor() {
@@ -34,8 +34,21 @@ const playerInfo: playerInfoType = {
   zIndex: 4,
 };
 
+const npcInfo = { 
+  npcName: "Pepito",
+  pos: new Vector(356, 550),
+  health: 100,
+  sprite: "human_001",
+  dialogue: [ "Hola, que tal?"],
+  type: NPCTypes.PACIFIC
+}
+
+const npc = new Array<npcType>();
+npc.push(npcInfo);
+
 const worldInfo: worldInfoType = {
   playerInfo,
+  npc
 }
 game.showDebug(true);
 game.initialize(worldInfo);

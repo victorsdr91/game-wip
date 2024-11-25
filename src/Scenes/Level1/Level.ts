@@ -1,26 +1,54 @@
-import { Scene } from "excalibur";
-import { playerInfoType, worldInfoType } from "./contract";
+import { Engine, Scene, Vector } from "excalibur";
+import { npcType, NPCTypes, playerInfoType, worldInfoType } from "./contract";
 import { Player } from "../../model/Player/Player";
 
-import { Resources } from "../../resources";
+import { Resources, worldLoader } from "./resources";
+import { PacificNpc } from "../../model/npc/PacificNpc";
 
 
 export class Level extends Scene {
     private _playerInfo: playerInfoType;
+    private _npcsInfo: Array<npcType>;
     private player: Player;
     
     constructor (worldInfo: worldInfoType) {
         super();
         this._playerInfo = worldInfo.playerInfo;
+        this._npcsInfo = worldInfo.npc;
+    }
+
+    onInitialize(engine: Engine): void {
+        engine.start(worldLoader).then(() => {
+            this.player = new Player(this._playerInfo.position);
+            this.player.z = this._playerInfo.zIndex;
+            this.player.setNickname(this._playerInfo.nickname);
+            this.add(this.player);
+            this.camera.strategy.lockToActor(this.player);
+            this.camera.zoom = 1.5;
+            Resources.Level1Map.addToScene(this);
+
+            this.loadNpcs();
+        });
     }
 
     onActivate() {
-        this.player = new Player(this._playerInfo.position);
-        this.player.z = this._playerInfo.zIndex;
-        this.player.setNickname(this._playerInfo.nickname);
-        this.add(this.player);
-        this.camera.strategy.lockToActor(this.player);
-        this.camera.zoom = 1.5;
-        Resources.Level1Map.addToScene(this);
+        
+    }
+
+    loadNpcs() {
+        //TODO: Read array of npcs
+        this._npcsInfo.forEach((npcType) => {
+            let npc;
+            if(npcType.type === NPCTypes.PACIFIC) {
+                npc = new PacificNpc({
+                    npcName: npcType.npcName,
+                    pos: npcType.pos,
+                    health: npcType.health,
+                    sprite: Resources[npcType.sprite],
+                    dialogue: npcType.dialogue
+                });
+            }
+            this.add(npc);
+        }) 
     }
 }

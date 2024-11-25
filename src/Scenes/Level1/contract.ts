@@ -6,13 +6,24 @@ export interface playerInfoType {
     zIndex: number;
 }
 
+export enum NPCTypes {
+    PACIFIC = "pacific",
+    AGRESSIVE = "agressive"
+}
+
 export interface npcType {
-    position: Vector;
-    name: string;
-    type: string;
+    npcName: string;
+    type: NPCTypes;
+    pos: Vector;
+    health: number,
+    sprite: string,
+    dialogue?: Array<String>
+
+    
 }
   
 export interface worldInfoType {
     playerInfo: playerInfoType,
-    npc?: [npcType],
+    npc: Array<npcType>,
 }
+

@@ -1,4 +1,4 @@
-import { Actor, CollisionType, Engine, ImageSource, Sprite, SpriteSheet, Vector } from "excalibur";
+import { Actor, CollisionType, ImageSource, Sprite, SpriteSheet} from "excalibur";
 
 export class Npc extends Actor {
     private speed: number = 16; // pixels/sec
@@ -16,7 +16,7 @@ export class Npc extends Actor {
         pos: pos,
         width: 20,
         height: 30,
-        collisionType: CollisionType.Active
+        collisionType: CollisionType.Fixed
       });
 
       this.npcName = npcName;
@@ -29,17 +29,11 @@ export class Npc extends Actor {
       const spriteSheet = SpriteSheet.fromImageSource({
         image: this.sprite,
         grid: {
-            rows: 23,
-            columns: 11,
+            rows: 4,
+            columns: 3,
             spriteWidth: 32,
             spriteHeight: 32
         },
-        spacing: {
-            // Optionally specify the offset from the top left of sheet to start parsing
-            originOffset: { x: 1, y: 1 },
-            // Optionally specify the margin between each sprite
-            margin: { x: 1, y: 1}
-        }
       });
       this.animations = {
         idle: {
@@ -49,6 +43,10 @@ export class Npc extends Actor {
           right: spriteSheet.getSprite(0,3)
         },
       };
+      this.z = 99;
+
+      this.graphics.add("idle-down", this.animations.idle.down);
+      this.graphics.use("idle-down");
       
     }
 
