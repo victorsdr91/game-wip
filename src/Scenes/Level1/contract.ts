@@ -14,12 +14,14 @@ export enum NPCTypes {
 export interface npcType {
     npcName: string;
     type: NPCTypes;
-    pos: Vector;
-    health: number,
-    sprite: string,
-    dialogue?: Array<String>
-
-    
+    pos: {
+        x: number,
+        y: number,
+        z?: number
+    };
+    health: number;
+    sprite: string;
+    dialogue?: Array<String>;    
 }
   
 export interface worldInfoType {

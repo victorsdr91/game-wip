@@ -1,4 +1,4 @@
-import { Actor, CollisionType, ImageSource, Sprite, SpriteSheet} from "excalibur";
+import { Actor, CollisionType, ImageSource, Sprite, SpriteSheet, Vector} from "excalibur";
 
 export class Npc extends Actor {
     private speed: number = 16; // pixels/sec
@@ -13,11 +13,13 @@ export class Npc extends Actor {
   
     constructor({ npcName, pos, health, sprite }) {
       super({
-        pos: pos,
+        pos: new Vector(pos.x, pos.y),
         width: 20,
         height: 30,
         collisionType: CollisionType.Fixed
       });
+
+      this.z = pos.z;
 
       this.npcName = npcName;
       this.health = health;

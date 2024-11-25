@@ -36,7 +36,7 @@ const playerInfo: playerInfoType = {
 
 const npcInfo = { 
   npcName: "Pepito",
-  pos: new Vector(356, 550),
+  pos: {x:356, y: 550, z: 99},
   health: 100,
   sprite: "human_001",
   dialogue: [ "Hola, que tal?"],
