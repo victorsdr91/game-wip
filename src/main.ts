@@ -1,8 +1,8 @@
 import { DisplayMode, Engine, Scene, Vector } from "excalibur";
 import { loader } from "./resources";
-import { Level1 } from "./Scenes/Level1/level1";
-import { MainMenu } from "./Scenes/MainMenu/MainMenu";
-import { playerInfoType, worldInfoType } from "./Scenes/Level1/contract";
+import { Level } from "./scenes/Level1/Level";
+import { MainMenu } from "./scenes/MainMenu/MainMenu";
+import { playerInfoType, worldInfoType } from "./scenes/Level1/contract";
 
 class Game extends Engine {
   constructor() {
@@ -14,7 +14,7 @@ class Game extends Engine {
   }
   initialize(worldInfo: worldInfoType)  {
 
-    const mainWorld = new Level1(worldInfo);
+    const mainWorld = new Level(worldInfo);
     this.addScene('mainmenu', new MainMenu());
     this.addScene('worldScene', mainWorld);
 

@@ -1,11 +1,11 @@
-import { Scene, Vector } from "excalibur";
+import { Scene } from "excalibur";
 import { playerInfoType, worldInfoType } from "./contract";
 import { Player } from "../../model/Player/Player";
 
 import { Resources } from "../../resources";
 
 
-export class Level1 extends Scene {
+export class Level extends Scene {
     private _playerInfo: playerInfoType;
     private player: Player;
     

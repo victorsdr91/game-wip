@@ -1069,4 +1069,24 @@
    <property name="collision" type="bool" value="true"/>
   </properties>
  </tile>
+ <wangsets>
+  <wangset name="Sand way" type="mixed" tile="-1">
+   <wangcolor name="" color="#ff0000" tile="-1" probability="1"/>
+   <wangcolor name="" color="#00ff00" tile="-1" probability="1"/>
+   <wangcolor name="" color="#0000ff" tile="-1" probability="1"/>
+   <wangtile tileid="496" wangid="3,3,2,2,2,3,3,3"/>
+   <wangtile tileid="497" wangid="3,3,2,2,2,2,2,3"/>
+   <wangtile tileid="498" wangid="3,3,3,3,2,2,2,3"/>
+   <wangtile tileid="504" wangid="2,2,2,2,2,3,3,3"/>
+   <wangtile tileid="505" wangid="1,1,1,1,1,1,1,1"/>
+   <wangtile tileid="506" wangid="2,3,3,3,2,2,2,2"/>
+   <wangtile tileid="512" wangid="2,2,2,3,3,3,3,3"/>
+   <wangtile tileid="513" wangid="2,2,2,3,3,3,2,2"/>
+   <wangtile tileid="514" wangid="2,3,3,3,3,3,2,2"/>
+  </wangset>
+  <wangset name="Grass" type="mixed" tile="-1">
+   <wangcolor name="" color="#ff0000" tile="-1" probability="1"/>
+   <wangtile tileid="563" wangid="1,1,1,1,1,1,1,1"/>
+  </wangset>
+ </wangsets>
 </tileset>

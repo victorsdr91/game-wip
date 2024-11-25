@@ -51,16 +51,6 @@ export class Npc extends Actor {
       };
       
     }
-  
-    onPreUpdate(engine: Engine, elapsedMs: number): void {
-      this.vel = Vector.Zero;
-      this.multiplier=3;
-      this.playerSpeed = this.speed*this.multiplier;
-      var walkMode = "idle";
-  
-      this.graphics.use(this.animations[walkMode][this.direction]);
-        
-  }
 
   public getHealth(): number{
     return this.health;
