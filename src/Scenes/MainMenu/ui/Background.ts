@@ -1,5 +1,5 @@
 import { ScreenElement} from "excalibur";
-import { Resources } from "../../../resources";
+import { MainMenuResources } from "../resources";
 
 export class Background extends ScreenElement {
     private callBack: () => void;
@@ -8,6 +8,6 @@ export class Background extends ScreenElement {
       super(position);
     }
     onInitialize() {
-       this.graphics.add(Resources.TitleBackground.toSprite());
+       this.graphics.add(MainMenuResources.TitleBackground.toSprite());
     }
   }
