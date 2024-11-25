@@ -2,12 +2,7 @@ import { DisplayMode, Engine, Scene, Vector } from "excalibur";
 import { loader } from "./resources";
 import { Level1 } from "./Scenes/Level1/level1";
 import { MainMenu } from "./Scenes/MainMenu/MainMenu";
-
-interface playerInfoType {
-  nickname: string;
-  position: Vector;
-  zIndex: number;
-}
+import { playerInfoType, worldInfoType } from "./Scenes/Level1/contract";
 
 class Game extends Engine {
   constructor() {
@@ -17,9 +12,11 @@ class Game extends Engine {
       displayMode: DisplayMode.FitScreen
     });
   }
-  initialize(scene: Scene)  {
+  initialize(worldInfo: worldInfoType)  {
+
+    const mainWorld = new Level1(worldInfo);
     this.addScene('mainmenu', new MainMenu());
-    this.addScene('worldScene', scene);
+    this.addScene('worldScene', mainWorld);
 
     this.start(loader).then(() => {
       this.goToScene('mainmenu').then(() => {
@@ -31,10 +28,14 @@ class Game extends Engine {
 }
 
 export const game = new Game();
-const playerInfo = {
+const playerInfo: playerInfoType = {
   nickname: "TrianMARC",
   position: new Vector(575, 498),
   zIndex: 4,
 };
+
+const worldInfo: worldInfoType = {
+  playerInfo,
+}
 game.showDebug(true);
-game.initialize(new Level1(playerInfo));
+game.initialize(worldInfo);

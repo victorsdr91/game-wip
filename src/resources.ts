@@ -7,7 +7,7 @@ import buildings from "/public/assets/tilesets/buildings.tsx";
 import terrains from "/public/assets/tilesets/terrains.tsx";
 import starting from "/public/assets/tilemaps/starting.tmx";
 
-import { TiledResource, TilesetResource } from "@excaliburjs/plugin-tiled";
+import { TiledResource } from "@excaliburjs/plugin-tiled";
 
 export const Resources = {
   TitleBackground: new ImageSource(titleback),

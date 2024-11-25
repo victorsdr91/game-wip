@@ -1,5 +1,5 @@
 import { Actor, vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Graphic, Sprite } from "excalibur";
-import { Resources } from "./resources";
+import { Resources } from "../../resources";
 
 type PlayerAnimations = {
   idle: {
@@ -24,8 +24,9 @@ type PlayerAnimations = {
 
 export class Player extends Actor {
   private speed: number = 16; // pixels/sec
-  private multiplier: number = 3;
-  private playerSpeed = this.speed*this.multiplier;
+  private nickname: string;
+  private multiplier: number;
+  private playerSpeed: number;
   private playerFrameSpeed: 200; // ms
   private health: number = 100;
   private spriteSheet: SpriteSheet;
@@ -40,7 +41,6 @@ export class Player extends Actor {
       collisionType: CollisionType.Active
     });
 
-    
   }
 
   onInitialize() {
@@ -115,20 +115,22 @@ export class Player extends Actor {
       
 }
 
-private walkMode(engine: Engine): string {
-  if(engine.input.keyboard.isHeld(Keys.A)) {
-    this.multiplier=6;
-    this.playerSpeed = this.speed*this.multiplier;
-    return "run";
-  }
-  return "walk";
-}
-
-  getSpeed() {
-    return this.speed;
+  private walkMode(engine: Engine): string {
+    if(engine.input.keyboard.isHeld(Keys.A)) {
+      this.multiplier=6;
+      this.playerSpeed = this.speed*this.multiplier;
+      return "run";
+    }
+    return "walk";
   }
 
-  getHealth() {
-    return this.health;
+  public setNickname(nickname: string): void {
+    this.nickname = nickname;
   }
+
+  public getNickname(): string {
+    return this.nickname
+  }
+
+
 }
