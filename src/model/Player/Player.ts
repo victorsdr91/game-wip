@@ -119,7 +119,7 @@ export class Player extends Actor {
         },
         {
           graphic: this.nickname,
-          offset: new Vector(16, -8),
+          offset: new Vector(16, -4),
         },
         
       ]
