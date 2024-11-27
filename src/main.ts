@@ -3,18 +3,26 @@ import { loader } from "./resources";
 import { Level } from "./scenes/Level1/Level";
 import { MainMenu } from "./scenes/MainMenu/MainMenu";
 import { npcType, NPCTypes, playerInfoType, worldInfoType } from "./scenes/Level1/contract";
+import { configType } from "./contract";
+import { default as keyboardConfig} from '../public/config/keyboard.json';
+import { Config } from "./state/Config";
 
 class Game extends Engine {
-  constructor() {
+  private worldInfo: worldInfoType;
+  private config: configType;
+
+  constructor(worldInfo: worldInfoType, config: configType) {
     super({
       width: 1366,
       height: 768,
       displayMode: DisplayMode.FitScreen
     });
+    this.worldInfo = worldInfo;
+    this.config = config;
   }
-  initialize(worldInfo: worldInfoType)  {
-
-    const mainWorld = new Level(worldInfo);
+  initialize()  {
+    Config.setControls(config.controls);
+    const mainWorld = new Level(this.worldInfo);
     this.addScene('mainmenu', new MainMenu());
     this.addScene('worldScene', mainWorld);
 
@@ -27,7 +35,7 @@ class Game extends Engine {
   }
 }
 
-export const game = new Game();
+
 const playerInfo: playerInfoType = {
   nickname: "TrianMARC",
   position: new Vector(575, 498),
@@ -41,7 +49,13 @@ const npcInfo = {
   sprite: "human_001",
   dialogue: [ "Hola, que tal?"],
   type: NPCTypes.PACIFIC
-}
+};
+
+const config: configType = {
+  controls: {
+    keyboard: keyboardConfig,
+  }
+};
 
 const npcList = new Array<npcType>();
 npcList.push(npcInfo);
@@ -49,6 +63,8 @@ npcList.push(npcInfo);
 const worldInfo: worldInfoType = {
   playerInfo,
   npcList
-}
+};
+
+export const game = new Game(worldInfo, config);
 game.showDebug(true);
-game.initialize(worldInfo);
+game.initialize();

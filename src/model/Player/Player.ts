@@ -1,5 +1,7 @@
 import { Actor, vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Graphic, Sprite, GraphicsGroup, Font, Color, Text, TextAlign } from "excalibur";
 import { Resources } from "../../resources";
+import { configType } from "../../contract";
+import { Config } from "../../state/Config";
 
 type PlayerAnimations = {
   idle: {
@@ -86,29 +88,33 @@ export class Player extends Actor {
     this.vel = Vector.Zero;
     this.multiplier=3;
     this.playerSpeed = this.speed*this.multiplier;
-    var walkMode = "idle";
+    let isWalking = false;
+
+    const movementConfig = Config.getControls().keyboard.movement;
+    const isRunning = this.isRunning(engine, movementConfig);
     
-    if (engine.input.keyboard.isHeld(Keys.ArrowRight)) {
-      walkMode = this.walkMode(engine);
+    if (engine.input.keyboard.isHeld(Keys[movementConfig.right])) {
+      isWalking = true;
       this.direction = "right";
       this.vel = vec(this.playerSpeed, 0);
     }
-    if (engine.input.keyboard.isHeld(Keys.ArrowLeft)) {
-      walkMode = this.walkMode(engine);
+    if (engine.input.keyboard.isHeld(Keys[movementConfig.left])) {
+      isWalking = true;
       this.direction = "left";
       this.vel = vec(-this.playerSpeed, 0);
     }
-    if (engine.input.keyboard.isHeld(Keys.ArrowUp)) {
-      walkMode = this.walkMode(engine);
+    if (engine.input.keyboard.isHeld(Keys[movementConfig.up])) {
+      isWalking = true;
       this.direction = "up";
       this.vel = vec(0, -this.playerSpeed);
     }
-    if (engine.input.keyboard.isHeld(Keys.ArrowDown)) {
-      walkMode = this.walkMode(engine);
+    if (engine.input.keyboard.isHeld(Keys[movementConfig.down])) {
+      isWalking = true;
       this.direction = "down";
       this.vel = vec(0, this.playerSpeed);
     }
 
+    const  walkMode = isWalking ? (isRunning ? "run" : "walk") : "idle";
 
     const graphicsGroup = new GraphicsGroup({
       useAnchor: true,
@@ -126,16 +132,15 @@ export class Player extends Actor {
     });
     graphicsGroup.width = 32;
     this.graphics.use(graphicsGroup);
-      
 }
 
-  private walkMode(engine: Engine): string {
-    if(engine.input.keyboard.isHeld(Keys.A)) {
+  private isRunning(engine: Engine, movementConfig): boolean {
+    if(engine.input.keyboard.isHeld(movementConfig.run)) {
       this.multiplier=6;
       this.playerSpeed = this.speed*this.multiplier;
-      return "run";
+      return true;
     }
-    return "walk";
+    return false;
   }
 
 }

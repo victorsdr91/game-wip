@@ -1,4 +1,5 @@
 import { Vector } from "excalibur";
+import { configType } from "../../contract";
 
 export interface playerInfoType {
     nickname: string;
@@ -25,7 +26,8 @@ export interface npcType {
 }
   
 export interface worldInfoType {
-    playerInfo: playerInfoType,
-    npcList: Array<npcType>,
+    config: configType;
+    playerInfo: playerInfoType;
+    npcList: Array<npcType>;
 }
 

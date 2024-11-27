@@ -1,0 +1,9 @@
+{
+    "movement": {
+        "up": "KeyW",
+        "down": "KeyS",
+        "left": "KeyA",
+        "right": "KeyD",
+        "run": "ShiftLeft"
+    }
+}

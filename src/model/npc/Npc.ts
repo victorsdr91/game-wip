@@ -1,6 +1,6 @@
 import { Actor, CollisionType, ImageSource, Sprite, SpriteSheet, Vector} from "excalibur";
 
-export class Npc extends Actor {
+export abstract class Npc extends Actor {
     private speed: number = 16; // pixels/sec
     private npcName: string;
     private multiplier: number;
