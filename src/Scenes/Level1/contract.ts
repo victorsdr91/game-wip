@@ -26,6 +26,6 @@ export interface npcType {
   
 export interface worldInfoType {
     playerInfo: playerInfoType,
-    npc: Array<npcType>,
+    npcList: Array<npcType>,
 }
 

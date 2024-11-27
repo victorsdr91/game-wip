@@ -43,12 +43,12 @@ const npcInfo = {
   type: NPCTypes.PACIFIC
 }
 
-const npc = new Array<npcType>();
-npc.push(npcInfo);
+const npcList = new Array<npcType>();
+npcList.push(npcInfo);
 
 const worldInfo: worldInfoType = {
   playerInfo,
-  npc
+  npcList
 }
 game.showDebug(true);
 game.initialize(worldInfo);

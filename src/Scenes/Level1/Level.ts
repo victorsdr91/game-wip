@@ -4,6 +4,7 @@ import { Player } from "../../model/Player/Player";
 
 import { Resources, worldLoader } from "./resources";
 import { PacificNpc } from "../../model/npc/PacificNpc";
+import { GameText } from "../MainMenu/ui/GameText";
 
 
 export class Level extends Scene {
@@ -14,7 +15,7 @@ export class Level extends Scene {
     constructor (worldInfo: worldInfoType) {
         super();
         this._playerInfo = worldInfo.playerInfo;
-        this._npcsInfo = worldInfo.npc;
+        this._npcsInfo = worldInfo.npcList;
     }
 
     onInitialize(engine: Engine): void {
@@ -23,19 +24,21 @@ export class Level extends Scene {
         });
     }
 
-    onActivate() {
-        this.player = new Player(this._playerInfo.position);
-        this.player.z = this._playerInfo.zIndex;
-        this.player.setNickname(this._playerInfo.nickname);
-        this.add(this.player);
-        this.camera.strategy.lockToActor(this.player);
-        this.camera.zoom = 1.5;
-            
-
+    onActivate(): void {
+        this.loadPlayer();
         this.loadNpcs();
     }
 
-    loadNpcs() {
+    private loadPlayer(): void {
+        this.player = new Player(this._playerInfo.position, this._playerInfo.nickname);
+        const nickname = new GameText(this._playerInfo.nickname, 6, this._playerInfo.position);
+        this.player.z = this._playerInfo.zIndex;
+        this.add(this.player);
+        this.camera.strategy.lockToActor(this.player);
+        this.camera.zoom = 1.5;
+    }
+
+    private loadNpcs(): void {
         this._npcsInfo.forEach((npcType) => {
             let npc;
             if(npcType.type === NPCTypes.PACIFIC) {

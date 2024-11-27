@@ -1,4 +1,4 @@
-import { Actor, vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Graphic, Sprite } from "excalibur";
+import { Actor, vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Graphic, Sprite, GraphicsGroup, Font, Color, Text, TextAlign } from "excalibur";
 import { Resources } from "../../resources";
 
 type PlayerAnimations = {
@@ -24,7 +24,7 @@ type PlayerAnimations = {
 
 export class Player extends Actor {
   private speed: number = 16; // pixels/sec
-  private nickname: string;
+  private nickname: Text;
   private multiplier: number;
   private playerSpeed: number;
   private playerFrameSpeed: 200; // ms
@@ -33,14 +33,14 @@ export class Player extends Actor {
   private animations: PlayerAnimations;
   private direction: string = "down";
 
-  constructor(pos: Vector) {
+  constructor(pos: Vector, nickname: string) {
     super({
       pos: pos,
       width: 20,
       height: 30,
       collisionType: CollisionType.Active
     });
-
+    this.nickname = new Text({ text: nickname, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
   }
 
   onInitialize() {
@@ -87,31 +87,45 @@ export class Player extends Actor {
     this.multiplier=3;
     this.playerSpeed = this.speed*this.multiplier;
     var walkMode = "idle";
-
-    this.graphics.use(this.animations[walkMode][this.direction]);
-    walkMode = this.walkMode(engine);
     
     if (engine.input.keyboard.isHeld(Keys.ArrowRight)) {
+      walkMode = this.walkMode(engine);
       this.direction = "right";
       this.vel = vec(this.playerSpeed, 0);
-      this.graphics.use(this.animations[walkMode][this.direction]);
     }
     if (engine.input.keyboard.isHeld(Keys.ArrowLeft)) {
+      walkMode = this.walkMode(engine);
       this.direction = "left";
       this.vel = vec(-this.playerSpeed, 0);
-      this.graphics.use(this.animations[walkMode][this.direction]);
     }
     if (engine.input.keyboard.isHeld(Keys.ArrowUp)) {
+      walkMode = this.walkMode(engine);
       this.direction = "up";
       this.vel = vec(0, -this.playerSpeed);
-      this.graphics.use(this.animations[walkMode][this.direction]);
     }
     if (engine.input.keyboard.isHeld(Keys.ArrowDown)) {
+      walkMode = this.walkMode(engine);
       this.direction = "down";
       this.vel = vec(0, this.playerSpeed);
-      this.graphics.use(this.animations[walkMode][this.direction]);
     }
-    
+
+
+    const graphicsGroup = new GraphicsGroup({
+      useAnchor: true,
+      members: [
+        {
+          graphic: this.animations[walkMode][this.direction],
+          offset: new Vector(0, 5),
+        },
+        {
+          graphic: this.nickname,
+          offset: new Vector(16, -8),
+        },
+        
+      ]
+    });
+    graphicsGroup.width = 32;
+    this.graphics.use(graphicsGroup);
       
 }
 
@@ -123,14 +137,5 @@ export class Player extends Actor {
     }
     return "walk";
   }
-
-  public setNickname(nickname: string): void {
-    this.nickname = nickname;
-  }
-
-  public getNickname(): string {
-    return this.nickname
-  }
-
 
 }

@@ -8,7 +8,6 @@ export class Npc extends Actor {
     private playerFrameSpeed: 200; // ms
     private health: number = 100;
     private sprite: ImageSource;
-    private direction: string = "down";
     private animations: {idle: { up: Sprite, down: Sprite, left: Sprite, right: Sprite}};
   
     constructor({ npcName, pos, health, sprite }) {
