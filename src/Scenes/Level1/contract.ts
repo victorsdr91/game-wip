@@ -1,10 +1,12 @@
 import { Vector } from "excalibur";
 import { configType } from "../../contract";
+import { ActorStats } from "../../model/ExtendedActor/contract";
 
 export interface playerInfoType {
     nickname: string;
     position: Vector;
     zIndex: number;
+    stats: ActorStats;
 }
 
 export enum NPCTypes {
@@ -22,11 +24,18 @@ export interface npcType {
     };
     health: number;
     sprite: string;
-    dialogue?: Array<String>;    
+    spriteSize: spriteSize;
+    dialogue?: Array<String>;
+    stats: ActorStats;    
 }
   
+export enum spriteSize {
+    medium = 32,
+    small = 16,
+    big = 64
+}
+
 export interface worldInfoType {
-    config: configType;
     playerInfo: playerInfoType;
     npcList: Array<npcType>;
 }

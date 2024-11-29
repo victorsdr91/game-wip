@@ -39,16 +39,58 @@ class Game extends Engine {
 const playerInfo: playerInfoType = {
   nickname: "TrianMARC",
   position: new Vector(575, 498),
-  zIndex: 4,
+  zIndex: 8,
+  stats: {
+    level: 1,
+    f_attack: 2,
+    f_defense: 2,
+    m_attack: 2,
+    m_defense: 2,
+    speed: 3,
+    cSpeed: 2,
+    agi: 2,
+    con: 20
+  }
 };
 
-const npcInfo = { 
+const human = { 
   npcName: "Pepito",
   pos: {x:356, y: 550, z: 99},
   health: 100,
   sprite: "human_001",
   dialogue: [ "Hola, que tal?"],
-  type: NPCTypes.PACIFIC
+  type: NPCTypes.PACIFIC,
+  stats: {
+    level: 100,
+    f_attack: 2,
+    f_defense: 2,
+    m_attack: 2,
+    m_defense: 2,
+    speed: 3,
+    cSpeed: 2,
+    agi: 2,
+    con: 2
+  }
+};
+
+const monster = { 
+  npcName: "Salamandro",
+  pos: {x:930, y: 414, z: 99},
+  health: 100,
+  sprite: "monster_001",
+  dialogue: [ "Hola, que tal?"],
+  type: NPCTypes.AGRESSIVE,
+  stats: {
+    level: 2,
+    f_attack: 2,
+    f_defense: 2,
+    m_attack: 2,
+    m_defense: 2,
+    speed: 3,
+    cSpeed: 2,
+    agi: 2,
+    con: 2
+  }
 };
 
 const config: configType = {
@@ -58,7 +100,8 @@ const config: configType = {
 };
 
 const npcList = new Array<npcType>();
-npcList.push(npcInfo);
+npcList.push(human);
+npcList.push(monster);
 
 const worldInfo: worldInfoType = {
   playerInfo,

@@ -1,97 +1,134 @@
-import { Actor, vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Graphic, Sprite, GraphicsGroup, Font, Color, Text, TextAlign } from "excalibur";
+import { vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Sprite, GraphicsGroup, Font, Color, Text, TextAlign } from "excalibur";
 import { Resources } from "../../resources";
-import { configType } from "../../contract";
 import { Config } from "../../state/Config";
+import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
+import { ActorStats } from "../ExtendedActor/contract";
 
 type PlayerAnimations = {
-  idle: {
-    left: Sprite;
-    up: Sprite;
-    right: Sprite;
-    down: Sprite;
-  }
-  walk: {
-    left: Animation;
-    up: Animation;
-    right: Animation;
-    down: Animation;
-  }
-  run: {
-    left: Animation;
-    up: Animation;
-    right: Animation;
-    down: Animation;
-  }
+  idle: SpriteObject;
+  walk: AnimationObject;
+  run: AnimationObject;
+  attack: AnimationObject[]
 };
 
-export class Player extends Actor {
-  private speed: number = 16; // pixels/sec
+interface AnimationObject {
+  up: Animation;
+  down: Animation;  
+  left: Animation;
+  right: Animation;
+}
+
+interface SpriteObject {
+  up: Sprite;
+  down: Sprite;  
+  left: Sprite;
+  right: Sprite;
+}
+
+
+export class Player extends ExtendedActor {
   private nickname: Text;
-  private multiplier: number;
-  private playerSpeed: number;
-  private playerFrameSpeed: 200; // ms
-  private health: number = 100;
   private spriteSheet: SpriteSheet;
   private animations: PlayerAnimations;
   private direction: string = "down";
+  private isAttacking: boolean = false;
+  private hasAttacked: boolean = false;
+  private attackMode: number = 0;
 
-  constructor(pos: Vector, nickname: string) {
+  constructor(pos: Vector, nickname: string, stats: ActorStats) {
     super({
       pos: pos,
-      width: 20,
-      height: 30,
-      collisionType: CollisionType.Active
+      width: 16,
+      height: 22,
+      collisionType: CollisionType.Active,
+      stats: stats,
     });
-    this.nickname = new Text({ text: nickname, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
+    this.nickname = new Text({ text: `lvl ${stats.level} ${nickname}`, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
   }
 
   onInitialize() {
     this.spriteSheet = SpriteSheet.fromImageSource({
       image: Resources.Player,
       grid: {
-          rows: 23,
-          columns: 11,
+          rows: 25,
+          columns: 8,
           spriteWidth: 32,
           spriteHeight: 32
       },
       spacing: {
-          // Optionally specify the offset from the top left of sheet to start parsing
-          originOffset: { x: 1, y: 1 },
+          originOffset: {
+            x: 0, y: 0
+          },
           // Optionally specify the margin between each sprite
-          margin: { x: 1, y: 1}
+          margin: { x: 0, y: 0}
       }
     });
+    let initialRange = 0;
+    
     this.animations = {
       idle: {
-        up: this.spriteSheet.getSprite(0,0),
-        down: this.spriteSheet.getSprite(0,1),
-        left: this.spriteSheet.getSprite(0,2),
-        right: this.spriteSheet.getSprite(0,3)
+        up: this.spriteSheet.getSprite(0,2),
+        down: this.spriteSheet.getSprite(0,0),
+        left: this.spriteSheet.getSprite(0,1).clone(),
+        right: this.spriteSheet.getSprite(0,1),
       },
       walk: {
-        up: Animation.fromSpriteSheet(this.spriteSheet, range(0, 2), this.playerFrameSpeed),
-        down: Animation.fromSpriteSheet(this.spriteSheet, range(11, 13), this.playerFrameSpeed),
-        left: Animation.fromSpriteSheet(this.spriteSheet, range(22, 24), this.playerFrameSpeed),
-        right: Animation.fromSpriteSheet(this.spriteSheet, range(33, 35), this.playerFrameSpeed)
+        down: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange, initialRange + 5), this.playerFrameSpeed),
+        left: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 5), this.playerFrameSpeed).clone(),
+        right: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange, initialRange + 5), this.playerFrameSpeed),
+        up: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 3), this.playerFrameSpeed),
       },
       run: {
-        up: Animation.fromSpriteSheet(this.spriteSheet, range(4, 6), this.playerFrameSpeed),
-        down: Animation.fromSpriteSheet(this.spriteSheet, range(15, 17), this.playerFrameSpeed),
-        left: Animation.fromSpriteSheet(this.spriteSheet, range(26, 28), this.playerFrameSpeed),
-        right: Animation.fromSpriteSheet(this.spriteSheet, range(37, 39), this.playerFrameSpeed)
-      }
+        down: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 5), this.playerFrameSpeed),
+        left: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 5), this.playerFrameSpeed).clone(),
+        right: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange, initialRange + 5), this.playerFrameSpeed),
+        up: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 5), this.playerFrameSpeed),
+      },
+      attack: [
+        {
+          down: Animation.fromSpriteSheet(this.spriteSheet, range(48, 51), this.playerFrameSpeed),
+          left: Animation.fromSpriteSheet(this.spriteSheet, range(72, 75), this.playerFrameSpeed).clone(),
+          right: Animation.fromSpriteSheet(this.spriteSheet, range(72, 75), this.playerFrameSpeed),
+          up: Animation.fromSpriteSheet(this.spriteSheet, range(96, 99), this.playerFrameSpeed),
+        },
+        {
+          down: Animation.fromSpriteSheet(this.spriteSheet, range(56, 59), this.playerFrameSpeed),
+          left: Animation.fromSpriteSheet(this.spriteSheet, range(80, 83), this.playerFrameSpeed).clone(),
+          right: Animation.fromSpriteSheet(this.spriteSheet, range(80, 83), this.playerFrameSpeed),
+          up: Animation.fromSpriteSheet(this.spriteSheet, range(104, 107), this.playerFrameSpeed),
+        },
+        {
+          down: Animation.fromSpriteSheet(this.spriteSheet, range(64, 67), this.playerFrameSpeed),
+          left: Animation.fromSpriteSheet(this.spriteSheet, range(88, 91), this.playerFrameSpeed).clone(),
+          right: Animation.fromSpriteSheet(this.spriteSheet, range(88, 91), this.playerFrameSpeed),
+          up: Animation.fromSpriteSheet(this.spriteSheet, range(112, 115), this.playerFrameSpeed),
+        },
+      ]
     };
     
+
+    
+    this.animations.idle.left.flipHorizontal = true;
+    this.animations.walk.left.flipHorizontal = true;
+    this.animations.run.left.flipHorizontal = true;
+
+    this.animations.attack.forEach((attack) => {
+
+      attack.left.flipHorizontal = true;
+    });
   }
 
   onPreUpdate(engine: Engine, elapsedMs: number): void {
     this.vel = Vector.Zero;
-    this.multiplier=3;
-    this.playerSpeed = this.speed*this.multiplier;
+    this.playerSpeed = this.speed*this.stats.speed;
     let isWalking = false;
 
     const movementConfig = Config.getControls().keyboard.movement;
     const isRunning = this.isRunning(engine, movementConfig);
+
+    if(engine.input.keyboard.isHeld(Keys.Key1)) {
+      this.isAttacking = true;
+    }
     
     if (engine.input.keyboard.isHeld(Keys[movementConfig.right])) {
       isWalking = true;
@@ -116,12 +153,20 @@ export class Player extends Actor {
 
     const  walkMode = isWalking ? (isRunning ? "run" : "walk") : "idle";
 
+    this.animations.attack[this.attackMode][this.direction].events.on('loop', () => {
+      this.isAttacking = false;
+      this.attackMode++;
+      if(this.attackMode > 2) {
+        this.attackMode = 0;
+      }
+    });
+    
     const graphicsGroup = new GraphicsGroup({
       useAnchor: true,
       members: [
         {
-          graphic: this.animations[walkMode][this.direction],
-          offset: new Vector(0, 5),
+          graphic: this.isAttacking ? this.animations.attack[this.attackMode][this.direction] : this.animations[walkMode][this.direction],
+          offset: new Vector(0, 8),
         },
         {
           graphic: this.nickname,
@@ -130,14 +175,20 @@ export class Player extends Actor {
         
       ]
     });
+    
     graphicsGroup.width = 32;
     this.graphics.use(graphicsGroup);
 }
 
+onPostUpdate(engine: Engine, delta: number): void {
+  if(!this.isAttacking && this.hasAttacked) {
+    
+  }
+}
+
   private isRunning(engine: Engine, movementConfig): boolean {
     if(engine.input.keyboard.isHeld(movementConfig.run)) {
-      this.multiplier=6;
-      this.playerSpeed = this.speed*this.multiplier;
+      this.playerSpeed = this.speed*this.stats.speed*2;
       return true;
     }
     return false;

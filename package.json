@@ -16,6 +16,12 @@
     "typescript": "5.6.3"
   },
   "devDependencies": {
-    "parcel": "2.13.0"
+    "@parcel/resolver-glob": "^2.13.2",
+    "parcel": "^2.13.2",
+    "parcel-plugin-static-files-copy": "^2.6.0"
+  },
+  "staticFiles": {
+    "staticPath": "public/assets",
+    "watcherGlob": "**"
   }
 }

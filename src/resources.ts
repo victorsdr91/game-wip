@@ -1,8 +1,8 @@
 import { DefaultLoader, ImageSource } from "excalibur";
-import player from "/public/assets/player.png"; // for parcelv2 this is configured in the .parcelrc
+import Player from "/public/assets/Player/Player_Old/Player.png";  // for parcelv2 this is configured in the .parcelrc
 
 export const Resources = {
-  Player: new ImageSource(player),
+  Player: new ImageSource(Player),
 } as const;
 
 

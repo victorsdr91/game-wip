@@ -1,28 +1,27 @@
-import { Actor, CollisionType, ImageSource, Sprite, SpriteSheet, Vector} from "excalibur";
+import { Color, Font, GraphicsGroup, ImageSource, Sprite, SpriteSheet, Text, TextAlign, Vector} from "excalibur";
+import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 
-export abstract class Npc extends Actor {
-    private speed: number = 16; // pixels/sec
-    private npcName: string;
-    private multiplier: number;
-    private playerSpeed: number;
-    private playerFrameSpeed: 200; // ms
-    private health: number = 100;
+
+
+export abstract class Npc extends ExtendedActor {
+    private npcName: Text;
     private sprite: ImageSource;
+    private spriteSize: spriteSize;
     private animations: {idle: { up: Sprite, down: Sprite, left: Sprite, right: Sprite}};
   
-    constructor({ npcName, pos, health, sprite }) {
+    constructor({ npcName, pos, sprite, spriteSize, collisionType, stats }) {
       super({
         pos: new Vector(pos.x, pos.y),
         width: 20,
         height: 30,
-        collisionType: CollisionType.Fixed
+        collisionType,
+        stats,
       });
 
       this.z = pos.z;
-
-      this.npcName = npcName;
-      this.health = health;
+      this.npcName = new Text({ text: `lvl ${stats.level} ${npcName}`, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
       this.sprite = sprite;
+      this.spriteSize = spriteSize
   
     }
   
@@ -32,8 +31,8 @@ export abstract class Npc extends Actor {
         grid: {
             rows: 4,
             columns: 3,
-            spriteWidth: 32,
-            spriteHeight: 32
+            spriteWidth: this.spriteSize,
+            spriteHeight: this.spriteSize,
         },
       });
       this.animations = {
@@ -47,15 +46,23 @@ export abstract class Npc extends Actor {
       this.z = 99;
 
       this.graphics.add("idle-down", this.animations.idle.down);
-      this.graphics.use("idle-down");
+
+      const graphicsGroup = new GraphicsGroup({
+        useAnchor: true,
+        members: [
+          {
+            graphic: this.animations.idle.down,
+            offset: new Vector(10, 5),
+          },
+          {
+            graphic: this.npcName,
+            offset: new Vector(32, -4),
+          },
+          
+        ]
+      });
+      graphicsGroup.width = 32;
+      this.graphics.use(graphicsGroup);
       
     }
-
-  public getHealth(): number{
-    return this.health;
-  }
-
-  public setHealth( health: number) {
-    this.health = health;
-  }
 }

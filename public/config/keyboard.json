@@ -5,5 +5,8 @@
         "left": "KeyA",
         "right": "KeyD",
         "run": "ShiftLeft"
-    }
+    },
+    "skills": {
+        "first": "Key1"
+    } 
 }
