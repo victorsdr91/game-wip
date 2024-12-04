@@ -1,5 +1,7 @@
-import { CollisionType } from "excalibur";
+import { CollisionGroupManager, CollisionType } from "excalibur";
 import { Npc } from "./Npc";
+
+const npcGroupMask = CollisionGroupManager.create('npcGroup')
 
 export class PacificNpc extends Npc {
     private dialogue: Array<string>;
@@ -11,6 +13,7 @@ export class PacificNpc extends Npc {
           sprite,
           spriteSize,
           collisionType: CollisionType.Fixed,
+          collisionGroup: npcGroupMask,
           stats,
         });
         this.dialogue = dialogue;

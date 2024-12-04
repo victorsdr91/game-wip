@@ -8,7 +8,7 @@ import * as HousesTiles from "/public/assets/House/Buildings/Houses/*.png";
 import * as TreeTiles from "/public/assets/Trees/*.png";
 import scene1 from "/public/assets/tilemaps/scene1.tmx";
 import human_001 from "/public/assets/sprites/human_001.png";
-import monster_001 from "/public/assets/sprites/monster_001.png";
+import Slime_Blue from "/public/assets/Enemies/Slime/Slime_New/Slime_Blue.png";
 
 import { TiledResource } from "@excaliburjs/plugin-tiled";
 const LevelPathMap = new Array();
@@ -36,7 +36,7 @@ toPathMap(LevelPathMap, HousesTiles, "../House/Buildings/Houses");
 
 export const Resources = {
   human_001: new ImageSource(human_001),
-  monster_001: new ImageSource(monster_001),
+  monster_001: new ImageSource(Slime_Blue),
   Level1Map: new TiledResource(
     scene1, 
     {

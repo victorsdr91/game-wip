@@ -1,4 +1,4 @@
-import { Actor } from "excalibur";
+import { Actor, Side } from "excalibur";
 
 import { ActorStats } from "./contract";
 
@@ -12,13 +12,15 @@ export abstract class ExtendedActor extends Actor {
   protected playerFrameSpeed: 200; // ms
   private health: number;
   public colliding: boolean = false;
+  public collisionSide: Side | null;
 
-  constructor({ pos, width, height, collisionType, stats}) {
+  constructor({ pos, width, height, collisionType, collisionGroup, stats}) {
     super({
       pos,
       width,
       height,
       collisionType,
+      collisionGroup,
     });
     this.stats = stats;
     this.health = this.getMaxHealth();
@@ -37,7 +39,7 @@ export abstract class ExtendedActor extends Actor {
     return this.health;
   }
 
-  protected getStats() {
+  public getStats(): ActorStats {
     return this.stats;
   }
 

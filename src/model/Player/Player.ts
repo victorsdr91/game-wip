@@ -1,8 +1,10 @@
-import { vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Sprite, GraphicsGroup, Font, Color, Text, TextAlign } from "excalibur";
+import { vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Sprite, GraphicsGroup, Font, Color, Text, TextAlign, Actor, GameEvent, EventEmitter, CollisionGroupManager, Side } from "excalibur";
 import { Resources } from "../../resources";
 import { Config } from "../../state/Config";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { ActorStats } from "../ExtendedActor/contract";
+import { ActorEvents } from "excalibur/build/dist/Actor";
+import { AgressiveNpc } from "../npc/AgressiveNpc";
 
 type PlayerAnimations = {
   idle: SpriteObject;
@@ -25,25 +27,44 @@ interface SpriteObject {
   right: Sprite;
 }
 
+type PlayerEvents = {
+  playerAttack: PlayerAttackEvent;
+}
+
+export class PlayerAttackEvent extends GameEvent<Player> {
+  constructor(public target: Player) {
+    super();
+  }
+}
+
+export const PlayerEvents = {
+  playerAttack: 'playerAttack'
+} as const;
+
+export const PlayerCollisionGroup = CollisionGroupManager.create('player');
 
 export class Player extends ExtendedActor {
+  public events = new EventEmitter<ActorEvents & PlayerEvents>();
   private nickname: Text;
   private spriteSheet: SpriteSheet;
   private animations: PlayerAnimations;
   private direction: string = "down";
-  private isAttacking: boolean = false;
+  public isAttacking: boolean = false;
   private hasAttacked: boolean = false;
   private attackMode: number = 0;
+  private attackCollisionActors: AgressiveNpc[];
 
   constructor(pos: Vector, nickname: string, stats: ActorStats) {
     super({
       pos: pos,
       width: 16,
       height: 22,
-      collisionType: CollisionType.Active,
+      collisionType: CollisionType.Passive,
+      collisionGroup: PlayerCollisionGroup,
       stats: stats,
     });
     this.nickname = new Text({ text: `lvl ${stats.level} ${nickname}`, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
+    this.attackCollisionActors = new Array<AgressiveNpc>();
   }
 
   onInitialize() {
@@ -118,6 +139,13 @@ export class Player extends ExtendedActor {
     });
   }
 
+  public calculateDamage(attacker: ExtendedActor, defender: ExtendedActor): number {
+    const attackerStats = attacker.getStats();
+    const defenderStats = defender.getStats();
+    const damageDealt = (attackerStats.f_attack*attackerStats.level - defenderStats.f_defense*defenderStats.level);
+    return damageDealt > 0 ? damageDealt : 0;
+  }
+
   onPreUpdate(engine: Engine, elapsedMs: number): void {
     this.vel = Vector.Zero;
     this.playerSpeed = this.speed*this.stats.speed;
@@ -155,6 +183,7 @@ export class Player extends ExtendedActor {
 
     this.animations.attack[this.attackMode][this.direction].events.on('loop', () => {
       this.isAttacking = false;
+      this.hasAttacked = true;
       this.attackMode++;
       if(this.attackMode > 2) {
         this.attackMode = 0;
@@ -178,13 +207,29 @@ export class Player extends ExtendedActor {
     
     graphicsGroup.width = 32;
     this.graphics.use(graphicsGroup);
-}
-
-onPostUpdate(engine: Engine, delta: number): void {
-  if(!this.isAttacking && this.hasAttacked) {
-    
   }
-}
+
+  onPostUpdate(engine: Engine, delta: number): void {
+    const activeAttack = this.hasAttacked && this.colliding;
+    if(this.colliding) {
+      if(this.collisionSide === Side.Top) {
+        this.vel = new Vector(this.vel.x, 0);
+      }
+    } 
+    if(activeAttack) {
+        this.attackCollisionActors.forEach((defender: AgressiveNpc) => {
+          const damageDealt = this.calculateDamage(this, defender);
+          defender.actions.blink(200, 200, 3);
+          defender.setHealth(defender.getHealth() - damageDealt);
+          console.log(`${this.nickname.text} ha hecho ${damageDealt} puntos de daño a ${defender.npcName.text}`);
+          if(!defender.isAttacking()) {
+            defender.toggleAttacking();
+          };
+        });
+      console.log("Player ha atacado");
+    }
+    this.hasAttacked = false;
+  }
 
   private isRunning(engine: Engine, movementConfig): boolean {
     if(engine.input.keyboard.isHeld(movementConfig.run)) {
@@ -194,4 +239,16 @@ onPostUpdate(engine: Engine, delta: number): void {
     return false;
   }
 
+  public addEnemyAttacked(npc: AgressiveNpc){
+    if(!this.attackCollisionActors.includes(npc)) {
+      this.attackCollisionActors.push(npc);
+    }
+  }
+
+  public removeEnemyAttacked(npc: AgressiveNpc){
+    const npcIndex = this.attackCollisionActors.indexOf(npc);
+    if( npcIndex > -1 ) {
+      this.attackCollisionActors.splice(npcIndex, 1);
+    }
+  }
 }

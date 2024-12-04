@@ -1,27 +1,43 @@
-import { Color, Font, GraphicsGroup, ImageSource, Sprite, SpriteSheet, Text, TextAlign, Vector} from "excalibur";
+import { Color, Font, GraphicsGroup, ImageSource, Sprite, SpriteSheet, Text, TextAlign, Vector, Animation} from "excalibur";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
+import { spriteSize } from "../../Scenes/Level1/contract";
+import { ActorStats } from "../ExtendedActor/contract";
 
-
+export interface npcAnimations {
+  
+  idle: { 
+    up: Sprite | Animation,
+    down: Sprite | Animation,
+    left: Sprite | Animation,
+    right: Sprite | Animation
+  };
+  attack?: {
+    up: Sprite | Animation,
+    down: Sprite | Animation,
+    left: Sprite | Animation,
+    right: Sprite | Animation
+  }
+}
 
 export abstract class Npc extends ExtendedActor {
-    private npcName: Text;
-    private sprite: ImageSource;
-    private spriteSize: spriteSize;
-    private animations: {idle: { up: Sprite, down: Sprite, left: Sprite, right: Sprite}};
-  
-    constructor({ npcName, pos, sprite, spriteSize, collisionType, stats }) {
+    public npcName: Text;
+    protected sprite: ImageSource;
+    protected spriteSize: { width: spriteSize, height: spriteSize };
+    protected animations: npcAnimations;
+    constructor({ npcName, pos, sprite, spriteSize, collisionType, collisionGroup, stats }) {
       super({
         pos: new Vector(pos.x, pos.y),
-        width: 20,
-        height: 30,
+        width: spriteSize.width,
+        height: spriteSize.height,
         collisionType,
+        collisionGroup,
         stats,
       });
 
       this.z = pos.z;
       this.npcName = new Text({ text: `lvl ${stats.level} ${npcName}`, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
       this.sprite = sprite;
-      this.spriteSize = spriteSize
+      this.spriteSize = spriteSize;
   
     }
   
@@ -31,8 +47,8 @@ export abstract class Npc extends ExtendedActor {
         grid: {
             rows: 4,
             columns: 3,
-            spriteWidth: this.spriteSize,
-            spriteHeight: this.spriteSize,
+            spriteWidth: this.spriteSize.width,
+            spriteHeight: this.spriteSize.height,
         },
       });
       this.animations = {

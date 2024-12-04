@@ -1,12 +1,12 @@
-import { CollisionStartEvent, Engine, Scene } from "excalibur";
-import { npcType, NPCTypes, playerInfoType, spriteSize, worldInfoType } from "./contract";
+import { CollisionEndEvent, CollisionStartEvent, Engine, Scene, Side, Vector } from "excalibur";
+import { NPCTypes, playerInfoType, worldInfoType } from "./contract";
 import { Player } from "../../model/Player/Player";
 
 import { Resources, worldLoader } from "./resources";
 import { PacificNpc } from "../../model/npc/PacificNpc";
-import { configType } from "../../contract";
 import { AgressiveNpc } from "../../model/npc/AgressiveNpc";
-import { Npc } from "../../model/npc/Npc";
+import { Slime } from "../../model/npc/Slime";
+import { ExtendedActor } from "../../model/ExtendedActor/ExtendedActor";
 
 
 export class Level extends Scene {
@@ -29,18 +29,17 @@ export class Level extends Scene {
                         npcName: npc.npcName,
                         pos: npc.pos,
                         sprite: Resources[npc.sprite],
-                        spriteSize: spriteSize.medium,
+                        spriteSize: npc.spriteSize,
                         dialogue: npc.dialogue,
                         stats: npc.stats,
                     })
                 );
             } else if(npc.type === NPCTypes.AGRESSIVE) {
                 this.agressiveNpcs.push(
-                    new AgressiveNpc({
+                    new Slime({
                         npcName: npc.npcName,
                         pos: npc.pos,
-
-                        spriteSize: spriteSize.medium,
+                        spriteSize: npc.spriteSize,
                         sprite: Resources[npc.sprite],
                         stats: npc.stats,
                     })
@@ -67,7 +66,8 @@ export class Level extends Scene {
         this.camera.strategy.lockToActor(this.player);
         this.camera.zoom = 2.3;
 
-        this.player.on
+        this.player.on("collisionstart", this.handlePlayerCollision);
+        this.player.on("collisionend", this.handlePlayerEndCollision);
     }
 
     private loadNpcs(): void {
@@ -76,23 +76,41 @@ export class Level extends Scene {
         });
         this.agressiveNpcs.forEach((npc) => {
             this.add(npc);
-
-            npc.on("collisionstart", this.handleEnemyCollision);
-            npc.on("collisionend", (ev) => {
-                if(ev.actor instanceof AgressiveNpc) {
-                    ev.actor.colliding = false;
-                }
-            })
         });
     }
     
     private handleEnemyCollision(ev: CollisionStartEvent) {
         if(ev.actor instanceof AgressiveNpc && !ev.actor.colliding) {
-            if(ev.other instanceof Player) {
+            if(ev.other instanceof Player && ev.actor.isAttacking()) {
                 ev.other.setHealth(ev.other.getHealth() - 10);
                 console.log("Vida del jugador: "+ev.other.getHealth());
+                
             }
             ev.actor.colliding = true;
-        };
+        }
     }
+
+    private handlePlayerEndCollision(ev: CollisionEndEvent) {
+        if (ev.actor instanceof Player) {
+            ev.actor.colliding = false;
+            if(ev.other instanceof AgressiveNpc) {
+                ev.actor.removeEnemyAttacked(ev.other);
+                console.log("Fin colision con "+ev.other.npcName.text);
+                ev.actor.collisionSide = null;
+            }
+        }   
+    }
+
+    private handlePlayerCollision(ev: CollisionStartEvent) {
+        if (ev.actor instanceof Player) {
+            const player = ev.actor;
+            player.colliding = true;
+            player.collisionSide = ev.side;
+            if(ev.other instanceof AgressiveNpc) {
+                player.addEnemyAttacked(ev.other);
+                console.log("Colisionando con "+ev.other.npcName.text);
+            }
+        }   
+    }
+
 }
