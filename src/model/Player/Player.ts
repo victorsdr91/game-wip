@@ -198,6 +198,8 @@ export class Player extends ExtendedActor {
         this.attackMode = 0;
       }
     });
+
+    this.hasAttacked && this.attack();
     
     const graphicsGroup = new GraphicsGroup({
       useAnchor: true,
@@ -218,19 +220,17 @@ export class Player extends ExtendedActor {
     this.graphics.use(graphicsGroup);
   }
 
-  onPostUpdate(engine: Engine, delta: number): void {
-    if(this.hasAttacked) {
-        this.attackCollisionActors.forEach((defender: AgressiveNpc) => {
-          const damageDealt = this.calculateDamage(this, defender);
-          defender.actions.blink(200, 200, 3);
-          defender.setHealth(defender.getHealth() - damageDealt);
-          console.log(`${this.nickname.text} ha hecho ${damageDealt} puntos de daño a ${defender.npcName.text}`);
-          if(!defender.isAttacking()) {
-            defender.toggleAttacking();
-          };
-        });
-      this.hasAttacked = false;
-    }
+  attack(): void {
+    this.attackCollisionActors.forEach((defender: AgressiveNpc) => {
+      const damageDealt = this.calculateDamage(this, defender);
+      defender.actions.blink(200, 200, 3);
+      defender.setHealth(defender.getHealth() - damageDealt);
+      console.log(`${this.nickname.text} ha hecho ${damageDealt} puntos de daño a ${defender.npcName.text}`);
+      if(!defender.isAttacking()) {
+        defender.toggleAttacking();
+      };
+    });
+    this.hasAttacked = false;
   }
 
   private isRunning(engine: Engine, movementConfig): boolean {
