@@ -66,8 +66,6 @@ export class Level extends Scene {
         this.camera.strategy.lockToActor(this.player);
         this.camera.zoom = 2.3;
 
-        this.player.on("collisionstart", this.handlePlayerCollision);
-        this.player.on("collisionend", this.handlePlayerEndCollision);
     }
 
     private loadNpcs(): void {
@@ -78,39 +76,6 @@ export class Level extends Scene {
             this.add(npc);
         });
     }
-    
-    private handleEnemyCollision(ev: CollisionStartEvent) {
-        if(ev.actor instanceof AgressiveNpc && !ev.actor.colliding) {
-            if(ev.other instanceof Player && ev.actor.isAttacking()) {
-                ev.other.setHealth(ev.other.getHealth() - 10);
-                console.log("Vida del jugador: "+ev.other.getHealth());
-                
-            }
-            ev.actor.colliding = true;
-        }
-    }
-
-    private handlePlayerEndCollision(ev: CollisionEndEvent) {
-        if (ev.actor instanceof Player) {
-            ev.actor.colliding = false;
-            if(ev.other instanceof AgressiveNpc) {
-                ev.actor.removeEnemyAttacked(ev.other);
-                console.log("Fin colision con "+ev.other.npcName.text);
-                ev.actor.collisionSide = null;
-            }
-        }   
-    }
-
-    private handlePlayerCollision(ev: CollisionStartEvent) {
-        if (ev.actor instanceof Player) {
-            const player = ev.actor;
-            player.colliding = true;
-            player.collisionSide = ev.side;
-            if(ev.other instanceof AgressiveNpc) {
-                player.addEnemyAttacked(ev.other);
-                console.log("Colisionando con "+ev.other.npcName.text);
-            }
-        }   
-    }
+       
 
 }
