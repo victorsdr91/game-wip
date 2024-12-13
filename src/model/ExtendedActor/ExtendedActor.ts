@@ -33,6 +33,9 @@ export abstract class ExtendedActor extends Actor {
     } else {
       this.health = health;
     }
+    if(this.health <= 0) {
+      this.kill();
+    }
   }
 
   public getHealth() {

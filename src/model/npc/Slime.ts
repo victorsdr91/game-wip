@@ -1,4 +1,4 @@
-import { CollisionType, GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine } from "excalibur";
+import { CollisionType, GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine, Scene } from "excalibur";
 import { AgressiveNpc } from "./AgressiveNpc";
 
 export class Slime extends AgressiveNpc {
@@ -47,11 +47,13 @@ export class Slime extends AgressiveNpc {
           down: Animation.fromSpriteSheet(spriteSheet, range(8, 15), 210),
           left: spriteSheet.getSprite(0,2),
           right: spriteSheet.getSprite(0,1)
-        }
+        },
+        die: Animation.fromSpriteSheet(spriteSheet, range(16, 23), 210),
       };
       this.z = 99;
 
       this.graphics.add("idle-down", this.animations.idle.down);
+      this.animations.die && this.graphics.add("die", this.animations.die);
       this.animations.attack && this.graphics.add("attack-down", this.animations.attack.down);
 
       const graphicsGroup = new GraphicsGroup({
@@ -76,5 +78,13 @@ export class Slime extends AgressiveNpc {
       if(this.isAttacking()) {
         this.graphics.use("attack-down");
       }
+    }
+
+    onPreKill(scene: Scene): void {
+      this.animateKill();
+    }
+
+    animateKill() {
+      this.graphics.use("die");
     }
 }

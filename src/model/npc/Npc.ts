@@ -17,6 +17,7 @@ export interface npcAnimations {
     left: Sprite | Animation,
     right: Sprite | Animation
   }
+  die?: Sprite | Animation,
 }
 
 export abstract class Npc extends ExtendedActor {

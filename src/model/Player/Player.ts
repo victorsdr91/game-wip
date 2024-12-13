@@ -49,8 +49,10 @@ export class Player extends ExtendedActor {
   private spriteSheet: SpriteSheet;
   private animations: PlayerAnimations;
   private direction: string = "down";
+  private movementMode: string = "idle";
   public isAttacking: boolean = false;
   private hasAttacked: boolean = false;
+  private controlMap = {};
   private attackMode: number = 0;
   private attackCollisionActors: AgressiveNpc[];
 
@@ -68,6 +70,31 @@ export class Player extends ExtendedActor {
 
     this.on("collisionstart", (evt) => { this.handlePlayerCollision(evt) });
     this.on("collisionend",(evt) => { this.resolveColission(evt) });
+
+    const actionsMap = {
+      "movement" : {
+        "left" : () => { this.move("left", "walk")},
+        "right" : () => { this.move("right", "walk")},
+        "up" : () => { this.move("up", "walk")},
+        "down" : () => { this.move("down", "walk")},
+        "run" : () => { this.run() },
+      },
+      "skills": {
+        "first": () => { this.isAttacking = true; }
+      }
+    };
+
+    const controls = Config.getControls().keyboard;
+    Object.keys(controls)
+    .forEach((type) => {
+      Object.keys(controls[type])
+      .forEach((key) => 
+        { 
+          this.controlMap[controls[type][key]] = actionsMap[type][key];
+        }
+      )
+    });
+
   }
 
   onInitialize() {
@@ -130,14 +157,11 @@ export class Player extends ExtendedActor {
       ]
     };
     
-
-    
     this.animations.idle.left.flipHorizontal = true;
     this.animations.walk.left.flipHorizontal = true;
     this.animations.run.left.flipHorizontal = true;
 
     this.animations.attack.forEach((attack) => {
-
       attack.left.flipHorizontal = true;
     });
   }
@@ -149,52 +173,53 @@ export class Player extends ExtendedActor {
     return damageDealt > 0 ? damageDealt : 0;
   }
 
+  private move( direction: string, mode: string) {
+      const collidingSide = {
+        right: this.colliding && this.collisionSide === Side.Right,
+        up: this.colliding && this.collisionSide === Side.Top,
+        left: this.colliding && this.collisionSide === Side.Left,
+        down: this.colliding && this.collisionSide === Side.Bottom,
+      };
+      this.movementMode = this.movementMode !== "run" ? mode : this.movementMode;
+      this.direction = direction;
+      const isXMovement = this.direction === "right" || this.direction === "left";
+      let x = 0;
+      let y = 0;
+      if(!collidingSide[this.direction]) {
+        if(isXMovement) {
+          x = direction === "right" ? this.playerSpeed : -this.playerSpeed;
+        }
+        else {
+          y = direction === "down" ? this.playerSpeed : -this.playerSpeed;
+        }
+      }
+      this.vel = vec(x, y);
+  }
+
+  private run(): void {
+    this.playerSpeed = this.speed*this.stats.speed*2;
+    this.movementMode = "run";
+  }
+
   onPreUpdate(engine: Engine, elapsedMs: number): void {
     this.vel = Vector.Zero;
     this.playerSpeed = this.speed*this.stats.speed;
-    let isWalking = false;
-    let isRunning = false;
-    const movementConfig = Config.getControls().keyboard.movement;
-    const collidingSide = {
-      right: this.colliding && this.collisionSide === Side.Right,
-      top: this.colliding && this.collisionSide === Side.Top,
-      left: this.colliding && this.collisionSide === Side.Left,
-      bottom: this.colliding && this.collisionSide === Side.Bottom,
-    };
-    
+    this.movementMode = "idle";
 
-    if(engine.input.keyboard.isHeld(Keys.Key1)) {
-      this.isAttacking = true;
-    }
-    isRunning = this.isRunning(engine, movementConfig);
-    if (engine.input.keyboard.isHeld(Keys[movementConfig.right]) && !collidingSide.right ) {
-      isWalking = true;
-      this.direction = "right";
-      this.vel = vec(this.playerSpeed, 0);
-    }
-    if (engine.input.keyboard.isHeld(Keys[movementConfig.left]) && !collidingSide.left ) {
-      isWalking = true;
-      this.direction = "left";
-      this.vel = vec(-this.playerSpeed, 0);
-    }
-    if (engine.input.keyboard.isHeld(Keys[movementConfig.up]) && !collidingSide.top ) {
-      isWalking = true;
-      this.direction = "up";
-      this.vel = vec(0, -this.playerSpeed);
-    }
-    if (engine.input.keyboard.isHeld(Keys[movementConfig.down]) && !collidingSide.bottom ) {
-      isWalking = true;
-      this.direction = "down";
-      this.vel = vec(0, this.playerSpeed);
-    }
-   const walkMode = isWalking ? (isRunning ? "run" : "walk") : "idle";
-    
+    Object.values(Keys)
+      .filter((key) => 
+        engine.input.keyboard.isHeld(key)
+      )
+      .forEach((key) => 
+        { 
+          this.controlMap[key] && this.controlMap[key]();
+        }
+      );
 
     this.animations.attack[this.attackMode][this.direction].events.on('loop', () => {
       this.isAttacking = false;
       this.hasAttacked = true;
-      this.attackMode++;
-      if(this.attackMode > 2) {
+      if(++this.attackMode > 2) {
         this.attackMode = 0;
       }
     });
@@ -205,7 +230,7 @@ export class Player extends ExtendedActor {
       useAnchor: true,
       members: [
         {
-          graphic: this.isAttacking ? this.animations.attack[this.attackMode][this.direction] : this.animations[walkMode][this.direction],
+          graphic: this.isAttacking ? this.animations.attack[this.attackMode][this.direction] : this.animations[this.movementMode][this.direction],
           offset: new Vector(0, 8),
         },
         {
@@ -233,14 +258,6 @@ export class Player extends ExtendedActor {
     this.hasAttacked = false;
   }
 
-  private isRunning(engine: Engine, movementConfig): boolean {
-    if(engine.input.keyboard.isHeld(movementConfig.run)) {
-      this.playerSpeed = this.speed*this.stats.speed*2;
-      return true;
-    }
-    return false;
-  }
-
   public addEnemyAttacked(npc: AgressiveNpc){
     if(!this.attackCollisionActors.includes(npc)) {
       this.attackCollisionActors.push(npc);
@@ -251,16 +268,12 @@ export class Player extends ExtendedActor {
     const npcIndex = this.attackCollisionActors.indexOf(npc);
     if( npcIndex > -1 ) {
       this.attackCollisionActors.splice(npcIndex, 1);
-    }
-
-   
+    }  
   }
 
   private handlePlayerCollision(ev: CollisionStartEvent) {
       if(ev.other instanceof AgressiveNpc) {
-          console.log("Colision con "+ev.other.npcName.text);
           this.addEnemyAttacked(ev.other);
-          
       };
       this.collisionSide = ev.side;
       this.colliding = true;
@@ -269,8 +282,7 @@ export class Player extends ExtendedActor {
   private resolveColission(ev: CollisionEndEvent) {
     if(ev.other instanceof AgressiveNpc) {
       this.removeEnemyAttacked(ev.other);
-      console.log("Fin de colision con "+ev.other.npcName.text);
     }
     this.colliding = false;
-}
+  }
 }
