@@ -24,6 +24,7 @@ export abstract class Npc extends ExtendedActor {
     protected sprite: ImageSource;
     protected spriteSize: { width: spriteSize, height: spriteSize };
     protected animations: npcAnimations;
+    public hpGraphic: Text;
     constructor({ npcName, pos, sprite, spriteSize, collisionType, collisionGroup, stats, eventEmitter }) {
       super({
         pos: new Vector(pos.x, pos.y),
@@ -37,6 +38,7 @@ export abstract class Npc extends ExtendedActor {
 
       this.z = pos.z;
       this.npcName = new Text({ text: `lvl ${stats.level} ${npcName}`, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
+      this.hpGraphic = new Text({ text: `${this.getHealth()}`, font: new Font({size: 8, color: Color.Green, textAlign: TextAlign.Center})});
       this.sprite = sprite;
       this.spriteSize = spriteSize;
   

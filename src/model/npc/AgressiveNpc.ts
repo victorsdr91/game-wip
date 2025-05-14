@@ -35,6 +35,7 @@ export class AgressiveNpc extends Npc {
         eventEmitter.on('player-health-depleted', () => {
           this.taunted = false;
           this.returnToOriginalPosition();
+          this.passiveHeal();
         });
     }
 
@@ -54,6 +55,21 @@ export class AgressiveNpc extends Npc {
       this.attacking = !this.attacking;
     }
 
+    protected passiveHeal(): void {
+      if(!this.isTaunted()) {
+          const interval = setInterval(() => {
+            if(this.getHealth() >= this.getMaxHealth()) {
+              clearInterval(interval);
+            }
+            const currentHealth = this.getHealth();
+            const pointsToRecover = this.getMaxHealth()*0.15;
+            this.setHealth(currentHealth + pointsToRecover);
+            this.hpGraphic.text = `${this.getHealth()}`;
+          }, 1000);
+        
+      }
+    }
+
     protected calculateDamage(attacker: ExtendedActor, defender: ExtendedActor): number {
         const attackerStats = attacker.getStats();
         const defenderStats = defender.getStats();
@@ -65,6 +81,7 @@ export class AgressiveNpc extends Npc {
       const damageReceived = damage - this.stats.f_defense*this.stats.level;
       const totalDamage = damageReceived > 0 ? damageReceived : 0;
       this.setHealth(this.getHealth() - totalDamage);
+      this.hpGraphic.text = `${this.getHealth()}`;
 
       if(!this.isTaunted()) {
         this.taunted = true;

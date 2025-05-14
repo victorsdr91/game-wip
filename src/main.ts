@@ -41,7 +41,7 @@ class Game extends Engine {
 
 const playerInfo: playerInfoType = {
   nickname: "TrianMARC",
-  position: new Vector(575, 498),
+  position: new Vector(123, 485),
   zIndex: 8,
   progress: {
     exp: 0,
@@ -60,57 +60,32 @@ const playerInfo: playerInfoType = {
   }
 };
 
-const human = { 
-  npcName: "Pepito",
-  pos: {x:356, y: 550, z: 6},
-  health: 100,
-  sprite: "human_001",
-  spriteSize: {
-    width: spriteSize.small,
-    height: spriteSize.medium
-  },
-  dialogue: [ "Hola, que tal?"],
-  type: NPCTypes.PACIFIC,
-  rewards: {
-    exp: 0,
-  },
-  stats: {
-    level: 100,
-    f_attack: 2,
-    f_defense: 2,
-    m_attack: 2,
-    m_defense: 2,
-    speed: 3,
-    cSpeed: 2,
-    agi: 2,
-    con: 2
-  }
-};
-
-const monster = { 
-  npcName: "Slime",
-  pos: {x:230, y: 414, z: 9},
-  health: 100,
-  sprite: "monster_001",
-  spriteSize: {
-    width: spriteSize.small,
-    height: spriteSize.small
-  },
-  type: NPCTypes.AGRESSIVE,
-  rewards: {
-    exp: 100,
-  },
-  stats: {
-    level: 2,
-    f_attack: 15,
-    f_defense: 2,
-    m_attack: 2,
-    m_defense: 2,
-    speed: 3,
-    cSpeed: 2,
-    agi: 2,
-    con: 2
-  }
+const generateMonster = (x: number, y: number) => {
+  return { 
+    npcName: "Slime",
+    pos: {x, y, z: 9},
+    health: 100,
+    sprite: "monster_001",
+    spriteSize: {
+      width: spriteSize.small,
+      height: spriteSize.small
+    },
+    type: NPCTypes.AGRESSIVE,
+    rewards: {
+      exp: 100,
+    },
+    stats: {
+      level: 2,
+      f_attack: 10,
+      f_defense: 2,
+      m_attack: 2,
+      m_defense: 2,
+      speed: 3,
+      cSpeed: 2,
+      agi: 2,
+      con: 2
+    }
+  };
 };
 
 const config: configType = {
@@ -120,8 +95,14 @@ const config: configType = {
 };
 
 const npcList = new Array<npcType>();
-npcList.push(human);
-npcList.push(monster);
+
+for(let i = 0; i < 5; i++) {
+  npcList.push(generateMonster(
+    491+Math.random()*132,
+    203+Math.random()*258
+  ));
+}
+
 
 const worldInfo: worldInfoType = {
   playerInfo,

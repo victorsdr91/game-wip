@@ -1,4 +1,4 @@
-import { CollisionType, GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine, ActionContext, AnimationStrategy } from "excalibur";
+import { CollisionType, GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine, ActionContext, AnimationStrategy, Graphic, Text, Font, Color, TextAlign } from "excalibur";
 import { AgressiveNpc } from "./AgressiveNpc";
 
 export class Slime extends AgressiveNpc {
@@ -27,14 +27,15 @@ export class Slime extends AgressiveNpc {
         grid: {
             rows: 3,
             columns: 8,
-            spriteWidth: 40,
-            spriteHeight: 36,
+            spriteWidth: 64,
+            spriteHeight: 64,
         },
         spacing: {
           originOffset: {
-            x: 12, y: 8
+            x: 0, y: 0
           },
-          margin: { x: 25, y: 32}
+          // Optionally specify the margin between each sprite
+          margin: { x: 0, y: 0}
       }
       });
       this.animations = {
@@ -59,29 +60,36 @@ export class Slime extends AgressiveNpc {
       (this.animations.die as Animation).events.on("end", () => { 
         this.event.emit("npc-aggresive-died", { rewards: this.rewards, actor: this.target});
         this.actions.clearActions();
-        setTimeout(() => { this.kill(); }, 1000*60*3);
+        setTimeout(() => { this.kill(); }, 1000*10);
       });
       (this.animations.attack?.down as Animation).events.on("loop", () => { this.handleAttack() })
       this.animations.attack && this.graphics.add("attack-down", this.animations.attack.down);
+      
+      this.handleEvents();
+    }
 
+    useGraphic(graphic: Graphic) {
       const graphicsGroup = new GraphicsGroup({
-        useAnchor: true,
+        useAnchor: false,
         members: [
           {
-            graphic: this.animations[animationMode].down,
-            offset: new Vector(4, -4),
+            graphic: graphic,
+            offset: new Vector(-32, -32),
           },
           {
             graphic: this.npcName,
-            offset: new Vector(24, -2),
+            offset: new Vector(0, -20),
+          },
+          {
+            graphic: this.hpGraphic,
+            offset: new Vector(0, -27),
           },
           
         ]
       });
       graphicsGroup.width = 32;
+
       this.graphics.use(graphicsGroup);
-      
-      this.handleEvents();
     }
 
     handleEvents() {
@@ -117,24 +125,26 @@ export class Slime extends AgressiveNpc {
 
     onPreUpdate(engine: Engine, elapsedMs: number): void {
       if(this.getHealth() > 0) {
+        this.useGraphic(this.graphics.use("idle-down"));
+        this.attacking = false;
+
         if(this.isTaunted()) {
           const distanceFromTarget = this.pos.distance(this.target.pos);
           this.actions.clearActions();
-          
+
           if(distanceFromTarget <= 20 && !this.isAttacking()) {
             this.attacking = true;
-            this.graphics.use("attack-down");
+            this.useGraphic(this.graphics.use("attack-down"));
           } else if(distanceFromTarget > 20 && distanceFromTarget < 80) {
             this.actions.meet(this.target, this.speed*this.stats.speed);
           } else if(distanceFromTarget > 80) {
             this.taunted=false;
             this.returnToOriginalPosition();
+            this.passiveHeal();
           }
-        } else {
-          this.graphics.use("idle-down");
         }
       } else {
-        this.graphics.use("die");
+        this.useGraphic(this.graphics.use("die"));
       }
     }
 }

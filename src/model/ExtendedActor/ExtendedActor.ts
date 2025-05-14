@@ -1,4 +1,4 @@
-import { Actor, Engine, EventEmitter, Side, Vector } from "excalibur";
+import { Actor, EventEmitter, Side, Vector } from "excalibur";
 
 import { ActorStats } from "./contract";
 
@@ -35,6 +35,8 @@ export abstract class ExtendedActor extends Actor {
     const maxHealth =  this.getMaxHealth();
     if(health >= maxHealth) {
       this.health = maxHealth;
+    } else if(health <= 0) {
+      this.health = 0;
     } else {
       this.health = health;
     }
@@ -51,7 +53,7 @@ export abstract class ExtendedActor extends Actor {
   public getMaxHealth(): number {
     return BASE_HEALTH+(this.stats.con*CON_MULTIPLIER);
   }
-  
+
   protected returnToOriginalPosition() {
       this.actions.moveTo(this.originalPosition, this.speed*this.stats.speed);
     }

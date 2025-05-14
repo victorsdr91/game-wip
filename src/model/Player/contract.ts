@@ -8,6 +8,13 @@ export interface PlayerAnimations {
   die: Animation;
 };
 
+export interface AttackPlayerAnimations {
+    up: Animation[];
+    down: Animation[];  
+    left: Animation[];
+    right: Animation[];
+}
+
 export interface AnimationObject {
   up: Animation;
   down: Animation;  
