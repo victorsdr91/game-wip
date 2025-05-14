@@ -1,13 +1,10 @@
-import { vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Sprite, GraphicsGroup, Font, Color, Text, TextAlign, Actor, GameEvent, EventEmitter, CollisionGroupManager, Side, PreCollisionEvent, CollisionStartEvent, PostCollisionEvent, CollisionEndEvent, AnimationStrategy } from "excalibur";
-import { PlayerResources } from "../../resources";
+import { vec, Animation, CollisionType, Engine, Keys, Vector, GraphicsGroup, Font, Color, Text, TextAlign, CollisionGroupManager, EventEmitter } from "excalibur";
 import { Config } from "../../state/Config";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { ActorStats } from "../ExtendedActor/contract";
-import { Npc } from "../npc/Npc";
 import { PlayerProgressType } from "../../scenes/Level1/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
 import { animationDirection, animationMode } from "./contract";
-
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
@@ -212,12 +209,7 @@ export class Player extends ExtendedActor {
     const damageReceived = damage - this.stats.f_defense*this.stats.level;
     const totalDamage = damageReceived > 0 ? damageReceived : 0;
     this.updateHealth(this.getHealth() - totalDamage);
-    if(actor instanceof Player) {
-      const player = actor as Player;
-      console.log(`${player.nickname.text} has made ${totalDamage} points to ${this.nickname.text}`);
-    } else if(actor instanceof Npc) {
-      console.log(`${this.nickname.text} has received ${totalDamage} points from ${actor.npcName.text}`);
-    }
+    
     if(this.getHealth() <= 0) {
       this.die();
     }

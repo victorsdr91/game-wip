@@ -5,15 +5,34 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="public/styles/main.css">
     <title>GAME Wip with Excalibur</title>
-    <style>
-        body {
-            margin: 0;
-        }
-    </style>
 </head>
 
 <body>
+    <main id="main">
+        <canvas id="game"></canvas>
+        <div id="hud" class="font-[PublicPixel] excalibur-scale hide absolute bg-amber-900 text-amber-200 text-xs">
+            <div id="player-info-hud" class="player-info p-2 border border-amber-950 border-2 rounded-md">
+                <h3 class="p-1">[lvl <span id="player-level" class="text-amber-300">1</span>] <span id="player-nickname">TrianMARC</span></h3>
+                <div id="hp-ui">
+                    <div id="hp-bar" class="w-full border border-amber-950 bg-amber-700 rounded-md">
+                        <div id="remaining-hp" class="bg-green-500 p-1 rounded-md">
+                            <div id="hp-points" class="absolute w-full text-center">
+                                <span id="remaining-hp-points">50</span>/<span id="total-hp-points">100</span>
+                            </div>
+                            <h4 class="">HP:</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </main>
+    <div id="player-dead-popup" class="excalibur-scale font-[PublicPixel] hide player-dead-banner p-3 bg-amber-900 text-amber-200 text-xs border-amber-950 border-3 rounded-md">
+        <div class="p-2">You have lost</div>
+        <button id="player-revive-button" class="block p-2 m-auto hover:bg-amber-950 border bg-amber-800 rounded-md">Revive</button>
+    </div>
     <script type="module" src="./src/main.ts"></script>
 </body>
 
