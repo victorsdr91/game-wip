@@ -11,24 +11,3 @@ export interface ActorStats {
     agi: number;
     con: number;
 }
-
-export interface PlayerAnimations {
-    idle: {
-        left: Sprite;
-        up: Sprite;
-        right: Sprite;
-        down: Sprite;
-    }
-    walk: {
-        left: Animation;
-        up: Animation;
-        right: Animation;
-        down: Animation;
-    }
-    run: {
-        left: Animation;
-        up: Animation;
-        right: Animation;
-        down: Animation;
-    }
-};

@@ -1,14 +1,25 @@
 import { CollisionGroupManager } from "excalibur";
 import { Npc } from "./Npc";
+import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
+import { RewardType } from "../../scenes/Level1/contract";
 
 export const EnemiesCollisionGroup = CollisionGroupManager.create('enemies');
 
+export type Drop = {
+  id: number,
+  name: string,
+  quantity: number,
+  probability: number,
+ 
+}
+
 export class AgressiveNpc extends Npc {
 
-    private attacking: boolean = false;
-    private taunted: boolean = false; 
+    protected attacking: boolean = false;
+    protected taunted: boolean = false;
+    protected rewards: RewardType;
 
-    constructor({ npcName, pos, sprite, spriteSize, stats, collisionType}) {
+    constructor({ npcName, pos, sprite, spriteSize, stats, rewards, collisionType, eventEmitter}) {
         super({
           npcName,
           pos,
@@ -16,6 +27,14 @@ export class AgressiveNpc extends Npc {
           spriteSize,
           stats,
           collisionType,
+          collisionGroup: EnemiesCollisionGroup,
+          eventEmitter,
+        });
+
+        this.rewards = rewards;
+        eventEmitter.on('player-health-depleted', () => {
+          this.taunted = false;
+          this.returnToOriginalPosition();
         });
     }
 
@@ -33,5 +52,23 @@ export class AgressiveNpc extends Npc {
 
     public toggleAttacking(): void {
       this.attacking = !this.attacking;
+    }
+
+    protected calculateDamage(attacker: ExtendedActor, defender: ExtendedActor): number {
+        const attackerStats = attacker.getStats();
+        const defenderStats = defender.getStats();
+        const damageDealt = (attackerStats.f_attack*attackerStats.level - defenderStats.f_defense*defenderStats.level);
+        return damageDealt > 0 ? damageDealt : 0;
+    }
+
+    protected receiveDamage (damage: number, actor: ExtendedActor): void {
+      const damageReceived = damage - this.stats.f_defense*this.stats.level;
+      const totalDamage = damageReceived > 0 ? damageReceived : 0;
+      this.setHealth(this.getHealth() - totalDamage);
+
+      if(!this.isTaunted()) {
+        this.taunted = true;
+        this.target = actor;
+      }
     }
 }

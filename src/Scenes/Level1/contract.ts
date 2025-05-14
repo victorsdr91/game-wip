@@ -9,6 +9,11 @@ export interface playerInfoType {
     stats: ActorStats;
 };
 
+export interface HealthType {
+    current: number;
+    total: number;
+}
+
 export interface PlayerProgressType {
     exp: number,
     expNextLevel: number,

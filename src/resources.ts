@@ -1,12 +1,10 @@
 import { DefaultLoader, ImageSource } from "excalibur";
-import Player from "/public/assets/Player/Player_Old/Player.png";  // for parcelv2 this is configured in the .parcelrc
-
-export const Resources = {
-  Player: new ImageSource(Player),
-} as const;
-
+import PlayerAnimations from "/public/assets/Player/Player_New/Player_Anim/*.png";  // for parcelv2 this is configured in the .parcelrc
 
 export const loader = new DefaultLoader();
-for (const res of Object.values(Resources)) {
-  loader.addResource(res);
-}
+export const PlayerResources = new Object();
+
+Object.keys(PlayerAnimations).forEach((key) => {
+  PlayerResources[key] = new ImageSource(PlayerAnimations[key] as string);
+  loader.addResource(PlayerResources[key]);
+});

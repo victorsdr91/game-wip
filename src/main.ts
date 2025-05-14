@@ -1,4 +1,4 @@
-import { DisplayMode, Engine, Scene, Vector } from "excalibur";
+import { DisplayMode, Engine, Scene, Screen, Vector } from "excalibur";
 import { loader } from "./resources";
 import { Level } from "./scenes/Level1/Level";
 import { MainMenu } from "./scenes/MainMenu/MainMenu";
@@ -6,6 +6,7 @@ import { npcType, NPCTypes, playerInfoType, spriteSize, worldInfoType } from "./
 import { configType } from "./contract";
 import { default as keyboardConfig} from '../public/config/keyboard.json';
 import { Config } from "./state/Config";
+import { calculateExPixelConversion } from "./ui/utils/calculateExPixelConversion";
 
 class Game extends Engine {
   private worldInfo: worldInfoType;
@@ -15,13 +16,15 @@ class Game extends Engine {
     super({
       width: 1366,
       height: 768,
+      pixelArt: true,
       displayMode: DisplayMode.FitScreen
     });
     this.worldInfo = worldInfo;
     this.config = config;
   }
+
   initialize()  {
-    Config.setControls(config.controls);
+    Config.setControls(this.config.controls);
     const mainWorld = new Level(this.worldInfo);
     this.addScene('mainmenu', new MainMenu());
     this.addScene('worldScene', mainWorld);
@@ -86,7 +89,7 @@ const human = {
 
 const monster = { 
   npcName: "Slime",
-  pos: {x:230, y: 414, z: 6},
+  pos: {x:230, y: 414, z: 9},
   health: 100,
   sprite: "monster_001",
   spriteSize: {
@@ -99,7 +102,7 @@ const monster = {
   },
   stats: {
     level: 2,
-    f_attack: 2,
+    f_attack: 15,
     f_defense: 2,
     m_attack: 2,
     m_defense: 2,
@@ -126,5 +129,11 @@ const worldInfo: worldInfoType = {
 };
 
 export const game = new Game(worldInfo, config);
+
+game.screen.events.on('resize', () => calculateExPixelConversion(game.screen));
+
 game.showDebug(true);
+game.start(loader).then(() => {
+  calculateExPixelConversion(game.screen);
+});
 game.initialize();

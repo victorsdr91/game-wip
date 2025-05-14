@@ -1,82 +1,47 @@
-import { vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Sprite, GraphicsGroup, Font, Color, Text, TextAlign, Actor, GameEvent, EventEmitter, CollisionGroupManager, Side, PreCollisionEvent, CollisionStartEvent, PostCollisionEvent, CollisionEndEvent } from "excalibur";
-import { Resources } from "../../resources";
+import { vec, SpriteSheet, Animation, range, CollisionType, Engine, Keys, Vector, Sprite, GraphicsGroup, Font, Color, Text, TextAlign, Actor, GameEvent, EventEmitter, CollisionGroupManager, Side, PreCollisionEvent, CollisionStartEvent, PostCollisionEvent, CollisionEndEvent, AnimationStrategy } from "excalibur";
+import { PlayerResources } from "../../resources";
 import { Config } from "../../state/Config";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { ActorStats } from "../ExtendedActor/contract";
-import { ActorEvents } from "excalibur/build/dist/Actor";
-import { AgressiveNpc } from "../npc/AgressiveNpc";
+import { Npc } from "../npc/Npc";
+import { PlayerProgressType } from "../../scenes/Level1/contract";
+import { PlayerAnimation } from "./PlayerAnimations";
+import { animationDirection, animationMode } from "./contract";
 
-type PlayerAnimations = {
-  idle: SpriteObject;
-  walk: AnimationObject;
-  run: AnimationObject;
-  attack: AnimationObject[]
-};
 
-interface AnimationObject {
-  up: Animation;
-  down: Animation;  
-  left: Animation;
-  right: Animation;
-}
-
-interface SpriteObject {
-  up: Sprite;
-  down: Sprite;  
-  left: Sprite;
-  right: Sprite;
-}
-
-type PlayerEvents = {
-  playerAttack: PlayerAttackEvent;
-}
-
-export class PlayerAttackEvent extends GameEvent<Player> {
-  constructor(public target: Player) {
-    super();
-  }
-}
-
-export const PlayerEvents = {
-  playerAttack: 'playerAttack'
-} as const;
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
 
 export class Player extends ExtendedActor {
-  public events = new EventEmitter<ActorEvents & PlayerEvents>();
-  private nickname: Text;
-  private spriteSheet: SpriteSheet;
-  private animations: PlayerAnimations;
-  private direction: string = "down";
-  private movementMode: string = "idle";
+  public nickname: Text;
+  private playerAnimation: PlayerAnimation;
+  private direction: animationDirection = animationDirection.DOWN;
+  private movementMode: animationMode = animationMode.IDLE;
   public isAttacking: boolean = false;
-  private hasAttacked: boolean = false;
   private controlMap = {};
   private attackMode: number = 0;
-  private attackCollisionActors: AgressiveNpc[];
+  private progress: PlayerProgressType;
+  private playerDead: boolean = false;
 
-  constructor(pos: Vector, nickname: string, stats: ActorStats) {
+  constructor(pos: Vector, nickname: string, progress: PlayerProgressType, stats: ActorStats, eventEmitter: EventEmitter) {
     super({
       pos: pos,
       width: 16,
       height: 22,
-      collisionType: CollisionType.Passive,
+      collisionType: CollisionType.Active,
       collisionGroup: PlayerCollisionGroup,
-      stats: stats,
+      stats,
+      eventEmitter,
     });
-    this.nickname = new Text({ text: `lvl ${stats.level} ${nickname}`, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
-    this.attackCollisionActors = new Array<AgressiveNpc>();
-
-    this.on("collisionstart", (evt) => { this.handlePlayerCollision(evt) });
-    this.on("collisionend",(evt) => { this.resolveColission(evt) });
-
+    this.nickname = new Text({ text: nickname, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
+    this.progress = progress;
+    this.playerAnimation = new PlayerAnimation(this.playerFrameSpeed);
     const actionsMap = {
       "movement" : {
-        "left" : () => { this.move("left", "walk")},
-        "right" : () => { this.move("right", "walk")},
-        "up" : () => { this.move("up", "walk")},
-        "down" : () => { this.move("down", "walk")},
+        "left" : () => { this.move(animationDirection.LEFT, animationMode.WALK)},
+        "right" : () => { this.move(animationDirection.RIGHT, animationMode.WALK)},
+        "up" : () => { this.move(animationDirection.UP, animationMode.WALK)},
+        "down" : () => { this.move(animationDirection.DOWN, animationMode.WALK)},
         "run" : () => { this.run() },
       },
       "skills": {
@@ -95,116 +60,112 @@ export class Player extends ExtendedActor {
       )
     });
 
+    this.handleEvents();
+
+  }
+
+  handleEvents() {
+    this.handleNpcBasicAttack();
+    this.handleMonsterRewards();
+  }
+
+  handleNpcBasicAttack() {
+    this.event.on("npc-attack-basic", ({ pos, range, damage, actor}) => {
+      let diff = this.pos.sub(pos);
+      if (diff.distance() > range) {
+        return;
+      }
+      
+      this.receiveDamage(damage, actor);
+    });
+  }
+
+  handleMonsterRewards() {
+    this.event.on("npc-aggresive-died", ({ actor, rewards}) => {
+      if(this.nickname.text === actor.nickname.text) {
+        if(rewards.exp) {
+          this.progress.exp += rewards.exp;
+          console.log(`${this.nickname.text} has received ${rewards.exp} experience points`);
+          this.isLvlUp(this.progress.exp) && this.lvlUp();
+        }
+      }
+    });
+  }
+
+  isLvlUp(exp: number): boolean {
+    return exp >= this.progress.expNextLevel;
+  }
+  
+  lvlUp() {
+    this.stats.level++;
+    const diffExp = this.progress.exp - this.progress.expNextLevel;
+    this.progress.exp = diffExp;
+    this.progress.expNextLevel += (this.progress.expNextLevel*1.5)+50;
+
+    this.event.emit('player-lvl-update', {newLvl: this.stats.level});
   }
 
   onInitialize() {
-    this.spriteSheet = SpriteSheet.fromImageSource({
-      image: Resources.Player,
-      grid: {
-          rows: 25,
-          columns: 8,
-          spriteWidth: 32,
-          spriteHeight: 32
-      },
-      spacing: {
-          originOffset: {
-            x: 0, y: 0
-          },
-          // Optionally specify the margin between each sprite
-          margin: { x: 0, y: 0}
-      }
-    });
-    let initialRange = 0;
-    
-    this.animations = {
-      idle: {
-        up: this.spriteSheet.getSprite(0,2),
-        down: this.spriteSheet.getSprite(0,0),
-        left: this.spriteSheet.getSprite(0,1).clone(),
-        right: this.spriteSheet.getSprite(0,1),
-      },
-      walk: {
-        down: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange, initialRange + 5), this.playerFrameSpeed),
-        left: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 5), this.playerFrameSpeed).clone(),
-        right: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange, initialRange + 5), this.playerFrameSpeed),
-        up: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 3), this.playerFrameSpeed),
-      },
-      run: {
-        down: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 5), this.playerFrameSpeed),
-        left: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 5), this.playerFrameSpeed).clone(),
-        right: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange, initialRange + 5), this.playerFrameSpeed),
-        up: Animation.fromSpriteSheet(this.spriteSheet, range(initialRange+=8, initialRange + 5), this.playerFrameSpeed),
-      },
-      attack: [
-        {
-          down: Animation.fromSpriteSheet(this.spriteSheet, range(48, 51), this.playerFrameSpeed),
-          left: Animation.fromSpriteSheet(this.spriteSheet, range(72, 75), this.playerFrameSpeed).clone(),
-          right: Animation.fromSpriteSheet(this.spriteSheet, range(72, 75), this.playerFrameSpeed),
-          up: Animation.fromSpriteSheet(this.spriteSheet, range(96, 99), this.playerFrameSpeed),
-        },
-        {
-          down: Animation.fromSpriteSheet(this.spriteSheet, range(56, 59), this.playerFrameSpeed),
-          left: Animation.fromSpriteSheet(this.spriteSheet, range(80, 83), this.playerFrameSpeed).clone(),
-          right: Animation.fromSpriteSheet(this.spriteSheet, range(80, 83), this.playerFrameSpeed),
-          up: Animation.fromSpriteSheet(this.spriteSheet, range(104, 107), this.playerFrameSpeed),
-        },
-        {
-          down: Animation.fromSpriteSheet(this.spriteSheet, range(64, 67), this.playerFrameSpeed),
-          left: Animation.fromSpriteSheet(this.spriteSheet, range(88, 91), this.playerFrameSpeed).clone(),
-          right: Animation.fromSpriteSheet(this.spriteSheet, range(88, 91), this.playerFrameSpeed),
-          up: Animation.fromSpriteSheet(this.spriteSheet, range(112, 115), this.playerFrameSpeed),
-        },
-      ]
-    };
-    
-    this.animations.idle.left.flipHorizontal = true;
-    this.animations.walk.left.flipHorizontal = true;
-    this.animations.run.left.flipHorizontal = true;
+    this.playerAnimation.initialize();
+    const attacks = this.playerAnimation.getAttackAnimations();
 
-    this.animations.attack.forEach((attack) => {
-      attack.left.flipHorizontal = true;
+    Object.values(attacks).forEach((attackDirection) => {
+      attackDirection.forEach((attack) => {
+        attack.events.on("loop", () => {
+          this.isAttacking = false;
+          this.playerBasicAttack();
+        });
+      });
     });
+
+    const dieAnimation = this.playerAnimation.useDieAnimation();
+    dieAnimation.events.on('end', () => {
+      setTimeout(() => {
+        this.event.emit('player-health-depleted', {callback: this.resetPlayer });
+      }, 1500);
+    })
   }
 
-  public calculateDamage(attacker: ExtendedActor, defender: ExtendedActor): number {
-    const attackerStats = attacker.getStats();
-    const defenderStats = defender.getStats();
-    const damageDealt = (attackerStats.f_attack*attackerStats.level - defenderStats.f_defense*defenderStats.level);
-    return damageDealt > 0 ? damageDealt : 0;
+  private playerBasicAttack() {
+    if(++this.attackMode > 2) {
+      this.attackMode = 0;
+    }
+
+    const eventData = {
+      actor: this,
+      pos: this.pos,
+      direction: this.direction,
+      range: 20,
+      damage: this.stats.f_attack*this.stats.level,
+    }
+    this.event.emit("player-attack-basic", eventData);
   }
 
-  private move( direction: string, mode: string) {
-      const collidingSide = {
-        right: this.colliding && this.collisionSide === Side.Right,
-        up: this.colliding && this.collisionSide === Side.Top,
-        left: this.colliding && this.collisionSide === Side.Left,
-        down: this.colliding && this.collisionSide === Side.Bottom,
-      };
-      this.movementMode = this.movementMode !== "run" ? mode : this.movementMode;
+  private move( direction: animationDirection, mode: animationMode) {
+      this.movementMode = this.movementMode !== animationMode.RUN ? mode : this.movementMode;
       this.direction = direction;
-      const isXMovement = this.direction === "right" || this.direction === "left";
+      const isXMovement = this.direction === animationDirection.RIGHT || this.direction === animationDirection.LEFT;
       let x = 0;
       let y = 0;
-      if(!collidingSide[this.direction]) {
-        if(isXMovement) {
-          x = direction === "right" ? this.playerSpeed : -this.playerSpeed;
-        }
-        else {
-          y = direction === "down" ? this.playerSpeed : -this.playerSpeed;
-        }
+      if(isXMovement) {
+        x = direction === animationDirection.RIGHT ? this.playerSpeed : -this.playerSpeed;
       }
+      else {
+        y = direction === animationDirection.DOWN ? this.playerSpeed : -this.playerSpeed;
+      }
+
       this.vel = vec(x, y);
   }
 
   private run(): void {
     this.playerSpeed = this.speed*this.stats.speed*2;
-    this.movementMode = "run";
+    this.movementMode = animationMode.RUN;
   }
 
   onPreUpdate(engine: Engine, elapsedMs: number): void {
     this.vel = Vector.Zero;
     this.playerSpeed = this.speed*this.stats.speed;
-    this.movementMode = "idle";
+    this.movementMode = animationMode.IDLE;
 
     Object.values(Keys)
       .filter((key) => 
@@ -215,22 +176,23 @@ export class Player extends ExtendedActor {
           this.controlMap[key] && this.controlMap[key]();
         }
       );
-
-    this.animations.attack[this.attackMode][this.direction].events.on('loop', () => {
-      this.isAttacking = false;
-      this.hasAttacked = true;
-      if(++this.attackMode > 2) {
-        this.attackMode = 0;
-      }
-    });
-
-    this.hasAttacked && this.attack();
+    let animationGraphic = this.playerGraphic(this.playerAnimation.usePlayerAnimation({ mode: this.movementMode, direction: this.direction}));
     
+    if(this.isAttacking) {
+      animationGraphic = this.playerGraphic(this.playerAnimation.useAttackAnimation(this.direction, this.attackMode || 0));
+    } else if(this.playerDead) {
+      animationGraphic = this.playerGraphic(this.playerAnimation.useDieAnimation());
+    }
+
+    this.graphics.use(animationGraphic);
+  }
+
+  protected playerGraphic(animation: Animation): GraphicsGroup {
     const graphicsGroup = new GraphicsGroup({
       useAnchor: true,
       members: [
         {
-          graphic: this.isAttacking ? this.animations.attack[this.attackMode][this.direction] : this.animations[this.movementMode][this.direction],
+          graphic: animation,
           offset: new Vector(0, 8),
         },
         {
@@ -242,47 +204,37 @@ export class Player extends ExtendedActor {
     });
     
     graphicsGroup.width = 32;
-    this.graphics.use(graphicsGroup);
+
+    return graphicsGroup;
   }
 
-  attack(): void {
-    this.attackCollisionActors.forEach((defender: AgressiveNpc) => {
-      const damageDealt = this.calculateDamage(this, defender);
-      defender.actions.blink(200, 200, 3);
-      defender.setHealth(defender.getHealth() - damageDealt);
-      console.log(`${this.nickname.text} ha hecho ${damageDealt} puntos de daño a ${defender.npcName.text}`);
-      if(!defender.isAttacking()) {
-        defender.toggleAttacking();
-      };
-    });
-    this.hasAttacked = false;
-  }
-
-  public addEnemyAttacked(npc: AgressiveNpc){
-    if(!this.attackCollisionActors.includes(npc)) {
-      this.attackCollisionActors.push(npc);
+  protected receiveDamage (damage: number, actor: ExtendedActor): void {
+    const damageReceived = damage - this.stats.f_defense*this.stats.level;
+    const totalDamage = damageReceived > 0 ? damageReceived : 0;
+    this.updateHealth(this.getHealth() - totalDamage);
+    if(actor instanceof Player) {
+      const player = actor as Player;
+      console.log(`${player.nickname.text} has made ${totalDamage} points to ${this.nickname.text}`);
+    } else if(actor instanceof Npc) {
+      console.log(`${this.nickname.text} has received ${totalDamage} points from ${actor.npcName.text}`);
+    }
+    if(this.getHealth() <= 0) {
+      this.die();
     }
   }
-
-  public removeEnemyAttacked(npc: AgressiveNpc){
-    const npcIndex = this.attackCollisionActors.indexOf(npc);
-    if( npcIndex > -1 ) {
-      this.attackCollisionActors.splice(npcIndex, 1);
-    }  
+  private updateHealth(health) {
+    this.setHealth(health);
+    this.event.emit('player-health-update', {health});
   }
 
-  private handlePlayerCollision(ev: CollisionStartEvent) {
-      if(ev.other instanceof AgressiveNpc) {
-          this.addEnemyAttacked(ev.other);
-      };
-      this.collisionSide = ev.side;
-      this.colliding = true;
+  private die() {
+    this.playerDead = true;
   }
 
-  private resolveColission(ev: CollisionEndEvent) {
-    if(ev.other instanceof AgressiveNpc) {
-      this.removeEnemyAttacked(ev.other);
-    }
-    this.colliding = false;
+  public resetPlayer = () => {
+    this.pos = this.originalPosition;
+    this.playerDead = false;
+    this.direction = animationDirection.DOWN;
+    this.updateHealth(this.getMaxHealth());
   }
 }

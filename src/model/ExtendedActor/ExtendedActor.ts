@@ -1,4 +1,4 @@
-import { Actor, Side } from "excalibur";
+import { Actor, Engine, EventEmitter, Side, Vector } from "excalibur";
 
 import { ActorStats } from "./contract";
 
@@ -13,8 +13,11 @@ export abstract class ExtendedActor extends Actor {
   private health: number;
   public colliding: boolean = false;
   public collisionSide: Side | null;
+  protected target: ExtendedActor;
+  protected event: EventEmitter;
+  protected originalPosition: Vector;
 
-  constructor({ pos, width, height, collisionType, collisionGroup, stats}) {
+  constructor({ pos, width, height, collisionType, collisionGroup, stats, eventEmitter}) {
     super({
       pos,
       width,
@@ -23,7 +26,9 @@ export abstract class ExtendedActor extends Actor {
       collisionGroup,
     });
     this.stats = stats;
+    this.event = eventEmitter;
     this.health = this.getMaxHealth();
+    this.originalPosition = pos;
   }
 
   public setHealth(health: number) {
@@ -32,9 +37,6 @@ export abstract class ExtendedActor extends Actor {
       this.health = maxHealth;
     } else {
       this.health = health;
-    }
-    if(this.health <= 0) {
-      this.kill();
     }
   }
 
@@ -46,8 +48,11 @@ export abstract class ExtendedActor extends Actor {
     return this.stats;
   }
 
-  private getMaxHealth(): number {
+  public getMaxHealth(): number {
     return BASE_HEALTH+(this.stats.con*CON_MULTIPLIER);
   }
-
+  
+  protected returnToOriginalPosition() {
+      this.actions.moveTo(this.originalPosition, this.speed*this.stats.speed);
+    }
 }

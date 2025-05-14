@@ -1,7 +1,6 @@
 import { Color, Font, GraphicsGroup, ImageSource, Sprite, SpriteSheet, Text, TextAlign, Vector, Animation} from "excalibur";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
-import { spriteSize } from "../../Scenes/Level1/contract";
-import { ActorStats } from "../ExtendedActor/contract";
+import { spriteSize } from "../../scenes/Level1/contract";
 
 export interface npcAnimations {
   
@@ -25,7 +24,7 @@ export abstract class Npc extends ExtendedActor {
     protected sprite: ImageSource;
     protected spriteSize: { width: spriteSize, height: spriteSize };
     protected animations: npcAnimations;
-    constructor({ npcName, pos, sprite, spriteSize, collisionType, collisionGroup, stats }) {
+    constructor({ npcName, pos, sprite, spriteSize, collisionType, collisionGroup, stats, eventEmitter }) {
       super({
         pos: new Vector(pos.x, pos.y),
         width: spriteSize.width,
@@ -33,6 +32,7 @@ export abstract class Npc extends ExtendedActor {
         collisionType,
         collisionGroup,
         stats,
+        eventEmitter
       });
 
       this.z = pos.z;
@@ -80,6 +80,5 @@ export abstract class Npc extends ExtendedActor {
       });
       graphicsGroup.width = 32;
       this.graphics.use(graphicsGroup);
-      
     }
 }
