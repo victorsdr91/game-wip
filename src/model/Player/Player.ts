@@ -24,7 +24,7 @@ export class Player extends ExtendedActor {
     super({
       pos: pos,
       width: 16,
-      height: 22,
+      height: 16,
       collisionType: CollisionType.Active,
       collisionGroup: PlayerCollisionGroup,
       stats,
