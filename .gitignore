@@ -3,3 +3,5 @@ dist
 .parcel-cache
 loaded.png
 play.png
+package-lock.json
+.cache
