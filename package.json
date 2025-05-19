@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "start": "parcel serve ./index.html",
-    "build": "parcel build ./index.html --dist-dir ./dist --public-url ./",
+    "start": "parcel serve ./src/index.html",
+    "build": "parcel build ./src/index.html --dist-dir ./dist --public-url ./",
     "test": "npm run build && ex-test -d ./dist -t ./test/test.js",
     "initTSC": "tsc --init",
     "tsc": "tsc"
