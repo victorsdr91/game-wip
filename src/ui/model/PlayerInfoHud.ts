@@ -2,18 +2,18 @@ import { EventEmitter } from "excalibur";
 import { Player } from "../../model/Player/Player";
 
 export class PlayerInfoHud {
-    private nickname: HTMLElement;
-    private lvl: HTMLElement;
-    private remainingHP: HTMLElement;
-    private totalHP: HTMLElement;
-    private hpBar: HTMLElement;
-    private playerTotalHP: number;
-    private playerDeadPopup:HTMLElement;
-    private playerDeadReviveButton: HTMLElement;
+    private nickname!: HTMLElement;
+    private lvl!: HTMLElement;
+    private remainingHP!: HTMLElement;
+    private totalHP!: HTMLElement;
+    private hpBar!: HTMLElement;
+    private playerTotalHP!: number;
+    private playerDeadPopup!: HTMLElement;
+    private playerDeadReviveButton!: HTMLElement;
 
     private eventEmitter: EventEmitter;
 
-    constructor({eventEmitter}) {
+    constructor(eventEmitter: EventEmitter) {
         this.eventEmitter = eventEmitter; 
         this.buildPlayerHUD();
         this.buildPlayerDeathPopup();

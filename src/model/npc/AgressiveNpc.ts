@@ -2,6 +2,7 @@ import { CollisionGroupManager } from "excalibur";
 import { Npc } from "./Npc";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { RewardType } from "../../scenes/Level1/contract";
+import { AgressiveNpcType } from "./contract";
 
 export const EnemiesCollisionGroup = CollisionGroupManager.create('enemies');
 
@@ -19,7 +20,7 @@ export class AgressiveNpc extends Npc {
     protected taunted: boolean = false;
     protected rewards: RewardType;
 
-    constructor({ npcName, pos, sprite, spriteSize, stats, rewards, collisionType, eventEmitter}) {
+    constructor({ npcName, pos, sprite, spriteSize, stats, rewards, collisionType, eventEmitter}: AgressiveNpcType) {
         super({
           npcName,
           pos,

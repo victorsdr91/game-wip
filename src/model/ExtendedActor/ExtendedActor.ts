@@ -1,6 +1,6 @@
 import { Actor, EventEmitter, Side, Vector } from "excalibur";
 
-import { ActorStats } from "./contract";
+import { ActorStats, ExtendedActorType } from "./contract";
 
 const BASE_HEALTH = 100;
 const CON_MULTIPLIER = 0.4;
@@ -8,16 +8,16 @@ const CON_MULTIPLIER = 0.4;
 export abstract class ExtendedActor extends Actor {
   protected stats: ActorStats;
   protected speed: number = 16;
-  protected playerSpeed: number;
-  protected playerFrameSpeed: 200; // ms
+  protected playerSpeed!: number;
+  protected playerFrameSpeed: number = 200; // ms
   private health: number;
   public colliding: boolean = false;
-  public collisionSide: Side | null;
-  protected target: ExtendedActor;
+  public collisionSide: Side | null | undefined;
+  protected target: ExtendedActor | undefined;
   protected event: EventEmitter;
   protected originalPosition: Vector;
 
-  constructor({ pos, width, height, collisionType, collisionGroup, stats, eventEmitter}) {
+  constructor({ pos, width, height, collisionType, collisionGroup, stats, eventEmitter}: ExtendedActorType) {
     super({
       pos,
       width,

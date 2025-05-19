@@ -1,5 +1,4 @@
-import { Sprite, Animation, Vector, CollisionType, CollisionGroup, EventEmitter } from "excalibur";
-
+import { Vector, CollisionType, CollisionGroup, EventEmitter } from "excalibur";
 export interface ActorStats {
     level: number;
     f_attack: number;
@@ -11,8 +10,7 @@ export interface ActorStats {
     agi: number;
     con: number;
 }
-
-export interface ExtendedActorType { 
+export interface ExtendedActorType {
     pos: Vector;
     width: number;
     height: number;

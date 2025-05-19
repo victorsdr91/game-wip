@@ -7,7 +7,7 @@ export interface HudInterface {
 }
 
 export class Hud {
-    private rootElement: HTMLElement;
+    private rootElement: HTMLElement | undefined;
     private playerInfo: PlayerInfoHud;
 
     constructor({ eventEmitter }: HudInterface) {
@@ -15,17 +15,17 @@ export class Hud {
         if($rootElement) {
             this.rootElement = $rootElement;
         };
-        this.playerInfo = new PlayerInfoHud({eventEmitter});
+        this.playerInfo = new PlayerInfoHud(eventEmitter);
     }
 
     public show() {
-        this.rootElement.classList.remove('hide');
-        this.rootElement.classList.add('show');
+        this.rootElement?.classList.remove('hide');
+        this.rootElement?.classList.add('show');
     }
 
     public hide() {
-        this.rootElement.classList.remove('show');
-        this.rootElement.classList.add('hide');
+        this.rootElement?.classList.remove('show');
+        this.rootElement?.classList.add('hide');
     }
 
     public updatePlayerInfoHud(player: Player) {

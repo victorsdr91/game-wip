@@ -1,9 +1,10 @@
-import { CollisionType, GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine, ActionContext, AnimationStrategy, Graphic, Text, Font, Color, TextAlign } from "excalibur";
+import { GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine, ActionContext, AnimationStrategy, Graphic, Text, Font, Color, TextAlign } from "excalibur";
 import { AgressiveNpc } from "./AgressiveNpc";
+import { AgressiveNpcType } from "./contract";
 
 export class Slime extends AgressiveNpc {
 
-    constructor({ npcName, pos, sprite, spriteSize, stats, rewards, eventEmitter}) {
+    constructor({ npcName, pos, sprite, spriteSize, collisionType, stats, rewards, eventEmitter}: AgressiveNpcType) {
         super({
           npcName,
           pos,
@@ -11,7 +12,7 @@ export class Slime extends AgressiveNpc {
           spriteSize,
           stats,
           rewards,
-          collisionType: CollisionType.Active,
+          collisionType,
           eventEmitter
         });
     }
@@ -129,13 +130,13 @@ export class Slime extends AgressiveNpc {
         this.attacking = false;
 
         if(this.isTaunted()) {
-          const distanceFromTarget = this.pos.distance(this.target.pos);
+          const distanceFromTarget = this.pos.distance(this.target?.pos);
           this.actions.clearActions();
 
           if(distanceFromTarget <= 20 && !this.isAttacking()) {
             this.attacking = true;
             this.useGraphic(this.graphics.use("attack-down"));
-          } else if(distanceFromTarget > 20 && distanceFromTarget < 80) {
+          } else if(distanceFromTarget > 20 && distanceFromTarget < 80 && this.target) {
             this.actions.meet(this.target, this.speed*this.stats.speed);
           } else if(distanceFromTarget > 80) {
             this.taunted=false;

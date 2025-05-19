@@ -1,4 +1,4 @@
-import { Engine, EventEmitter, Scene } from "excalibur";
+import { CollisionType, Engine, EventEmitter, Scene } from "excalibur";
 import { NPCTypes, playerInfoType, worldInfoType } from "./contract";
 import { Resources, worldLoader } from "./resources";
 import { PacificNpc } from "../../model/npc/PacificNpc";
@@ -11,7 +11,7 @@ import { Hud } from "../../ui/Hud";
 export class Level extends Scene {
     private _playerInfo: playerInfoType;
     private hud: Hud;
-    private player: Player;
+    private player: Player | undefined;
     private pacificNpcs: PacificNpc[];
     private agressiveNpcs: AgressiveNpc[];
     private eventEmitter: EventEmitter;
@@ -33,7 +33,8 @@ export class Level extends Scene {
                         pos: npc.pos,
                         sprite: Resources[npc.sprite],
                         spriteSize: npc.spriteSize,
-                        dialogue: npc.dialogue,
+                        dialogue: npc.dialogue || [""],
+                        collisionType: CollisionType.Fixed,
                         stats: npc.stats,
                         eventEmitter: this.eventEmitter,
                     })
@@ -46,8 +47,9 @@ export class Level extends Scene {
                         pos: npc.pos,
                         spriteSize: npc.spriteSize,
                         sprite: Resources[npc.sprite],
+                        collisionType: CollisionType.Active,
                         stats: npc.stats,
-                        rewards: npc.rewards,
+                        rewards: npc.rewards || { exp: 0 },
                         eventEmitter: this.eventEmitter,
                     });
                     this.agressiveNpcs.push(npcToPush);
@@ -87,8 +89,10 @@ export class Level extends Scene {
     }
 
     private loadHUD(): void {
-        this.hud.updatePlayerInfoHud(this.player);
-        this.hud.show();
+        if(this.player) {
+            this.hud.updatePlayerInfoHud(this.player);
+            this.hud.show();
+        }
     }
        
 

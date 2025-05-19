@@ -13,15 +13,14 @@ import Slime_Blue from "/public/assets/Enemies/Slime/Slime_New/Slime_Blue.png";
 import { TiledResource } from "@excaliburjs/plugin-tiled";
 const LevelPathMap = new Array();
 
-const toPathMap = ( pathMap, resource, inputPath, format = "png"): void => {
+
+const toPathMap = ( pathMap, resource, inputPath, format = "png") => {
   Object.keys(resource).forEach(( key ) => {
     pathMap.push({
       path: `${inputPath}/${key}.${format}`,
       output: resource[key],
     })
   });
-
-  return pathMap;
 };
 
 toPathMap(LevelPathMap, tilesets, "tilesets", "tsx");
@@ -34,7 +33,7 @@ toPathMap(LevelPathMap, TreeTiles, "../../Trees");
 toPathMap(LevelPathMap, HousesTiles, "../House/Buildings/Houses");
 
 
-export const Resources = {
+const Resources = {
   human_001: new ImageSource(human_001),
   monster_001: new ImageSource(Slime_Blue),
   Level1Map: new TiledResource(
@@ -44,9 +43,11 @@ export const Resources = {
       pathMap: LevelPathMap
     }
   ),
-} as const;
+};
 
-export const worldLoader = new DefaultLoader();
+const worldLoader = new DefaultLoader();
 for (const res of Object.values(Resources)) {
   worldLoader.addResource(res);
 }
+
+module.exports = { worldLoader, Resources };

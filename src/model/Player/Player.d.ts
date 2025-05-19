@@ -1,0 +1,32 @@
+import { Animation, Engine, Vector, GraphicsGroup, Text, EventEmitter } from "excalibur";
+import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
+import { ActorStats } from "../ExtendedActor/contract";
+import { PlayerProgressType } from "../../scenes/Level1/contract";
+export declare const PlayerCollisionGroup: import("excalibur").CollisionGroup;
+export declare class Player extends ExtendedActor {
+    nickname: Text;
+    private playerAnimation;
+    private direction;
+    private movementMode;
+    isAttacking: boolean;
+    private controlMap;
+    private attackMode;
+    private progress;
+    private playerDead;
+    constructor(pos: Vector, nickname: string, progress: PlayerProgressType, stats: ActorStats, eventEmitter: EventEmitter);
+    handleEvents(): void;
+    handleNpcBasicAttack(): void;
+    handleMonsterRewards(): void;
+    isLvlUp(exp: number): boolean;
+    lvlUp(): void;
+    onInitialize(): void;
+    private playerBasicAttack;
+    private move;
+    private run;
+    onPreUpdate(engine: Engine, elapsedMs: number): void;
+    protected playerGraphic(animation: Animation): GraphicsGroup;
+    protected receiveDamage(damage: number, actor: ExtendedActor): void;
+    private updateHealth;
+    private die;
+    resetPlayer: () => void;
+}

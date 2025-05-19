@@ -9,6 +9,19 @@ export class MainMenu extends Scene {
     private fullScreenButtonText: GameText;
     private windowedButtonText: GameText;
 
+    constructor() {
+        super();
+        this.windowedButtonText = new GameText("WINDOW", 26, { x:385, y:515});
+        this.fullScreenButtonText = new GameText("FULL SCREEN", 24, { x:360, y:515});
+        this.fullScreenButton = new Button(
+            () => {this.setFullScreen(this.engine)},
+            {
+                x: 350,
+                y: 500,
+            }
+        );
+    }
+
     /**
      * Start-up logic, called once
      */
@@ -31,16 +44,6 @@ export class MainMenu extends Scene {
         );
         const exitButtonText = new GameText("EXIT", 26, { x:410, y:415});
 
-        this.fullScreenButton = new Button(
-            () => {this.setFullScreen(engine)},
-            {
-                x: 350,
-                y: 500,
-            }
-        );
-        this.fullScreenButtonText = new GameText("FULL SCREEN", 24, { x:360, y:515});
-
-        this.windowedButtonText = new GameText("WINDOW", 26, { x:385, y:515});
         this.add(new Background({x: 0, y: 0}));
         
         engine.start(mainMenuLoader).then(() => {

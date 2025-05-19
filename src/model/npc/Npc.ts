@@ -1,6 +1,7 @@
 import { Color, Font, GraphicsGroup, ImageSource, Sprite, SpriteSheet, Text, TextAlign, Vector, Animation} from "excalibur";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { spriteSize } from "../../scenes/Level1/contract";
+import { NpcType } from "./contract";
 
 export interface npcAnimations {
   
@@ -23,9 +24,9 @@ export abstract class Npc extends ExtendedActor {
     public npcName: Text;
     protected sprite: ImageSource;
     protected spriteSize: { width: spriteSize, height: spriteSize };
-    protected animations: npcAnimations;
+    protected animations: npcAnimations | undefined;
     public hpGraphic: Text;
-    constructor({ npcName, pos, sprite, spriteSize, collisionType, collisionGroup, stats, eventEmitter }) {
+    constructor({ npcName, pos, sprite, spriteSize, collisionType, collisionGroup, stats, eventEmitter }: NpcType) {
       super({
         pos: new Vector(pos.x, pos.y),
         width: spriteSize.width,
@@ -36,7 +37,7 @@ export abstract class Npc extends ExtendedActor {
         eventEmitter
       });
 
-      this.z = pos.z;
+      this.z = pos.z || 9;
       this.npcName = new Text({ text: `lvl ${stats.level} ${npcName}`, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
       this.hpGraphic = new Text({ text: `${this.getHealth()}`, font: new Font({size: 8, color: Color.Green, textAlign: TextAlign.Center})});
       this.sprite = sprite;

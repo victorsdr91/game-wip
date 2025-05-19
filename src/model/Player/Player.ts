@@ -5,6 +5,7 @@ import { ActorStats } from "../ExtendedActor/contract";
 import { PlayerProgressType } from "../../scenes/Level1/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
 import { animationDirection, animationMode } from "./contract";
+import { keyboardType } from "../../contract";
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
@@ -15,7 +16,7 @@ export class Player extends ExtendedActor {
   private direction: animationDirection = animationDirection.DOWN;
   private movementMode: animationMode = animationMode.IDLE;
   public isAttacking: boolean = false;
-  private controlMap = {};
+  private controlMap: Object = {};
   private attackMode: number = 0;
   private progress: PlayerProgressType;
   private playerDead: boolean = false;
@@ -46,7 +47,7 @@ export class Player extends ExtendedActor {
       }
     };
 
-    const controls = Config.getControls().keyboard;
+    const controls: keyboardType = Config.getControls().keyboard;
     Object.keys(controls)
     .forEach((type) => {
       Object.keys(controls[type])

@@ -1,11 +1,9 @@
 export interface configType {
-    controls: controlsType
+    controls: controlsType;
 }
-
 export interface controlsType {
     keyboard: keyboardType;
 }
-
 export interface keyboardType {
     movement: {
         up: string;
@@ -13,5 +11,5 @@ export interface keyboardType {
         left: string;
         right: string;
         run: string;
-    }
+    };
 }

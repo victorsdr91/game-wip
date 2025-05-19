@@ -1,15 +1,14 @@
 import { SpriteSheet, Animation, range, Sprite, ImageSource, AnimationStrategy } from "excalibur";
 import { PlayerResources } from "../../resources";
-import { animationDirection, AttackPlayerAnimations, PlayerAnimations, useAnimationInput } from "./contract";
+import { animationDirection, AnimationObject, AttackPlayerAnimations, PlayerAnimations, useAnimationInput } from "./contract";
 
 
 export class PlayerAnimation {
     private noActionSpritesheet: SpriteSheet;
     private attackSpriteSheet: SpriteSheet;
-    private playerAnimations: PlayerAnimations;
-    private attackAnimations: AttackPlayerAnimations;
+    private playerAnimations!: PlayerAnimations;
+    private attackAnimations!: AttackPlayerAnimations;
     private playerFrameSpeed: number;
-    private nextAttackAnimation: number = -1;
 
     constructor(playerFrameSpeed: number) {
         this.playerFrameSpeed = playerFrameSpeed;
