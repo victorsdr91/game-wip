@@ -1,4 +1,4 @@
-import { DisplayMode, Engine, Scene, Screen, Vector } from "excalibur";
+import { DisplayMode, Engine, Vector } from "excalibur";
 import { loader } from "./resources";
 import { Level } from "./scenes/Level1/Level";
 import { MainMenu } from "./scenes/MainMenu/MainMenu";
