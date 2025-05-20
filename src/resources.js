@@ -1,4 +1,4 @@
-"use srtict";
+"use strict";
 import { DefaultLoader, ImageSource } from "excalibur";
 import PlayerAnimations from "/public/assets/Player/Player_New/Player_Anim/*.png";  // for parcelv2 this is configured in the .parcelrc
 
