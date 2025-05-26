@@ -1,22 +1,40 @@
 import { Vector } from "excalibur";
 import { ActorStats } from "../../model/ExtendedActor/contract";
+import { PlayerProgressType } from "../../model/Player/contract";
+import { ItemProps } from "../../model/Item/contract";
+import { PacificNpcType } from "../../model/npc/contract";
 
 export interface playerInfoType {
     nickname: string;
     position: Vector;
     zIndex: number;
     progress: PlayerProgressType;
+    currentHealth: number,
+    maxHealth: number,
     stats: ActorStats;
 };
+
+export interface agressiveNpcType {
+    name: string;
+    pos: {
+        x: number;
+        y: number;
+        z?: number;
+    };
+    sprite: string;
+    spriteSize: {
+        width: number;
+        height: number;
+    };
+    stats: ActorStats;
+    currentHealth?: number;
+    maxHealth: number;
+    rewards: RewardType;
+}
 
 export interface HealthType {
     current: number;
     total: number;
-}
-
-export interface PlayerProgressType {
-    exp: number,
-    expNextLevel: number,
 }
 
 export enum NPCTypes {
@@ -24,7 +42,7 @@ export enum NPCTypes {
     AGRESSIVE = "agressive"
 }
 
-export interface npcType {
+export interface NPC {
     npcName: string;
     type: NPCTypes;
     pos: {
@@ -51,22 +69,18 @@ export enum spriteSize {
 
 export interface RewardType {
     exp: number,
-    money?: number,
     items?: ItemDrop[],
 }
 
-export interface Item {
-    id: number,
-    name: string,
-}
-
-export interface ItemDrop extends Item {
+export interface ItemDrop {
+    item: ItemProps;
     probability: number;
     quantity: number;
 }
 
 export interface worldInfoType {
     playerInfo: playerInfoType;
-    npcList: Array<npcType>;
+    pacificNPCs: Array<PacificNpcType>;
+    agressiveNPCs: Array<agressiveNpcType>;
 }
 

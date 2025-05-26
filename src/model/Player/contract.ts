@@ -1,4 +1,20 @@
-import { Sprite, Animation } from "excalibur";
+import { Sprite, Animation, Vector, EventEmitter } from "excalibur";
+import { ActorStats } from "../ExtendedActor/contract";
+
+export interface PlayerProps {
+  pos: Vector;
+  name: string;
+  progress: PlayerProgressType;
+  stats: ActorStats;
+  eventEmitter: EventEmitter;
+  currentHealth;
+  maxHealth;
+}
+
+export type PlayerProgressType = {
+    exp: number;
+    expNextLevel: number;
+}
 
 export interface PlayerAnimations {
   idle: SpriteObject;
@@ -27,24 +43,4 @@ export interface SpriteObject {
   down: Sprite;  
   left: Sprite;
   right: Sprite;
-}
-
-export interface useAnimationInput {
-    mode: animationMode,
-    direction: animationDirection,
-}
-
-export enum animationMode {
-    IDLE = "idle",
-    WALK = "walk",
-    RUN = "run",
-    DAMAGED = "damaged",
-    DIE = "die"
-}
-
-export enum animationDirection {
-    UP = "up",
-    DOWN = "down",
-    LEFT = "left",
-    RIGHT = "right"
 }

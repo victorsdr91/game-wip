@@ -1,11 +1,12 @@
 import { CollisionType, Engine, EventEmitter, Scene } from "excalibur";
-import { NPCTypes, playerInfoType, worldInfoType } from "./contract";
+import { playerInfoType, worldInfoType } from "./contract";
 import { Resources, worldLoader } from "./resources";
 import { PacificNpc } from "../../model/npc/PacificNpc";
-import { AgressiveNpc, Drop } from "../../model/npc/AgressiveNpc";
+import { AgressiveNpc } from "../../model/npc/AgressiveNpc";
 import { Slime } from "../../model/npc/Slime";
 import { Player } from "../../model/Player/Player";
 import { Hud } from "../../ui/Hud";
+import { PlayerProps } from "../../model/Player/contract";
 
 
 export class Level extends Scene {
@@ -25,36 +26,38 @@ export class Level extends Scene {
         this.eventEmitter = new EventEmitter();
         this.hud = new Hud({eventEmitter: this.eventEmitter});
 
-        worldInfo.npcList.forEach((npc) => {
-            if(npc.type === NPCTypes.PACIFIC) {
-                this.pacificNpcs.push(
-                    new PacificNpc({
-                        npcName: npc.npcName,
-                        pos: npc.pos,
-                        sprite: Resources[npc.sprite],
-                        spriteSize: npc.spriteSize,
-                        dialogue: npc.dialogue || [""],
-                        collisionType: CollisionType.Fixed,
-                        stats: npc.stats,
-                        eventEmitter: this.eventEmitter,
-                    })
-                );
-            } else if(npc.type === NPCTypes.AGRESSIVE) {
-                let npcToPush: AgressiveNpc;
-                if(npc.npcName === "Slime") {
-                    npcToPush = new Slime({
-                        npcName: npc.npcName,
-                        pos: npc.pos,
-                        spriteSize: npc.spriteSize,
-                        sprite: Resources[npc.sprite],
-                        collisionType: CollisionType.Active,
-                        stats: npc.stats,
-                        rewards: npc.rewards || { exp: 0 },
-                        eventEmitter: this.eventEmitter,
-                    });
-                    this.agressiveNpcs.push(npcToPush);
-                }
-                
+        worldInfo.pacificNPCs.forEach((npc) => {
+            this.pacificNpcs.push(
+                new PacificNpc({
+                    name: npc.name,
+                    pos: npc.pos,
+                    sprite: Resources[npc.sprite],
+                    spriteSize: npc.spriteSize,
+                    dialogue: npc.dialogue || [""],
+                    collisionType: CollisionType.Fixed,
+                    stats: npc.stats,
+                    currentHealth: npc.currentHealth,
+                    maxHealth: npc.maxHealth,
+                    eventEmitter: this.eventEmitter,
+                })
+            );
+        });
+         worldInfo.agressiveNPCs.forEach((npc) => {
+            let npcToPush: AgressiveNpc;
+             if(npc.name === "Slime") {
+                npcToPush = new Slime({
+                    name: npc.name,
+                    pos: npc.pos,
+                    spriteSize: npc.spriteSize,
+                    sprite: npc.sprite,
+                    collisionType: CollisionType.Active,
+                    stats: npc.stats,
+                    currentHealth: npc.currentHealth,
+                    maxHealth: npc.maxHealth,
+                    rewards: npc.rewards || { exp: 0 },
+                    eventEmitter: this.eventEmitter,
+                });
+                this.agressiveNpcs.push(npcToPush);
             }
         });
     }
@@ -72,7 +75,17 @@ export class Level extends Scene {
     }
 
     private loadPlayer(): void {
-        this.player = new Player(this._playerInfo.position, this._playerInfo.nickname, this._playerInfo.progress, this._playerInfo.stats, this.eventEmitter);
+        const playerProps: PlayerProps = {
+            pos: this._playerInfo.position,
+            name: this._playerInfo.nickname,
+            progress: this._playerInfo.progress,
+            stats: this._playerInfo.stats,
+            eventEmitter: this.eventEmitter,
+            currentHealth: this._playerInfo.currentHealth,
+            maxHealth: this._playerInfo.maxHealth,
+        };
+
+        this.player = new Player(playerProps);
         this.player.z = this._playerInfo.zIndex;
         this.add(this.player);
         this.camera.strategy.lockToActor(this.player);

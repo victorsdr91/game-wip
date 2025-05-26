@@ -1,39 +1,35 @@
-import { vec, Animation, CollisionType, Engine, Keys, Vector, GraphicsGroup, Font, Color, Text, TextAlign, CollisionGroupManager, EventEmitter } from "excalibur";
+import { Animation, CollisionType, Engine, Keys, Vector, GraphicsGroup, CollisionGroupManager } from "excalibur";
 import { Config } from "../../state/Config";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
-import { ActorStats } from "../ExtendedActor/contract";
-import { PlayerProgressType } from "../../scenes/Level1/contract";
+import { animationDirection, animationMode } from "../ExtendedActor/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
-import { animationDirection, animationMode } from "./contract";
 import { keyboardType } from "../../contract";
+import { PlayerProgressType, PlayerProps } from "./contract";
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
 
 export class Player extends ExtendedActor {
-  public nickname: Text;
   private playerAnimation: PlayerAnimation;
-  private direction: animationDirection = animationDirection.DOWN;
-  private movementMode: animationMode = animationMode.IDLE;
-  public isAttacking: boolean = false;
   private controlMap: Object = {};
   private attackMode: number = 0;
   private progress: PlayerProgressType;
-  private playerDead: boolean = false;
 
-  constructor(pos: Vector, nickname: string, progress: PlayerProgressType, stats: ActorStats, eventEmitter: EventEmitter) {
+  constructor({pos, name, currentHealth, maxHealth, progress, stats, eventEmitter}: PlayerProps) {
     super({
+      name,
       pos: pos,
       width: 16,
       height: 16,
+      currentHealth,
+      maxHealth,
       collisionType: CollisionType.Active,
       collisionGroup: PlayerCollisionGroup,
       stats,
       eventEmitter,
     });
-    this.nickname = new Text({ text: nickname, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
     this.progress = progress;
-    this.playerAnimation = new PlayerAnimation(this.playerFrameSpeed);
+    this.playerAnimation = new PlayerAnimation(this.frameSpeed);
     const actionsMap = {
       "movement" : {
         "left" : () => { this.move(animationDirection.LEFT, animationMode.WALK)},
@@ -68,22 +64,22 @@ export class Player extends ExtendedActor {
   }
 
   handleNpcBasicAttack() {
-    this.event.on("npc-attack-basic", ({ pos, range, damage, actor}) => {
+    this.eventManager.on("npc-attack-basic", ({ pos, range, damage, actor}) => {
       let diff = this.pos.sub(pos);
       if (diff.distance() > range) {
         return;
       }
-      
-      this.receiveDamage(damage, actor);
+      const healthAfterDamage = this.receiveDamage(damage, actor);
+      this.updateHealth(healthAfterDamage);
     });
   }
 
   handleMonsterRewards() {
-    this.event.on("npc-aggresive-died", ({ actor, rewards}) => {
-      if(this.nickname.text === actor.nickname.text) {
+    this.eventManager.on("npc-aggresive-died", ({ actor, rewards}) => {
+      if(this.name === actor.name) {
         if(rewards.exp) {
           this.progress.exp += rewards.exp;
-          console.log(`${this.nickname.text} has received ${rewards.exp} experience points`);
+          console.log(`${this.name} has received ${rewards.exp} experience points`);
           this.isLvlUp(this.progress.exp) && this.lvlUp();
         }
       }
@@ -100,7 +96,7 @@ export class Player extends ExtendedActor {
     this.progress.exp = diffExp;
     this.progress.expNextLevel += (this.progress.expNextLevel*1.5)+50;
 
-    this.event.emit('player-lvl-update', {newLvl: this.stats.level});
+    this.eventManager.emit('player-lvl-update', {newLvl: this.stats.level});
   }
 
   onInitialize() {
@@ -119,7 +115,7 @@ export class Player extends ExtendedActor {
     const dieAnimation = this.playerAnimation.useDieAnimation();
     dieAnimation.events.on('end', () => {
       setTimeout(() => {
-        this.event.emit('player-health-depleted', {callback: this.resetPlayer });
+        this.eventManager.emit('player-health-depleted', {callback: this.resetPlayer });
       }, 1500);
     })
   }
@@ -136,33 +132,17 @@ export class Player extends ExtendedActor {
       range: 20,
       damage: this.stats.f_attack*this.stats.level,
     }
-    this.event.emit("player-attack-basic", eventData);
-  }
-
-  private move( direction: animationDirection, mode: animationMode) {
-      this.movementMode = this.movementMode !== animationMode.RUN ? mode : this.movementMode;
-      this.direction = direction;
-      const isXMovement = this.direction === animationDirection.RIGHT || this.direction === animationDirection.LEFT;
-      let x = 0;
-      let y = 0;
-      if(isXMovement) {
-        x = direction === animationDirection.RIGHT ? this.playerSpeed : -this.playerSpeed;
-      }
-      else {
-        y = direction === animationDirection.DOWN ? this.playerSpeed : -this.playerSpeed;
-      }
-
-      this.vel = vec(x, y);
+    this.eventManager.emit("player-attack-basic", eventData);
   }
 
   private run(): void {
-    this.playerSpeed = this.speed*this.stats.speed*2;
+    this.movementSpeed = this.movementSpeed*2;
     this.movementMode = animationMode.RUN;
   }
 
   onPreUpdate(engine: Engine, elapsedMs: number): void {
     this.vel = Vector.Zero;
-    this.playerSpeed = this.speed*this.stats.speed;
+    this.movementSpeed = this.speed*this.stats.speed;
     this.movementMode = animationMode.IDLE;
 
     Object.values(Keys)
@@ -178,7 +158,7 @@ export class Player extends ExtendedActor {
     
     if(this.isAttacking) {
       animationGraphic = this.playerGraphic(this.playerAnimation.useAttackAnimation(this.direction, this.attackMode || 0));
-    } else if(this.playerDead) {
+    } else if(this.isDead) {
       animationGraphic = this.playerGraphic(this.playerAnimation.useDieAnimation());
     }
 
@@ -194,7 +174,7 @@ export class Player extends ExtendedActor {
           offset: new Vector(0, 8),
         },
         {
-          graphic: this.nickname,
+          graphic: this.nameTextGraphic,
           offset: new Vector(16, -4),
         },
         
@@ -202,31 +182,17 @@ export class Player extends ExtendedActor {
     });
     
     graphicsGroup.width = 32;
-
     return graphicsGroup;
   }
 
-  protected receiveDamage (damage: number, actor: ExtendedActor): void {
-    const damageReceived = damage - this.stats.f_defense*this.stats.level;
-    const totalDamage = damageReceived > 0 ? damageReceived : 0;
-    this.updateHealth(this.getHealth() - totalDamage);
-    
-    if(this.getHealth() <= 0) {
-      this.die();
-    }
-  }
-  private updateHealth(health) {
+  private updateHealth(health: number): void {
     this.setHealth(health);
-    this.event.emit('player-health-update', {health});
-  }
-
-  private die() {
-    this.playerDead = true;
+    this.eventManager.emit('player-health-update', {health: this.getHealth()});
   }
 
   public resetPlayer = () => {
     this.pos = this.originalPosition;
-    this.playerDead = false;
+    this.isDead = false;
     this.direction = animationDirection.DOWN;
     this.updateHealth(this.getMaxHealth());
   }

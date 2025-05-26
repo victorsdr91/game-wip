@@ -1,4 +1,4 @@
-import { CollisionGroupManager } from "excalibur";
+import { CollisionGroupManager, ImageSource } from "excalibur";
 import { Npc } from "./Npc";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { RewardType } from "../../scenes/Level1/contract";
@@ -6,27 +6,21 @@ import { AgressiveNpcType } from "./contract";
 
 export const EnemiesCollisionGroup = CollisionGroupManager.create('enemies');
 
-export type Drop = {
-  id: number,
-  name: string,
-  quantity: number,
-  probability: number,
- 
-}
-
 export class AgressiveNpc extends Npc {
 
     protected attacking: boolean = false;
     protected taunted: boolean = false;
     protected rewards: RewardType;
 
-    constructor({ npcName, pos, sprite, spriteSize, stats, rewards, collisionType, eventEmitter}: AgressiveNpcType) {
+    constructor({ name, pos, sprite, spriteSize, stats, currentHealth, maxHealth, rewards, collisionType, eventEmitter}: AgressiveNpcType) {
         super({
-          npcName,
+          name,
           pos,
           sprite,
           spriteSize,
           stats,
+          currentHealth,
+          maxHealth,
           collisionType,
           collisionGroup: EnemiesCollisionGroup,
           eventEmitter,
@@ -46,10 +40,6 @@ export class AgressiveNpc extends Npc {
 
     public toggleTaunted(): void {
       this.taunted = !this.taunted;
-    }
-
-    public isAttacking(): boolean {
-      return this.attacking;
     }
 
     public toggleAttacking(): void {

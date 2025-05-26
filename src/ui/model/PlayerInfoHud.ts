@@ -67,7 +67,7 @@ export class PlayerInfoHud {
     }
 
     public updateInformation(player: Player): void {
-        this.updateNickname(player.nickname.text);
+        this.updateNickname(player.name);
         this.updateLvl(player.getStats().level);
         this.updateTotalHP(player.getMaxHealth());
         this.updateRemainingHP(player.getHealth());

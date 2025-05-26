@@ -1,6 +1,7 @@
 import { SpriteSheet, Animation, range, Sprite, ImageSource, AnimationStrategy } from "excalibur";
 import { PlayerResources } from "../../resources";
-import { animationDirection, AnimationObject, AttackPlayerAnimations, PlayerAnimations, useAnimationInput } from "./contract";
+import { AttackPlayerAnimations, PlayerAnimations } from "./contract";
+import { animationDirection, useAnimationInput } from "../ExtendedActor/contract";
 
 
 export class PlayerAnimation {

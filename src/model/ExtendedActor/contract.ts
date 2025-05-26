@@ -1,4 +1,4 @@
-import { Sprite, Animation, Vector, CollisionType, CollisionGroup, EventEmitter } from "excalibur";
+import { Vector, CollisionType, CollisionGroup, EventEmitter } from "excalibur";
 
 export interface ActorStats {
     level: number;
@@ -13,11 +13,34 @@ export interface ActorStats {
 }
 
 export interface ExtendedActorType { 
+    name: string;
     pos: Vector;
     width: number;
     height: number;
     collisionType: CollisionType;
     collisionGroup: CollisionGroup;
+    maxHealth: number;
+    currentHealth?:number;
     stats: ActorStats;
     eventEmitter: EventEmitter;
+}
+
+export enum animationMode {
+    IDLE = "idle",
+    WALK = "walk",
+    RUN = "run",
+    DAMAGED = "damaged",
+    DIE = "die"
+}
+
+export enum animationDirection {
+    UP = "up",
+    DOWN = "down",
+    LEFT = "left",
+    RIGHT = "right"
+}
+
+export interface useAnimationInput {
+    mode: animationMode,
+    direction: animationDirection,
 }

@@ -2,6 +2,7 @@ import { Color, Font, GraphicsGroup, ImageSource, Sprite, SpriteSheet, Text, Tex
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { spriteSize } from "../../scenes/Level1/contract";
 import { NpcType } from "./contract";
+import { Resources } from "../../scenes/Level1/resources";
 
 export interface npcAnimations {
   
@@ -21,26 +22,27 @@ export interface npcAnimations {
 }
 
 export abstract class Npc extends ExtendedActor {
-    public npcName: Text;
     protected sprite: ImageSource;
     protected spriteSize: { width: spriteSize, height: spriteSize };
     protected animations: npcAnimations | undefined;
     public hpGraphic: Text;
-    constructor({ npcName, pos, sprite, spriteSize, collisionType, collisionGroup, stats, eventEmitter }: NpcType) {
+    constructor({ name, pos, sprite, spriteSize, collisionType, collisionGroup, stats, currentHealth, maxHealth, eventEmitter }: NpcType) {
       super({
+        name,
         pos: new Vector(pos.x, pos.y),
         width: spriteSize.width,
         height: spriteSize.height,
         collisionType,
         collisionGroup,
         stats,
+        currentHealth,
+        maxHealth,
         eventEmitter
       });
 
       this.z = pos.z || 9;
-      this.npcName = new Text({ text: `lvl ${stats.level} ${npcName}`, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
       this.hpGraphic = new Text({ text: `${this.getHealth()}`, font: new Font({size: 8, color: Color.Green, textAlign: TextAlign.Center})});
-      this.sprite = sprite;
+      this.sprite = Resources[sprite];
       this.spriteSize = spriteSize;
   
     }
@@ -75,7 +77,7 @@ export abstract class Npc extends ExtendedActor {
             offset: new Vector(10, 5),
           },
           {
-            graphic: this.npcName,
+            graphic: this.nameTextGraphic,
             offset: new Vector(32, -4),
           },
           

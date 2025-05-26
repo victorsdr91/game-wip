@@ -2,11 +2,12 @@ import { DisplayMode, Engine, Vector } from "excalibur";
 import { loader } from "./resources";
 import { Level } from "./scenes/Level1/Level";
 import { MainMenu } from "./scenes/MainMenu/MainMenu";
-import { npcType, NPCTypes, playerInfoType, spriteSize, worldInfoType } from "./scenes/Level1/contract";
+import { agressiveNpcType, playerInfoType, spriteSize, worldInfoType } from "./scenes/Level1/contract";
 import { configType } from "./contract";
 import { default as keyboardConfig} from '../public/config/keyboard.json';
 import { Config } from "./state/Config";
 import { calculateExPixelConversion } from "./ui/utils/calculateExPixelConversion";
+import { PacificNpcType } from "./model/npc/contract";
 
 class Game extends Engine {
   private worldInfo: worldInfoType;
@@ -43,6 +44,8 @@ const playerInfo: playerInfoType = {
   nickname: "TrianMARC",
   position: new Vector(123, 485),
   zIndex: 8,
+  currentHealth: 128,
+  maxHealth: 128,
   progress: {
     exp: 0,
     expNextLevel: 100,
@@ -60,17 +63,17 @@ const playerInfo: playerInfoType = {
   }
 };
 
-const generateMonster = (x: number, y: number) => {
+const generateMonster = (x: number, y: number): agressiveNpcType => {
   return { 
-    npcName: "Slime",
+    name: "Slime",
     pos: {x, y, z: 9},
-    health: 100,
+    currentHealth: 128,
+    maxHealth: 128,
     sprite: "monster_001",
     spriteSize: {
       width: spriteSize.small,
       height: spriteSize.small
     },
-    type: NPCTypes.AGRESSIVE,
     rewards: {
       exp: 100,
     },
@@ -94,10 +97,10 @@ const config: configType = {
   }
 };
 
-const npcList = new Array<npcType>();
+const agressiveNPCs = new Array<agressiveNpcType>();
 
 for(let i = 0; i < 5; i++) {
-  npcList.push(generateMonster(
+  agressiveNPCs.push(generateMonster(
     491+Math.random()*132,
     203+Math.random()*258
   ));
@@ -106,7 +109,8 @@ for(let i = 0; i < 5; i++) {
 
 const worldInfo: worldInfoType = {
   playerInfo,
-  npcList
+  agressiveNPCs,
+  pacificNPCs: new Array<PacificNpcType>(),
 };
 
 export const game = new Game(worldInfo, config);

@@ -4,13 +4,15 @@ import { AgressiveNpcType } from "./contract";
 
 export class Slime extends AgressiveNpc {
 
-    constructor({ npcName, pos, sprite, spriteSize, collisionType, stats, rewards, eventEmitter}: AgressiveNpcType) {
+    constructor({ name, pos, sprite, spriteSize, collisionType, stats, currentHealth, maxHealth, rewards, eventEmitter}: AgressiveNpcType) {
         super({
-          npcName,
+          name,
           pos,
           sprite,
           spriteSize,
           stats,
+          currentHealth,
+          maxHealth,
           rewards,
           collisionType,
           eventEmitter
@@ -18,9 +20,8 @@ export class Slime extends AgressiveNpc {
     }
 
     onInitialize() {
-
       let animationMode = "idle";
-      if(this.isAttacking()) {
+      if(this.isAttacking) {
         animationMode = "attack";
       }
       const spriteSheet = SpriteSheet.fromImageSource({
@@ -59,7 +60,7 @@ export class Slime extends AgressiveNpc {
       this.graphics.add("idle-down", this.animations.idle.down);
       this.animations.die && this.graphics.add("die", this.animations.die);
       (this.animations.die as Animation).events.on("end", () => { 
-        this.event.emit("npc-aggresive-died", { rewards: this.rewards, actor: this.target});
+        this.eventManager.emit("npc-aggresive-died", { rewards: this.rewards, actor: this.target});
         this.actions.clearActions();
         setTimeout(() => { this.kill(); }, 1000*10);
       });
@@ -69,6 +70,7 @@ export class Slime extends AgressiveNpc {
       this.handleEvents();
     }
 
+    //TODO: Standarize for any kind of mob
     useGraphic(graphic: Graphic) {
       const graphicsGroup = new GraphicsGroup({
         useAnchor: false,
@@ -78,7 +80,7 @@ export class Slime extends AgressiveNpc {
             offset: new Vector(-32, -32),
           },
           {
-            graphic: this.npcName,
+            graphic: this.nameTextGraphic,
             offset: new Vector(0, -20),
           },
           {
@@ -98,7 +100,7 @@ export class Slime extends AgressiveNpc {
     }
 
     handlePlayerAttackEvent() {
-      this.event.on("player-attack-basic", ({ pos, range, direction, damage, actor}) => {
+      this.eventManager.on("player-attack-basic", ({ pos, range, direction, damage, actor}) => {
         let diff = this.pos.sub(pos);
         if (diff.distance() > range) {
           return;
@@ -120,7 +122,7 @@ export class Slime extends AgressiveNpc {
         pos: this.pos,
         damage: this.stats.f_attack*this.stats.level,
       }
-      this.event.emit("npc-attack-basic", eventData);
+      this.eventManager.emit("npc-attack-basic", eventData);
       this.attacking = false;
     }
 
@@ -133,7 +135,7 @@ export class Slime extends AgressiveNpc {
           const distanceFromTarget = this.pos.distance(this.target?.pos);
           this.actions.clearActions();
 
-          if(distanceFromTarget <= 20 && !this.isAttacking()) {
+          if(distanceFromTarget <= 20 && !this.isAttacking) {
             this.attacking = true;
             this.useGraphic(this.graphics.use("attack-down"));
           } else if(distanceFromTarget > 20 && distanceFromTarget < 80 && this.target) {

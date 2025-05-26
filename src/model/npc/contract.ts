@@ -3,13 +3,13 @@ import { RewardType } from "../../scenes/Level1/contract";
 import { ActorStats } from "../ExtendedActor/contract";
 
 export interface NpcType {
-    npcName: string;
+    name: string;
     pos: {
         x: number;
         y: number;
         z?: number;
     };
-    sprite: ImageSource;
+    sprite: string;
     spriteSize: {
         width: number;
         height: number;
@@ -17,41 +17,47 @@ export interface NpcType {
     collisionType: CollisionType;
     collisionGroup: CollisionGroup;
     stats: ActorStats;
+    currentHealth?: number;
+    maxHealth: number;
     eventEmitter: EventEmitter;
 }
 
 export interface PacificNpcType {
-    npcName: string;
+    name: string;
     pos: {
         x: number;
         y: number;
         z?: number;
     };
-    sprite: ImageSource;
+    sprite: string;
     spriteSize: {
         width: number;
         height: number;
     };
     collisionType: CollisionType;
     stats: ActorStats;
+    currentHealth?: number;
+    maxHealth: number;
     eventEmitter: EventEmitter;
     dialogue: string[];
 }
 
 export interface AgressiveNpcType {
-    npcName: string;
+    name: string;
     pos: {
         x: number;
         y: number;
         z?: number;
     };
-    sprite: ImageSource;
+    sprite: string;
     spriteSize: {
         width: number;
         height: number;
     };
     collisionType: CollisionType;
     stats: ActorStats;
+    currentHealth?: number;
+    maxHealth: number;
     eventEmitter: EventEmitter;
     rewards: RewardType;
 }
