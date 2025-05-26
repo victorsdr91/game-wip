@@ -18,5 +18,4 @@ export class Item {
     equals(item: Item): boolean {
         return item.id === this.id;
     }
-
 }

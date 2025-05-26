@@ -7,15 +7,17 @@ const npcGroupMask = CollisionGroupManager.create('npcGroup')
 export class PacificNpc extends Npc {
     private dialogue: Array<string>;
 
-    constructor({ npcName, pos, sprite, spriteSize, dialogue, stats, eventEmitter}: PacificNpcType) {
+    constructor({ name, pos, sprite, spriteSize, dialogue, stats, currentHealth, maxHealth, eventEmitter}: PacificNpcType) {
         super({
-          npcName,
+          name,
           pos,
           sprite,
           spriteSize,
           collisionType: CollisionType.Fixed,
           collisionGroup: npcGroupMask,
           stats,
+          currentHealth,
+          maxHealth,
           eventEmitter,
         });
         this.dialogue = dialogue;
