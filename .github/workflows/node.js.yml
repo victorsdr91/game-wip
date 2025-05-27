@@ -19,4 +19,4 @@ jobs:
       with:
         node-version: 'lts/*'
     - run: npm i
-    - run: npm build
+    - run: npm run build
