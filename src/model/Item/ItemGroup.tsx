@@ -8,10 +8,10 @@ export class ItemGroup {
     private weight: number;
 
     constructor({item, quantity, stack}: ItemGroupProps) {
-        this.item = item;
+        this.item = new Item(item);
         this.quantity = quantity;
         this.stack = stack;
-        this.weight = item.getWeight()*quantity;
+        this.weight = this.item.getWeight()*quantity;
     }
 
     public addItem(item: Item): number | null {

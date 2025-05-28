@@ -79,6 +79,7 @@ export class Level extends Scene {
             pos: this._playerInfo.position,
             name: this._playerInfo.nickname,
             progress: this._playerInfo.progress,
+            inventory: this._playerInfo.inventory,
             stats: this._playerInfo.stats,
             eventEmitter: this.eventEmitter,
             currentHealth: this._playerInfo.currentHealth,

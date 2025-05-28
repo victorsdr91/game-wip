@@ -50,4 +50,16 @@ export class Item {
     public getId(): number {
         return this.id;
     }
+
+    public getItemProps(): ItemProps {
+        return {
+            id: this.getId(),
+            name: this.getName(),
+            description: this.getDescription(),
+            cooldown: this.getCooldown(),
+            type: this.getType(),
+            agruppable: this.isAgruppable(),
+            weight: this.getWeight(),
+        }
+    }
 }
