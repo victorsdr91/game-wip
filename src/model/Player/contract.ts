@@ -1,11 +1,13 @@
 import { Sprite, Animation, Vector, EventEmitter } from "excalibur";
 import { ActorStats } from "../ExtendedActor/contract";
+import { InventoryProps } from "model/Inventory/contract";
 
 export interface PlayerProps {
   pos: Vector;
   name: string;
   progress: PlayerProgressType;
   stats: ActorStats;
+  inventory: InventoryProps;
   eventEmitter: EventEmitter;
   currentHealth;
   maxHealth;
