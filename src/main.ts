@@ -8,7 +8,6 @@ import { default as keyboardConfig} from '../public/config/keyboard.json';
 import { Config } from "./state/Config";
 import { calculateExPixelConversion } from "./ui/utils/calculateExPixelConversion";
 import { PacificNpcType } from "./model/npc/contract";
-import { ItemGroup } from "model/Item/ItemGroup";
 import { ItemType } from "model/Item/contract";
 
 class Game extends Engine {
