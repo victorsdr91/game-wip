@@ -3,11 +3,13 @@ import { ActorStats } from "../../model/ExtendedActor/contract";
 import { PlayerProgressType } from "../../model/Player/contract";
 import { ItemProps } from "../../model/Item/contract";
 import { PacificNpcType } from "../../model/npc/contract";
+import { InventoryProps } from "model/Inventory/contract";
 
 export interface playerInfoType {
     nickname: string;
     position: Vector;
     zIndex: number;
+    inventory: InventoryProps;
     progress: PlayerProgressType;
     currentHealth: number,
     maxHealth: number,

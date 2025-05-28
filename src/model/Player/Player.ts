@@ -5,6 +5,7 @@ import { animationDirection, animationMode } from "../ExtendedActor/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
 import { keyboardType } from "../../contract";
 import { PlayerProgressType, PlayerProps } from "./contract";
+import { Inventory } from "model/Inventory/Inventory";
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
@@ -14,8 +15,9 @@ export class Player extends ExtendedActor {
   private controlMap: Object = {};
   private attackMode: number = 0;
   private progress: PlayerProgressType;
+  private inventory: Inventory;
 
-  constructor({pos, name, currentHealth, maxHealth, progress, stats, eventEmitter}: PlayerProps) {
+  constructor({pos, name, currentHealth, maxHealth, progress, stats, inventory, eventEmitter}: PlayerProps) {
     super({
       name,
       pos: pos,
@@ -30,6 +32,7 @@ export class Player extends ExtendedActor {
     });
     this.progress = progress;
     this.playerAnimation = new PlayerAnimation(this.frameSpeed);
+    this.inventory = new Inventory(inventory);
     const actionsMap = {
       "movement" : {
         "left" : () => { this.move(animationDirection.LEFT, animationMode.WALK)},
@@ -56,6 +59,27 @@ export class Player extends ExtendedActor {
 
     this.handleEvents();
 
+  }
+
+  onInitialize() {
+    this.playerAnimation.initialize();
+    const attacks = this.playerAnimation.getAttackAnimations();
+
+    Object.values(attacks).forEach((attackDirection) => {
+      attackDirection.forEach((attack) => {
+        attack.events.on("loop", () => {
+          this.isAttacking = false;
+          this.playerBasicAttack();
+        });
+      });
+    });
+
+    const dieAnimation = this.playerAnimation.useDieAnimation();
+    dieAnimation.events.on('end', () => {
+      setTimeout(() => {
+        this.eventManager.emit('player-health-depleted', {callback: this.resetPlayer });
+      }, 1500);
+    })
   }
 
   handleEvents() {
@@ -97,27 +121,6 @@ export class Player extends ExtendedActor {
     this.progress.expNextLevel += (this.progress.expNextLevel*1.5)+50;
 
     this.eventManager.emit('player-lvl-update', {newLvl: this.stats.level});
-  }
-
-  onInitialize() {
-    this.playerAnimation.initialize();
-    const attacks = this.playerAnimation.getAttackAnimations();
-
-    Object.values(attacks).forEach((attackDirection) => {
-      attackDirection.forEach((attack) => {
-        attack.events.on("loop", () => {
-          this.isAttacking = false;
-          this.playerBasicAttack();
-        });
-      });
-    });
-
-    const dieAnimation = this.playerAnimation.useDieAnimation();
-    dieAnimation.events.on('end', () => {
-      setTimeout(() => {
-        this.eventManager.emit('player-health-depleted', {callback: this.resetPlayer });
-      }, 1500);
-    })
   }
 
   private playerBasicAttack() {

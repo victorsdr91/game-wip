@@ -8,6 +8,8 @@ import { default as keyboardConfig} from '../public/config/keyboard.json';
 import { Config } from "./state/Config";
 import { calculateExPixelConversion } from "./ui/utils/calculateExPixelConversion";
 import { PacificNpcType } from "./model/npc/contract";
+import { ItemGroup } from "model/Item/ItemGroup";
+import { ItemType } from "model/Item/contract";
 
 class Game extends Engine {
   private worldInfo: worldInfoType;
@@ -49,6 +51,26 @@ const playerInfo: playerInfoType = {
   progress: {
     exp: 0,
     expNextLevel: 100,
+  },
+  inventory: {
+    items: [
+      {
+        item: {
+          id: 1,
+          name: "Wooden sword",
+          description: "An small sword made with wood for novice adventurers",
+          cooldown: 0,
+          type: ItemType.WEREABLE,
+          agruppable: false,
+          weight: 5,
+        },
+        quantity: 1,
+        stack: 1,
+      },
+    ],
+    slots: 32,
+    maxWeight: 5000,
+    currentWeight: 0
   },
   stats: {
     level: 1,

@@ -1,3 +1,5 @@
+import { Item } from "./Item";
+
 export enum ItemType {
     WEREABLE = "wereable",
     USABLE = "usable",
@@ -12,4 +14,12 @@ export interface ItemProps {
     description: string;
     cooldown: number;
     type: ItemType;
+    agruppable?: boolean;
+    weight: number;
+}
+
+export interface ItemGroupProps {
+    item: Item;
+    quantity: number;
+    stack: number;
 }
