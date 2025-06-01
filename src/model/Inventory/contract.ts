@@ -1,9 +1,7 @@
-import { ItemGroupProps, ItemProps } from "model/Item/contract";
-import { ItemGroup } from "model/Item/ItemGroup";
+import { ItemGroupProps } from "model/Item/contract";
 
 export interface InventoryProps {
-    items?: ItemGroupProps[];
     slots: number;
     maxWeight: number;
-    currentWeight: number;
+    items?: Map<number, number>;
 }
