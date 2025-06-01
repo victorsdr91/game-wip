@@ -8,13 +8,15 @@ import { default as keyboardConfig} from '../public/config/keyboard.json';
 import { Config } from "./state/Config";
 import { calculateExPixelConversion } from "./ui/utils/calculateExPixelConversion";
 import { PacificNpcType } from "./model/npc/contract";
-import { ItemType } from "model/Item/contract";
+import { playerInfo } from "./mocks/player";
+import { ItemFactory } from "./factory/Item/ItemFactory";
+import ITEMS from "./mocks/items.json";
 
 class Game extends Engine {
   private worldInfo: worldInfoType;
   private config: configType;
 
-  constructor(worldInfo: worldInfoType, config: configType) {
+   constructor(worldInfo: worldInfoType, config: configType) {
     super({
       width: 1366,
       height: 768,
@@ -25,64 +27,22 @@ class Game extends Engine {
     this.config = config;
   }
 
-  initialize()  {
-    Config.setControls(this.config.controls);
-    const mainWorld = new Level(this.worldInfo);
-    this.addScene('mainmenu', new MainMenu());
-    this.addScene('worldScene', mainWorld);
+  async setUpGame()  {
+    console.log("Setting up game...");
+    try {
+      Config.setControls(this.config.controls);
+      ItemFactory.loadItems(ITEMS);
+      const mainWorld = new Level(this.worldInfo);
+      this.addScene('mainmenu', new MainMenu());
+      this.addScene('worldScene', mainWorld);
 
-    this.start(loader).then(() => {
-      this.goToScene('mainmenu').then(() => {
-        console.log(this.currentSceneName);
-      });
-      
-    });
+      await this.goToScene('mainmenu');
+      console.log("Current scene:", this.currentSceneName);
+    } catch (error) {
+      console.error("Error setting up game:", error);
+    }
   }
 }
-
-
-const playerInfo: playerInfoType = {
-  nickname: "TrianMARC",
-  position: new Vector(123, 485),
-  zIndex: 8,
-  currentHealth: 128,
-  maxHealth: 128,
-  progress: {
-    exp: 0,
-    expNextLevel: 100,
-  },
-  inventory: {
-    items: [
-      {
-        item: {
-          id: 1,
-          name: "Wooden sword",
-          description: "An small sword made with wood for novice adventurers",
-          cooldown: 0,
-          type: ItemType.WEREABLE,
-          agruppable: false,
-          weight: 5,
-        },
-        quantity: 1,
-        stack: 1,
-      },
-    ],
-    slots: 32,
-    maxWeight: 5000,
-    currentWeight: 0
-  },
-  stats: {
-    level: 1,
-    f_attack: 10,
-    f_defense: 12,
-    m_attack: 5,
-    m_defense: 10,
-    speed: 3,
-    cSpeed: 2,
-    agi: 2,
-    con: 20
-  }
-};
 
 const generateMonster = (x: number, y: number): agressiveNpcType => {
   return { 
@@ -137,9 +97,11 @@ const worldInfo: worldInfoType = {
 export const game = new Game(worldInfo, config);
 
 game.screen.events.on('resize', () => calculateExPixelConversion(game.screen));
-
 game.showDebug(true);
+
 game.start(loader).then(() => {
   calculateExPixelConversion(game.screen);
+  game.setUpGame().catch(error => {
+    console.error("Failed to setup game:", error);
+  });
 });
-game.initialize();
