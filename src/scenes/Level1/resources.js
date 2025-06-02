@@ -33,7 +33,7 @@ toPathMap(LevelPathMap, TreeTiles, "../../Trees");
 toPathMap(LevelPathMap, HousesTiles, "../House/Buildings/Houses");
 
 
-const Resources = {
+export const Resources = {
   human_001: new ImageSource(human_001),
   monster_001: new ImageSource(Slime_Blue),
   Level1Map: new TiledResource(
@@ -45,7 +45,7 @@ const Resources = {
   ),
 };
 
-const worldLoader = new DefaultLoader();
+export const worldLoader = new DefaultLoader();
 for (const res of Object.values(Resources)) {
   worldLoader.addResource(res);
 }

@@ -2,7 +2,6 @@ import { ItemGroup } from "model/Item/ItemGroup";
 import { InventoryProps } from "./contract";
 import { ItemFactory } from "../../factory/Item/ItemFactory";
 
-
 export class Inventory {
 
     private items: Map<number, ItemGroup>;

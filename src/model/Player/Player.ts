@@ -15,8 +15,6 @@ export class Player extends ExtendedActor {
   private controlMap: Object = {};
   private attackMode: number = 0;
   private progress: PlayerProgressType;
-  private isRunning: boolean = false;
-  private originalSpeed: number;
   private inventory: Inventory;
 
   constructor({pos, name, currentHealth, maxHealth, progress, stats, inventory, eventEmitter}: PlayerProps) {
@@ -60,15 +58,12 @@ export class Player extends ExtendedActor {
     });
 
     this.handleEvents();
-    this.originalSpeed = this.speed*this.stats.speed;
 
   }
 
   onInitialize() {
     this.playerAnimation.initialize();
     const attacks = this.playerAnimation.getAttackAnimations();
-    
-    this.movementSpeed = this.originalSpeed;
 
     Object.values(attacks).forEach((attackDirection) => {
       attackDirection.forEach((attack) => {
@@ -144,27 +139,14 @@ export class Player extends ExtendedActor {
   }
 
   private run(): void {
+    this.movementSpeed = this.movementSpeed*2;
     this.movementMode = animationMode.RUN;
-    this.isRunning = true;
-  }
-
-  private updateMovementSpeed(engine: Engine): void {
-    this.movementSpeed = this.isRunning ? this.originalSpeed*2 : this.originalSpeed;
-    const runKey = Config.getControls().keyboard.movement.run as Keys;
-
-    if(this.isRunning && !engine.input.keyboard.isHeld(runKey)) {
-      this.isRunning = false;
-      this.movementMode = animationMode.WALK;
-      this.movementSpeed = this.originalSpeed;
-    }
-  
   }
 
   onPreUpdate(engine: Engine, elapsedMs: number): void {
     this.vel = Vector.Zero;
+    this.movementSpeed = this.speed*this.stats.speed;
     this.movementMode = animationMode.IDLE;
-
-    this.updateMovementSpeed(engine);
 
     Object.values(Keys)
       .filter((key) => 
@@ -176,8 +158,6 @@ export class Player extends ExtendedActor {
         }
       );
     let animationGraphic = this.playerGraphic(this.playerAnimation.usePlayerAnimation({ mode: this.movementMode, direction: this.direction}));
-
-    
     
     if(this.isAttacking) {
       animationGraphic = this.playerGraphic(this.playerAnimation.useAttackAnimation(this.direction, this.attackMode || 0));

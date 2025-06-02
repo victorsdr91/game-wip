@@ -27,7 +27,6 @@
     "emitDeclarationOnly": true,
     "noImplicitAny": false,
     "preserveWatchOutput": true,                               /* Enable all strict type-checking options. */
-    
   },
   "exclude": ["dist", "public/assets"] 
 }
