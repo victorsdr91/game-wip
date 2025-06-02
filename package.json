@@ -10,17 +10,27 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@excaliburjs/plugin-tiled": "0.29.2",
+    "@excaliburjs/plugin-tiled": "0.30.2",
     "@excaliburjs/testing": "0.26.0",
-    "@tailwindcss/postcss": "^4.1.7",
-    "excalibur": "0.29.3",
-    "tailwindcss": "^4.1.7",
-    "typescript": "^5.6.3"
+    "@parcel/rsc": "^2.15.2",
+    "excalibur": "0.30.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@parcel/resolver-glob": "^2.13.2",
-    "parcel": "^2.13.2",
-    "parcel-plugin-static-files-copy": "^2.6.0"
+    "@parcel/transformer-typescript-tsc": "^2.15.2",
+    "@tailwindcss/postcss": "^4.1.7",
+    "@types/node": "^20",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.3",
+    "parcel": "^2.15.2",
+    "parcel-plugin-static-files-copy": "^2.6.0",
+    "tailwindcss": "^4.1.7",
+    "typescript": "^5.6.3"
   },
   "staticFiles": {
     "staticPath": "public",
