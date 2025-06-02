@@ -1,5 +1,6 @@
+
 import React from 'react';
-const PlayerNameplate = () => {
+const PlayerNameplate = () => { 
     return (
       <div id="player-info-hud" className="player-info p-2 border-amber-950 border-2 rounded-md">
         <h3 className="p-1">[lvl <span id="player-level" className="text-amber-300">1</span>] <span id="player-nickname">TrianMARC</span></h3>

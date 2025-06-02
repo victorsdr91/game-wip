@@ -7,6 +7,7 @@ import { Slime } from "../../model/npc/Slime";
 import { Player } from "../../model/Player/Player";
 import { Hud } from "../../ui/Hud";
 import { PlayerProps } from "../../model/Player/contract";
+import { PlayerInfoState } from "ui/model/PlayerInfoState";
 
 
 export class Level extends Scene {

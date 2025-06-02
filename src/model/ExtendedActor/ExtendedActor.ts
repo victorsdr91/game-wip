@@ -13,11 +13,13 @@ export abstract class ExtendedActor extends Actor {
   protected target: ExtendedActor | undefined;
   protected eventManager: EventEmitter;
   protected originalPosition: Vector;
+  protected originalSpeed: number;
 
   protected movementMode: animationMode = animationMode.IDLE;
   protected direction: animationDirection = animationDirection.DOWN;
 
   protected isAttacking: boolean = false;
+  protected isRunning: boolean = false;
   protected isDead: boolean;
 
   constructor({ name, pos, width, height, collisionType, collisionGroup, stats, maxHealth, currentHealth, eventEmitter}: ExtendedActorType) {
@@ -35,6 +37,7 @@ export abstract class ExtendedActor extends Actor {
     this.maxHealth = maxHealth;
     this.currentHealth = currentHealth || maxHealth;
     this.originalPosition = pos;
+    this.originalSpeed = this.speed * this.stats.speed;
     this.isDead = this.currentHealth <= 0;
   }
 

@@ -64,6 +64,7 @@ export class Player extends ExtendedActor {
   onInitialize() {
     this.playerAnimation.initialize();
     const attacks = this.playerAnimation.getAttackAnimations();
+    console.log("Player inventory loaded: \n", this.inventory);
 
     Object.values(attacks).forEach((attackDirection) => {
       attackDirection.forEach((attack) => {
@@ -77,6 +78,7 @@ export class Player extends ExtendedActor {
     const dieAnimation = this.playerAnimation.useDieAnimation();
     dieAnimation.events.on('end', () => {
       setTimeout(() => {
+        console.log("Player health depleted, resetting player...");
         this.eventManager.emit('player-health-depleted', {callback: this.resetPlayer });
       }, 1500);
     })
@@ -139,15 +141,21 @@ export class Player extends ExtendedActor {
   }
 
   private run(): void {
-    this.movementSpeed = this.movementSpeed*2;
+    this.isRunning = true;
     this.movementMode = animationMode.RUN;
   }
 
   onPreUpdate(engine: Engine, elapsedMs: number): void {
     this.vel = Vector.Zero;
-    this.movementSpeed = this.speed*this.stats.speed;
+    this.movementSpeed = this.isRunning ? this.originalSpeed * 2 : this.originalSpeed;
     this.movementMode = animationMode.IDLE;
 
+    const runKey = Config.getControls().keyboard.movement.run as Keys;
+
+    if(this.isRunning && !engine.input.keyboard.isHeld(runKey)) {
+      this.isRunning = false;
+      this.movementMode = animationMode.WALK;
+    }
     Object.values(Keys)
       .filter((key) => 
         engine.input.keyboard.isHeld(key)

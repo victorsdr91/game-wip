@@ -11,5 +11,5 @@ export const App = () => {
       <PlayerNameplate />
     </HudWrapper>
     <PlayerDeadPopup />
-  </>;
+    </>;
 };
