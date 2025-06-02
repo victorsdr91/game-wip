@@ -1,6 +1,7 @@
 import { ItemProps, ItemType } from "./contract";
+import { ItemInterface } from "./interface/ItemInterface";
 
-export class Item {
+export class Item implements ItemInterface {
     private id: number;
     private agruppable: boolean;
     private name: string;
@@ -8,6 +9,7 @@ export class Item {
     private cooldown: number; //ms
     private type: ItemType;
     private weight: number;
+    private effect: any; // Placeholder for future effects
 
     constructor({id, name, description, cooldown, type, weight, agruppable}: ItemProps) {
         this.id = id;
@@ -49,17 +51,5 @@ export class Item {
 
     public getId(): number {
         return this.id;
-    }
-
-    public getItemProps(): ItemProps {
-        return {
-            id: this.getId(),
-            name: this.getName(),
-            description: this.getDescription(),
-            cooldown: this.getCooldown(),
-            type: this.getType(),
-            agruppable: this.isAgruppable(),
-            weight: this.getWeight(),
-        }
     }
 }

@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "name": "Wooden sword",
+        "description": "An small sword made with wood for novice adventurers",
+        "cooldown": 0,
+        "type": "wereable",
+        "agruppable": false,
+        "weight": 5,
+        "slot": "main_hand",
+        "stats": {
+          "f_attack": 5
+        },
+        "durability": 100,
+        "maxDurability": 100,
+        "isEquipped": false
+    }
+]
