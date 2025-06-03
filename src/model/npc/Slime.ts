@@ -111,7 +111,7 @@ export class Slime extends AgressiveNpc {
         const attackFromBottom = pos.y < this.pos.y && direction === "down";
   
         if (attackFromRight || attackFromLeft || attackFromBottom || attackFromTop) {
-          this.receiveDamage(damage, actor);
+          this.receiveDamageFromPlayer(damage, actor);
         }
       });
     }
