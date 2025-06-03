@@ -1,38 +1,32 @@
-import { EventEmitter } from "excalibur";
-import { PlayerInfoHud } from "./model/PlayerInfoHud";
 import { Player } from "../model/Player/Player";
-
-export interface HudInterface {
-    eventEmitter: EventEmitter;
-}
+import { Game } from "services/Game";
+import { HudPlayerEvents, HudPlayerInfoUpdate } from "state/helpers/PlayerEvents";
+import { GameEvents, HudToggle } from "state/helpers/GameEvents";
 
 export class Hud {
-    private rootElement: HTMLElement | undefined;
-    private playerInfo: PlayerInfoHud;
 
-    constructor({ eventEmitter }: HudInterface) {
-        const $rootElement = document.getElementById('hud');
-        if($rootElement) {
-            this.rootElement = $rootElement;
+    private show: boolean;
+
+    constructor({}) {
+        this.show = false;
+    }
+
+    public toogleShow() {
+        this.show = !this.show;
+        const data: HudToggle = {
+            show: this.show
         };
-        this.playerInfo = new PlayerInfoHud(eventEmitter);
-    }
-
-    public show() {
-        this.rootElement?.classList.remove('hide');
-        this.rootElement?.classList.add('show');
-    }
-
-    public hide() {
-        this.rootElement?.classList.remove('show');
-        this.rootElement?.classList.add('hide');
+        Game.getInstance().emit(GameEvents.HUD_TOGGLE, data);
     }
 
     public updatePlayerInfoHud(player: Player) {
-        this.playerInfo.updateInformation(player);
-    }
-    
-    public getPlayerInfoHUD() {
-        return this.playerInfo;
+        const data: HudPlayerInfoUpdate = {
+            nickname: player.name,
+            lvl: player.getStats().level,
+            totalHP: player.getMaxHealth(),
+            remainingHP: player.getHealth()
+        };
+
+        Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_INFO_UPDATE, data);
     }
 }

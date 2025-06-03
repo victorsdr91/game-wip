@@ -3,6 +3,7 @@ import { Npc } from "./Npc";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { RewardType } from "../../scenes/Level1/contract";
 import { AgressiveNpcType } from "./contract";
+import { HudPlayerEvents } from "state/helpers/PlayerEvents";
 
 export const EnemiesCollisionGroup = CollisionGroupManager.create('enemies');
 
@@ -27,7 +28,7 @@ export class AgressiveNpc extends Npc {
         });
 
         this.rewards = rewards;
-        eventEmitter.on('player-health-depleted', () => {
+        eventEmitter.on(HudPlayerEvents.HUD_PLAYER_HEALTH_DEPLETED, () => {
           this.taunted = false;
           this.returnToOriginalPosition();
           this.passiveHeal();

@@ -6,6 +6,8 @@ import { PlayerAnimation } from "./PlayerAnimations";
 import { keyboardType } from "../../contract";
 import { PlayerProgressType, PlayerProps } from "./contract";
 import { Inventory } from "model/Inventory/Inventory";
+import { Game } from "services/Game";
+import { HudPlayerEvents } from "state/helpers/PlayerEvents";
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
@@ -16,6 +18,7 @@ export class Player extends ExtendedActor {
   private attackMode: number = 0;
   private progress: PlayerProgressType;
   private inventory: Inventory;
+  private deathMessageShown: boolean = false;
 
   constructor({pos, name, currentHealth, maxHealth, progress, stats, inventory, eventEmitter}: PlayerProps) {
     super({
@@ -74,14 +77,6 @@ export class Player extends ExtendedActor {
         });
       });
     });
-
-    const dieAnimation = this.playerAnimation.useDieAnimation();
-    dieAnimation.events.on('end', () => {
-      setTimeout(() => {
-        console.log("Player health depleted, resetting player...");
-        this.eventManager.emit('player-health-depleted', {callback: this.resetPlayer });
-      }, 1500);
-    })
   }
 
   handleEvents() {
@@ -122,7 +117,7 @@ export class Player extends ExtendedActor {
     this.progress.exp = diffExp;
     this.progress.expNextLevel += (this.progress.expNextLevel*1.5)+50;
 
-    this.eventManager.emit('player-lvl-update', {newLvl: this.stats.level});
+    Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_LVL_UPDATE, {level: this.stats.level});
   }
 
   private playerBasicAttack() {
@@ -176,6 +171,14 @@ export class Player extends ExtendedActor {
     this.graphics.use(animationGraphic);
   }
 
+  onPostUpdate(engine: Engine, elapsed: number): void {
+    if(this.isDead && !this.deathMessageShown) {
+      console.log("Player health depleted, resetting player...");
+      Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_HEALTH_DEPLETED, { onRevive: this.resetPlayer });
+      this.deathMessageShown = true;
+    }
+  }
+
   protected playerGraphic(animation: Animation): GraphicsGroup {
     const graphicsGroup = new GraphicsGroup({
       useAnchor: true,
@@ -198,13 +201,14 @@ export class Player extends ExtendedActor {
 
   private updateHealth(health: number): void {
     this.setHealth(health);
-    this.eventManager.emit('player-health-update', {health: this.getHealth()});
+    Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_REMAINING_HP, {remainingHP: this.getHealth()});
   }
 
   public resetPlayer = () => {
     this.pos = this.originalPosition;
     this.isDead = false;
     this.direction = animationDirection.DOWN;
+    this.deathMessageShown = false;
     this.updateHealth(this.getMaxHealth());
   }
 }

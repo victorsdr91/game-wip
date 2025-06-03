@@ -7,7 +7,6 @@ import { Slime } from "../../model/npc/Slime";
 import { Player } from "../../model/Player/Player";
 import { Hud } from "../../ui/Hud";
 import { PlayerProps } from "../../model/Player/contract";
-import { PlayerInfoState } from "ui/model/PlayerInfoState";
 
 
 export class Level extends Scene {
@@ -106,9 +105,7 @@ export class Level extends Scene {
     private loadHUD(): void {
         if(this.player) {
             this.hud.updatePlayerInfoHud(this.player);
-            this.hud.show();
+            this.hud.toogleShow();
         }
     }
-       
-
 }
