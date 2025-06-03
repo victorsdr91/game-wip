@@ -69,10 +69,9 @@ export class AgressiveNpc extends Npc {
         return damageDealt > 0 ? damageDealt : 0;
     }
 
-    protected receiveDamage (damage: number, actor: ExtendedActor): void {
-      const damageReceived = damage - this.stats.f_defense*this.stats.level;
-      const totalDamage = damageReceived > 0 ? damageReceived : 0;
-      this.setHealth(this.getHealth() - totalDamage);
+    protected receiveDamageFromPlayer (damage: number, actor: ExtendedActor): void {
+      const healthAfterDamage = this.receiveDamage(damage, actor);
+      this.setHealth(healthAfterDamage);
       this.hpGraphic.text = `${this.getHealth()}`;
 
       if(!this.isTaunted()) {
