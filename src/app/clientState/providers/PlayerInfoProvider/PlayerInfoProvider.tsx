@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGameEvent } from "app/clientState/hooks/useGameEvent/useGameEvent";
-import PlayerInfoContext from './PlayerInfoContext';
+import PlayerInfoContext, { PlayerInfo } from './PlayerInfoContext';
 import { HudPlayerEvents } from 'state/helpers/PlayerEvents';
 
 const PlayerInfoProvider = ({children}) => {
@@ -14,7 +14,7 @@ const PlayerInfoProvider = ({children}) => {
 
   useGameEvent({
     event: HudPlayerEvents.HUD_PLAYER_INFO_UPDATE,
-    callback: ({ nickname, lvl, remainingHP, totalHP }) => {
+    callback: ({ nickname, lvl, remainingHP, totalHP }: PlayerInfo) => {
       setNickname(nickname);
       setLvl(lvl);
       setRemainingHP(remainingHP);
@@ -25,14 +25,14 @@ const PlayerInfoProvider = ({children}) => {
 
   useGameEvent({
     event: HudPlayerEvents.HUD_PLAYER_LVL_UPDATE,
-    callback: ({ lvl }) => {
+    callback: ({ lvl }: PlayerInfo) => {
       setLvl(lvl);
     }
   });
 
   useGameEvent({
     event: HudPlayerEvents.HUD_PLAYER_REMAINING_HP,
-    callback: ({ remainingHP }) => {
+    callback: ({ remainingHP }: PlayerInfo) => {
       setRemainingHP(remainingHP);
       setHPPercentage((remainingHP / totalHP) * 100);
       if(isDead === true && remainingHP > 0) {
