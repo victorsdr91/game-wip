@@ -1,4 +1,4 @@
-import { ItemType } from "../contract";
+import { ItemType } from "../types/ItemTypes.enum";
 
 export interface ItemInterface {
     getId(): number;

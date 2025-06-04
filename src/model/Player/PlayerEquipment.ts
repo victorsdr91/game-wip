@@ -1,10 +1,9 @@
 import { ItemGroup } from "model/Item/ItemGroup";
-import { PlayerEquipmentProps } from "./contract";
+import { EquipmentType, PlayerEquipmentProps } from "./contract";
 import { ItemFactory } from "factory/Item/ItemFactory";
-import { SlotType } from "model/Item/contract";
 
 export class PlayerEquipment {
-    private _equipment: Partial<Record<SlotType, ItemGroup>>;
+    private _equipment: EquipmentType;
 
     constructor({ equipment }: PlayerEquipmentProps = {}) {
         this._equipment = {};
@@ -16,7 +15,7 @@ export class PlayerEquipment {
         }        
     }
 
-    public get equipment(): Record<string, ItemGroup> {
+    public get equipment(): EquipmentType {
         return this._equipment;
     }
 

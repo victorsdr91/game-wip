@@ -1,13 +1,7 @@
+import { SlotType } from "model/Player/types/SlotType.enum";
 import { Item } from "./Item";
-import { WereableItem } from "./WereableItem";
-
-export enum ItemType {
-    WEREABLE = "wereable",
-    USABLE = "usable",
-    QUEST = "quest",
-    MISC = "misc",
-    COIN = "coin",
-}
+import { ItemType } from "./types/ItemTypes.enum";
+import { ItemClass } from "./types/ItemTypes";
 
 export interface ItemIface {
     readonly id: number;
@@ -25,34 +19,10 @@ export interface ItemIface {
     stackSize?: number; // Optional property for stackable items
 }
 
-export type ItemProps = ItemIface;
-
-export type WereableItemProps = ItemProps & {
-    slot: SlotType;
-    stats?: ItemStats;
-    durability: number; 
-    maxDurability: number;
-};
-
 export interface ItemGroupProps {
-    item: Item | WereableItem;
+    item: ItemClass;
     quantity: number;
-}
-
-export enum SlotType {
-    HEAD = "head",
-    BODY = "body",
-    BELT = "belt",
-    LEGS = "legs",
-    BOOTS = "boots",
-    GLOVES = "gloves",
-    MAIN_HAND = "main_hand",
-    SECOND_HAND = "second_hand",
-    NECKLACE = "necklace",
-    RING = "ring",
-    BULLET = "bullet",
-}
-
+};
 
 export interface ItemStats {
     f_attack?: number;

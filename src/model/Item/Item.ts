@@ -1,5 +1,6 @@
-import { ItemProps, ItemType } from "./contract";
 import { ItemInterface } from "./interface/ItemInterface";
+import { ItemType } from "./types/ItemTypes.enum";
+import { ItemProps } from "./types/ItemTypes";
 
 export class Item implements ItemInterface {
     private id: number;

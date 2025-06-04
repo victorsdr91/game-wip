@@ -1,9 +1,10 @@
-import { WereableItemProps, ItemProps } from "../../model/Item/contract";
+
+import { ItemClass, ItemProps, WereableItemProps } from "model/Item/types/ItemTypes";
 import { Item } from "../../model/Item/Item";
 import { WereableItem } from "../../model/Item/WereableItem";
 
 export class ItemFactory {
-    private static items: Map<number, Item | WereableItem> = new Map();
+    private static items: Map<number, ItemClass> = new Map();
     
     constructor() {
         throw new Error("ItemFactory is a static class and cannot be instantiated.");   
@@ -18,7 +19,7 @@ export class ItemFactory {
         });
     }
 
-    public static createItem(itemData: any): Item | WereableItem {
+    public static createItem(itemData: any): ItemClass {
         if (itemData.slot) {
             // Create a WereableItem
             return new WereableItem(itemData as WereableItemProps);
@@ -28,7 +29,7 @@ export class ItemFactory {
         }
     }
 
-    public static getItemById(id: number): Item | WereableItem | undefined {
+    public static getItemById(id: number): ItemClass | undefined {
         return this.items.get(id);
     }
 }

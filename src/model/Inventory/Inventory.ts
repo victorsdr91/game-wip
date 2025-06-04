@@ -44,7 +44,7 @@ export class Inventory {
                 return false;
             }
             const stackSize = item.isAgruppable() ? 20 : 1; // Example stack size logic
-            this.items.set(itemId, new ItemGroup({ item, quantity, stack: stackSize }));
+            this.items.set(itemId, new ItemGroup({ item, quantity }));
         }
         this.currentWeight += itemWeight;
         return true;

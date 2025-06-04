@@ -1,5 +1,7 @@
-import { ItemStats, SlotType, WereableItemProps } from "./contract";
+import { SlotType } from "model/Player/types/SlotType.enum";
+import { ItemStats} from "./contract";
 import { Item } from "./Item";
+import { WereableItemProps } from "./types/ItemTypes";
 
 export class WereableItem extends Item {
     private slot: SlotType;

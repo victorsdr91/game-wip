@@ -1,7 +1,7 @@
 import { Animation, CollisionType, Engine, Keys, Vector, GraphicsGroup, CollisionGroupManager } from "excalibur";
 import { Config } from "../../state/Config";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
-import { ActorStats, animationDirection, animationMode } from "../ExtendedActor/contract";
+import { animationDirection, animationMode } from "../ExtendedActor/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
 import { keyboardType } from "../../contract";
 import { PlayerProgressType, PlayerProps } from "./contract";
@@ -10,7 +10,7 @@ import { Game } from "services/Game";
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";
 import { PlayerEquipment } from "./PlayerEquipment";
 import { WereableItem } from "model/Item/WereableItem";
-import { SlotType } from "model/Item/contract";
+import { SlotType } from "./types/SlotType.enum";
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');

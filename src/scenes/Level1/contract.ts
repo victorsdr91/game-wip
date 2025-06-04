@@ -1,12 +1,12 @@
 import { Vector } from "excalibur";
 import { ActorStats } from "../../model/ExtendedActor/contract";
-import { EquipmentProps, PlayerProgressType } from "../../model/Player/contract";
-import { ItemProps, SlotType } from "../../model/Item/contract";
+import { EquipmentProps, EquipmentPropsType, PlayerProgressType } from "../../model/Player/contract";
 import { PacificNpcType } from "../../model/npc/contract";
 import { InventoryProps } from "model/Inventory/contract";
+import { ItemProps } from "model/Item/types/ItemTypes";
 
 export interface playerInfoType {
-    equipment?: Partial<Record<SlotType, EquipmentProps>>;
+    equipment?: EquipmentPropsType;
     nickname: string;
     position: Vector;
     zIndex: number;
