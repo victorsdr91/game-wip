@@ -1,6 +1,6 @@
 import { Vector } from "excalibur";
 import { ActorStats } from "../../model/ExtendedActor/contract";
-import { EquipmentProps, EquipmentPropsType, PlayerProgressType } from "../../model/Player/contract";
+import { EquipmentPropsType, PlayerProgressType } from "../../model/Player/contract";
 import { PacificNpcType } from "../../model/npc/contract";
 import { InventoryProps } from "model/Inventory/contract";
 import { ItemProps } from "model/Item/types/ItemTypes";
