@@ -146,7 +146,7 @@ export class Player extends ExtendedActor {
     this.progress.exp = diffExp;
     this.progress.expNextLevel += (this.progress.expNextLevel*1.5)+50;
 
-    Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_LVL_UPDATE, {level: this.stats.level});
+    Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_LVL_UPDATE, {level: this.calculatedStats.level});
   }
 
   private playerBasicAttack() {
@@ -159,9 +159,24 @@ export class Player extends ExtendedActor {
       pos: this.pos,
       direction: this.direction,
       range: 20,
-      damage: this.stats.f_attack*this.stats.level,
+      damage: this.calculatePhysicalDamage(),
     }
     this.eventManager.emit("player-attack-basic", eventData);
+  }
+
+  private calculatePhysicalDamage(): number {
+    if(this.target) {
+      const targetStats = this.target.getStats();
+      const levelDifference = this.stats.level - targetStats.level;
+      
+      if(levelDifference < 0) {
+        return this.calculatedStats.f_attack + (1.5*this.stats.level) - (levelDifference * 2);
+      } else if(levelDifference > 0) {
+        return this.calculatedStats.f_attack + (1.5*this.stats.level) + (levelDifference * 2);
+      }
+    }
+
+    return this.calculatedStats.f_attack + (1.5*this.stats.level);
   }
 
   private run(): void {
