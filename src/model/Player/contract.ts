@@ -1,6 +1,8 @@
 import { Sprite, Animation, Vector, EventEmitter } from "excalibur";
 import { ActorStats } from "../ExtendedActor/contract";
 import { InventoryProps } from "model/Inventory/contract";
+import { ItemGroup } from "model/Item/ItemGroup";
+import { SlotType } from "model/Item/contract";
 
 export interface PlayerProps {
   pos: Vector;
@@ -8,6 +10,7 @@ export interface PlayerProps {
   progress: PlayerProgressType;
   stats: ActorStats;
   inventory: InventoryProps;
+  equipment?: Record<SlotType, EquipmentProps>;
   eventEmitter: EventEmitter;
   currentHealth;
   maxHealth;
@@ -45,4 +48,13 @@ export interface SpriteObject {
   down: Sprite;  
   left: Sprite;
   right: Sprite;
+}
+
+export interface PlayerEquipmentProps {
+  equipment?: Record<SlotType, EquipmentProps>;
+};
+
+export interface EquipmentProps {
+  itemId: number;
+  quantity: number;
 }

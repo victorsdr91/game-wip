@@ -20,6 +20,10 @@ export const playerInfo: playerInfoType = {
     maxWeight: 5000,
     items: playerItems,
   },
+  equipment: {
+    main_hand: { itemId: 1, quantity: 1 }, // Assuming 1 is the ID for a sword
+    bullet: { itemId: 2, quantity: 20 }, // Assuming 2 is the ID for a bullet
+  },
   stats: {
     level: 1,
     f_attack: 10,

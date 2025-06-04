@@ -6,9 +6,8 @@ export class WereableItem extends Item {
     private stats?: ItemStats;
     private durability: number; // Optional property for durability
     private maxDurability: number; // Optional property for maximum durability
-    private equipped: boolean; // Optional property to check if the item is equipped
     
-    constructor({id, name, description, cooldown, type, weight, agruppable, slot, stats, durability, maxDurability, isEquipped}: WereableItemProps) {
+    constructor({id, name, description, cooldown, type, weight, agruppable, stackSize, slot, stats, durability, maxDurability}: WereableItemProps) {
         super({
             id,
             name,
@@ -16,13 +15,13 @@ export class WereableItem extends Item {
             cooldown,
             type,
             weight,
-            agruppable
+            agruppable,
+            stackSize,
         });
 
         this.stats = stats;
         this.durability = durability;
         this.maxDurability = maxDurability;
-        this.equipped = isEquipped || false; // Default to false if not provided
         this.slot = slot;
     }
     public getSlot(): SlotType {
@@ -47,17 +46,5 @@ export class WereableItem extends Item {
 
     public getMaxDurability(): number {
         return this.maxDurability;
-    }
-
-    public isEquipped(): boolean {
-        return this.equipped;
-    }
-
-    public equip(): void {
-        this.equipped = true;
-    }
-
-    public removeFromEquipment(): void {
-        this.equipped = false;
     }
 }

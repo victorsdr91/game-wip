@@ -1,13 +1,16 @@
 import { Animation, CollisionType, Engine, Keys, Vector, GraphicsGroup, CollisionGroupManager } from "excalibur";
 import { Config } from "../../state/Config";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
-import { animationDirection, animationMode } from "../ExtendedActor/contract";
+import { ActorStats, animationDirection, animationMode } from "../ExtendedActor/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
 import { keyboardType } from "../../contract";
 import { PlayerProgressType, PlayerProps } from "./contract";
 import { Inventory } from "model/Inventory/Inventory";
 import { Game } from "services/Game";
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";
+import { PlayerEquipment } from "./PlayerEquipment";
+import { WereableItem } from "model/Item/WereableItem";
+import { SlotType } from "model/Item/contract";
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
@@ -19,8 +22,9 @@ export class Player extends ExtendedActor {
   private progress: PlayerProgressType;
   private inventory: Inventory;
   private deathMessageShown: boolean = false;
+  private equipment: PlayerEquipment;
 
-  constructor({pos, name, currentHealth, maxHealth, progress, stats, inventory, eventEmitter}: PlayerProps) {
+  constructor({pos, name, currentHealth, maxHealth, progress, stats, inventory, equipment, eventEmitter}: PlayerProps) {
     super({
       name,
       pos: pos,
@@ -36,6 +40,7 @@ export class Player extends ExtendedActor {
     this.progress = progress;
     this.playerAnimation = new PlayerAnimation(this.frameSpeed);
     this.inventory = new Inventory(inventory);
+    this.equipment = new PlayerEquipment({equipment});
     const actionsMap = {
       "movement" : {
         "left" : () => { this.move(animationDirection.LEFT, animationMode.WALK)},
@@ -68,6 +73,11 @@ export class Player extends ExtendedActor {
     this.playerAnimation.initialize();
     const attacks = this.playerAnimation.getAttackAnimations();
     console.log("Player inventory loaded: \n", this.inventory);
+
+    this.calculateStats();
+    console.log("Player equipment loaded: \n", this.equipment.equipment);
+    console.log("Player original stats: \n", this.stats);
+    console.log("Player calculated stats: \n", this.calculatedStats);
 
     Object.values(attacks).forEach((attackDirection) => {
       attackDirection.forEach((attack) => {
@@ -106,6 +116,25 @@ export class Player extends ExtendedActor {
       }
     });
   }
+
+  private calculateStats(): void {
+    const equipment = this.equipment.equipment;
+
+    for(const [key, value] of Object.entries(equipment)) {
+      const item = value.getItem();
+      if(item instanceof WereableItem && item.getStats() && key !== SlotType.BULLET) {
+        const itemStats = item.getStats();
+        if(itemStats) {
+          Object.keys(itemStats).forEach((statKey) => {
+            if(this.calculatedStats[statKey]) {
+              this.calculatedStats[statKey] += itemStats[statKey];
+            } 
+          });
+        }
+      }
+    }
+  }
+
 
   isLvlUp(exp: number): boolean {
     return exp >= this.progress.expNextLevel;

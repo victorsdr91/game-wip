@@ -7,10 +7,10 @@ export class ItemGroup {
     private stack: number;
     private weight: number;
 
-    constructor({item, quantity, stack}: ItemGroupProps) {
+    constructor({item, quantity}: ItemGroupProps) {
         this.item = item;
-        this.quantity = Math.min(quantity, stack);
-        this.stack = stack;
+        this.stack = item.getStackSize() || 1; // Default stack size if not defined
+        this.quantity = Math.min(quantity, this.stack);
         this.weight = this.item.getWeight()*quantity;
     }
 

@@ -8,11 +8,27 @@
         "agruppable": false,
         "weight": 5,
         "slot": "main_hand",
+        "stackSize": 1,
         "stats": {
           "f_attack": 5
         },
         "durability": 100,
-        "maxDurability": 100,
-        "isEquipped": false
+        "maxDurability": 100
+    },
+    {
+        "id": 2,
+        "name": "Arrow",
+        "description": "An small arrow made with wood for novice adventurers",
+        "cooldown": 0,
+        "type": "wereable",
+        "agruppable": true,
+        "weight": 5,
+        "slot": "bullet",
+        "stackSize": 30,
+        "stats": {
+          "f_attack": 20
+        },
+        "durability": 100,
+        "maxDurability": 100
     }
 ]

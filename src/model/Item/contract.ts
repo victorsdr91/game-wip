@@ -22,7 +22,7 @@ export interface ItemIface {
     stats?: ItemStats;
     durability?: number;
     maxDurability?: number;
-    isEquipped?: boolean;
+    stackSize?: number; // Optional property for stackable items
 }
 
 export type ItemProps = ItemIface;
@@ -31,14 +31,12 @@ export type WereableItemProps = ItemProps & {
     slot: SlotType;
     stats?: ItemStats;
     durability: number; 
-    maxDurability: number; 
-    isEquipped?: boolean; // Optional property to check if the item is equipped
+    maxDurability: number;
 };
 
 export interface ItemGroupProps {
     item: Item | WereableItem;
     quantity: number;
-    stack: number;
 }
 
 export enum SlotType {
@@ -52,6 +50,7 @@ export enum SlotType {
     SECOND_HAND = "second_hand",
     NECKLACE = "necklace",
     RING = "ring",
+    BULLET = "bullet",
 }
 
 

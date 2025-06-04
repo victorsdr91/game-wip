@@ -9,6 +9,7 @@ import { Hud } from "../../ui/Hud";
 import { PlayerProps } from "../../model/Player/contract";
 
 
+
 export class Level extends Scene {
     private _playerInfo: playerInfoType;
     private hud: Hud;
@@ -80,6 +81,7 @@ export class Level extends Scene {
             name: this._playerInfo.nickname,
             progress: this._playerInfo.progress,
             inventory: this._playerInfo.inventory,
+            equipment: this._playerInfo.equipment,
             stats: this._playerInfo.stats,
             eventEmitter: this.eventEmitter,
             currentHealth: this._playerInfo.currentHealth,

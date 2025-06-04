@@ -9,9 +9,10 @@ export class Item implements ItemInterface {
     private cooldown: number; //ms
     private type: ItemType;
     private weight: number;
+    private stackSize: number = 1; // Default stack size, can be modified later
     private effect: any; // Placeholder for future effects
 
-    constructor({id, name, description, cooldown, type, weight, agruppable}: ItemProps) {
+    constructor({id, name, description, cooldown, type, weight, agruppable, stackSize}: ItemProps) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -19,14 +20,15 @@ export class Item implements ItemInterface {
         this.type = type;
         this.weight = weight;
         this.agruppable = agruppable || false;
+        this.stackSize = stackSize || 1; // Default stack size
     }
 
     public isAgruppable():boolean {
         return this.agruppable;
     }
 
-    equals(item: Item): boolean {
-        return item.id === this.id;
+    equals(item: ItemInterface): boolean {
+        return item.getId() === this.getId();
     }
 
     public getName() {
@@ -47,6 +49,10 @@ export class Item implements ItemInterface {
 
     public getCooldown(): number {
         return this.cooldown;
+    }
+
+    public getStackSize(): number {
+        return this.stackSize;
     }
 
     public getId(): number {
