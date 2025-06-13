@@ -5,11 +5,11 @@ import { WereableItemProps } from "./types/ItemTypes";
 
 export class WereableItem extends Item {
     private slot: SlotType;
-    private stats?: ItemStats;
+    private stats: ItemStats;
     private durability: number; // Optional property for durability
     private maxDurability: number; // Optional property for maximum durability
     
-    constructor({id, name, description, cooldown, type, weight, agruppable, stackSize, slot, stats, durability, maxDurability}: WereableItemProps) {
+    constructor({id, name, description, cooldown, type, weight, agruppable, stackSize, slot, stats, durability, maxDurability, sprite, icon}: WereableItemProps) {
         super({
             id,
             name,
@@ -19,9 +19,11 @@ export class WereableItem extends Item {
             weight,
             agruppable,
             stackSize,
+            icon,
+            sprite
         });
 
-        this.stats = stats;
+        this.stats = stats || {};
         this.durability = durability;
         this.maxDurability = maxDurability;
         this.slot = slot;
@@ -30,11 +32,11 @@ export class WereableItem extends Item {
         return this.slot;
     }
 
-    public getStats(): ItemStats | undefined {
+    public getStats(): ItemStats {
         return this.stats;
     }
 
-    public setStats(stats: ItemStats | undefined): void {
+    public setStats(stats: ItemStats): void {
         this.stats = stats;
     }
 

@@ -59,7 +59,7 @@ export class MainMenu extends Scene {
     }
 
     public onPreUpdate(engine: Engine, delta: number): void {
-        if(engine.screen.isFullScreen) {
+        if(engine.screen.isFullscreen) {
             this.remove(this.fullScreenButtonText);
             this.add(this.windowedButtonText);
         } else if(this.windowedButtonText.isInitialized) {
@@ -70,10 +70,10 @@ export class MainMenu extends Scene {
     }
 
     private setFullScreen(engine: Engine) {
-        if(engine.screen.isFullScreen) {
-            engine.screen.exitFullScreen();
+        if(engine.screen.isFullscreen) {
+            engine.screen.exitFullscreen();
         } else {
-            engine.screen.goFullScreen();
+            engine.screen.enterFullscreen("app");
         }
     }
 

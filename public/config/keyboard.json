@@ -8,5 +8,9 @@
     },
     "skills": {
         "first": "Digit1"
+    },
+    "shortcuts": {
+        "bag": "KeyB",
+        "player": "KeyC"
     } 
 }

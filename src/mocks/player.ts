@@ -1,8 +1,16 @@
 import { Vector } from "excalibur";
+import { InventoryItem } from "model/Inventory/contract";
 import { playerInfoType } from "scenes/Level1/contract";
 
-const playerItems: Map<number, number> = new Map<number, number>();
-playerItems.set(1, 1); // Adding a sword with ID 1 and quantity 1
+const playerItems: Map<number, InventoryItem> = new Map<number, InventoryItem>();
+playerItems.set(1, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
+playerItems.set(2, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
+playerItems.set(3, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
+playerItems.set(4, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
+playerItems.set(5, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
+playerItems.set(6, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
+playerItems.set(7, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
+
 
 
 export const playerInfo: playerInfoType = {
@@ -16,8 +24,8 @@ export const playerInfo: playerInfoType = {
     expNextLevel: 100,
   },
   inventory: {
-    slots: 32,
-    maxWeight: 5000,
+    slots: 56,
+    maxWeight: 900,
     items: playerItems,
   },
   equipment: {

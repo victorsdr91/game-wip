@@ -1,25 +1,45 @@
 import { ItemGroup } from "model/Item/ItemGroup";
 import { InventoryProps } from "./contract";
 import { ItemFactory } from "../../factory/Item/ItemFactory";
+import { Game } from "services/Game";
+import { HudPlayerEvents, InventoryEventPayload } from "state/helpers/PlayerEvents";
 
 export class Inventory {
 
     private items: Map<number, ItemGroup>;
+    private itemPositions: Map<number, { x: number, y: number }>;
+    private game: Game;
     private slots: number;
     private maxWeight: number;
     private currentWeight: number;
 
     constructor({slots, maxWeight, items}: InventoryProps) {
+        this.game = Game.getInstance();
         this.slots = slots;
         this.maxWeight = maxWeight;
         this.items = new Map();
+        this.itemPositions = new Map();
         this.currentWeight = 0;
-        items?.forEach((itemId, quantity) => {
-            this.addItem(itemId, quantity);
+
+        for (let slotIndex = 0; slotIndex < this.slots; slotIndex++) {
+            this.itemPositions.set(slotIndex, {
+                x: (slotIndex % 8) * 40, // Ajustado a 40 para coincidir con GRID_SIZE + GRID_GAP
+                y: Math.floor(slotIndex / 8) * 40
+            });
+        }
+
+        items?.forEach((item, slotIndex) => {
+            if (slotIndex < this.slots) {
+                this.addItemToSlot(item.itemId, item.quantity, slotIndex);
+            }
         });
+
+        this.setupEventListeners();
+
+        this.emitInventoryUpdate();
     }
 
-    public addItem(itemId: number, quantity: number): boolean {
+     private addItemToSlot(itemId: number, quantity: number, slotId: number): boolean {
         const item = ItemFactory.getItemById(itemId);
         if (!item) {
             throw new Error(`Item with ID ${itemId} not found.`);
@@ -27,34 +47,140 @@ export class Inventory {
 
         const itemWeight = item.getWeight() * quantity;
         if (this.currentWeight + itemWeight > this.maxWeight) {
-            console.error("Cannot add item: Exceeds weight limit.");
             return false;
         }
 
-        if (this.items.has(itemId)) {
-            const itemGroup = this.items.get(itemId)!;
-            const remainingQuantity = itemGroup.addQuantity(quantity);
-            if (remainingQuantity > 0) {
-                console.error("Cannot add item: Stack limit reached.");
-                return false;
-            }
-        } else {
-            if (this.items.size >= this.slots) {
-                console.error("Cannot add item: Inventory is full.");
-                return false;
-            }
-            const stackSize = item.isAgruppable() ? 20 : 1; // Example stack size logic
-            this.items.set(itemId, new ItemGroup({ item, quantity }));
-        }
+        this.items.set(slotId, new ItemGroup({ item, quantity }));
         this.currentWeight += itemWeight;
         return true;
     }
 
-    public removeItem(itemId: number, quantity: number): boolean {
-        if (this.items.has(itemId)) {
-            const itemGroup = this.items.get(itemId)!;
-            itemGroup.removeQuantity(quantity);
+    private setupEventListeners(): void {
+        this.game.on(HudPlayerEvents.HUD_PLAYER_INVENTORY_ITEM_MOVED, (event: unknown) => {
+            const { fromSlot, toSlot } = event as { 
+                fromSlot: number;
+                toSlot: number;
+            };
+            this.updateItemPosition(fromSlot, toSlot);
+        });
 
+        this.game.on(HudPlayerEvents.HUD_PLAYER_INVENTORY_ITEM_DROPPED, (event: unknown) => {
+            const { itemId } = event as { itemId: number; position: { x: number; y: number; }};
+            this.removeItemFromInventory(itemId);
+        });
+    }
+
+    private emitInventoryUpdate(): void {
+        const payload: InventoryEventPayload = {
+            slots: this.slots,
+            maxWeight: this.maxWeight,
+            currentWeight: this.currentWeight,
+            items: this.items,
+            itemPositions: this.itemPositions
+        };
+        
+        this.game.emit(HudPlayerEvents.HUD_PLAYER_INVENTORY_UPDATE, payload);
+    }
+
+    public updateItemPosition(fromSlot: number, toSlot: number): void {
+        if (fromSlot === toSlot) return;
+        
+        const sourceItem = this.items.get(fromSlot);
+        if (!sourceItem) return;
+
+        const targetItem = this.items.get(toSlot);
+
+        // Intercambiar items y sus posiciones
+        if (targetItem) {
+            this.items.set(fromSlot, targetItem);
+        } else {
+            this.items.delete(fromSlot);
+        }
+
+        this.items.set(toSlot, sourceItem);
+
+        // Importante: No necesitamos actualizar itemPositions porque las posiciones
+        // están asociadas a los slots, no a los items
+        
+        this.emitInventoryUpdate();
+    }
+
+    public findFirstEmptySlot(): number | null {
+        for (let i = 0; i < this.slots; i++) {
+            if (!this.items.has(i)) {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    public moveItemToEquipment(itemId: number, slotType: string): void {
+        // Implementar lógica para mover item al equipamiento
+    }
+
+    public dropItem(itemId: number): void {
+        if (this.items.has(itemId)) {
+            this.items.delete(itemId);
+            this.itemPositions.delete(itemId);
+            this.emitInventoryUpdate();
+        }
+    }
+
+    public addItem(itemId: number, quantity: number): boolean {
+        const item = ItemFactory.getItemById(itemId);
+        if (!item) return false;
+
+        // Si el item es agrupable, buscar slots con el mismo tipo de item
+        if (item.isAgruppable()) {
+            for (const [slotId, itemGroup] of this.items) {
+                if (itemGroup.getItem().getId() === itemId) {
+                    const remainingQuantity = itemGroup.addQuantity(quantity);
+                    if (remainingQuantity <= 0) {
+                        return true;
+                    }
+                    quantity = remainingQuantity; // actualizar cantidad restante
+                }
+            }
+        }
+
+        // Si llegamos aquí, necesitamos un nuevo slot
+        const emptySlot = this.findFirstEmptySlot();
+        if (emptySlot === null) return false;
+
+        return this.addItemToSlot(itemId, quantity, emptySlot);
+    }
+
+    public findItemById(itemId: number): ItemGroup | undefined {
+        this.items.forEach((itemGroup) => {
+            if(itemGroup) {
+                if(itemGroup.getItem().getId() === itemId) {
+                    return itemGroup;
+                }
+            }
+        });
+        return undefined;
+
+    }
+
+    private removeItemFromInventory(itemId: number): void {
+        if (this.items.has(itemId)) {
+            const item = this.items.get(itemId);
+            this.items.delete(itemId);
+            this.itemPositions.delete(itemId);
+            
+            // Emitir evento para que el item aparezca en el mundo
+            this.game.emit(HudPlayerEvents.HUD_PLAYER_ITEM_DROPPED_IN_WORLD, {
+                itemId,
+                item
+            });
+
+            this.emitInventoryUpdate();
+        }
+    };
+    public removeItem(itemId: number, quantity: number): boolean {
+        const itemGroup = this.findItemById(itemId)!;
+        if (itemGroup) {
+            itemGroup.removeQuantity(quantity);
             const itemWeight = itemGroup.getItem().getWeight() * quantity;
             this.currentWeight -= itemWeight;
 
@@ -66,7 +192,7 @@ export class Inventory {
         return false;
     }
 
-    public listItems(): ItemGroup[] {
+    public listItems(): (ItemGroup | null)[] {
         return Array.from(this.items.values());
     }
 

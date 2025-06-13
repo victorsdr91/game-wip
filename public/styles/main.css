@@ -39,5 +39,12 @@ html,body {
     position: absolute;
     left: 50%;
     top: 50%;
+    transform: translate(calc(-50%*var(--pixel-conversion)), calc(30%*var(--pixel-conversion)));
+}
+
+.player-inventory {
+    position: absolute;
+    left: 50%;
+    top: 50%;
     transform: translate(-50%, -50%);
 }

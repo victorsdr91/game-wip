@@ -13,7 +13,9 @@
           "f_attack": 5
         },
         "durability": 100,
-        "maxDurability": 100
+        "maxDurability": 100,
+        "icon": "sword_wood_common",
+        "sprite": null
     },
     {
         "id": 2,
@@ -29,6 +31,8 @@
           "f_attack": 20
         },
         "durability": 100,
-        "maxDurability": 100
+        "maxDurability": 100,
+        "icon": null,
+        "sprite": null
     }
 ]

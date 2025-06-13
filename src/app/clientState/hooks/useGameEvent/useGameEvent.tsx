@@ -7,12 +7,12 @@ export interface useGameEventProps {
 };
 
 export const useGameEvent = async ({ event, callback }: useGameEventProps) => {
-    const gameInstance: Game = Game.getInstance();
     useEffect(() => {
-        gameInstance.on(event, callback);
-
+        const game = Game.getInstance();
+        const subscription = game.on(event, callback);
+        
         return () => {
-            gameInstance.off(event, callback);
+            subscription.close();
         };
-    },[event, callback]);
+    }, [event, callback]);
 };

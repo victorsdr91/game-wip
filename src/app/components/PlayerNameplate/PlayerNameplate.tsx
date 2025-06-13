@@ -11,7 +11,7 @@ const PlayerNameplate = () => {
   };
 
   return (
-    <div className="player-info p-2 border-amber-950 border-2 rounded-md">
+    <div className="player-info p-2 relative border-amber-950 bg-amber-900 border-2 rounded-md">
       <h3 className="p-1">[lvl <span className="text-amber-300">{lvl}</span>] { nickname }</h3>
       <div>
         <div className="w-full border border-amber-950 bg-amber-700 rounded-md">

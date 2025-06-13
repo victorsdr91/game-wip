@@ -1,4 +1,4 @@
-import { controlsType } from "../contract";
+import { controlsType } from "./contract";
 
 export class Config {
     private static controller: controlsType; 

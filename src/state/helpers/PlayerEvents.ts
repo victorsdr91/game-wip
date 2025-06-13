@@ -1,9 +1,27 @@
+import { ItemGroup } from "model/Item/ItemGroup";
+
 export enum HudPlayerEvents {
     HUD_PLAYER_INFO_UPDATE = 'hud_player_info_update',
     HUD_PLAYER_LVL_UPDATE = 'hud_player_lvl_update',
     HUD_PLAYER_REMAINING_HP = 'hud_player_remaining_hp',
     HUD_PLAYER_HEALTH_DEPLETED = 'hud_player_health_depleted',
     HUD_PLAYER_INFO_RESET = 'hud_player_info_reset',
+    HUD_PLAYER_INVENTORY_UPDATE = 'hud_player_inventory_update',
+    HUD_PLAYER_INVENTORY_ITEM_ADDED = 'hud_player_inventory_item_added',
+    HUD_PLAYER_INVENTORY_ITEM_MOVED = 'hud_player_inventory_item_moved',
+    HUD_PLAYER_INVENTORY_ITEM_DROPPED = "hud_player_inventory_item_dropped",
+    HUD_PLAYER_ITEM_DROPPED_IN_WORLD = "HUD_PLAYER_ITEM_DROPPED_IN_WORLD",
+    HUD_PLAYER_EQUIPMENT_ITEM_MOVED = "HUD_PLAYER_EQUIPMENT_ITEM_MOVED",
+    HUD_PLAYER_TOGGLE_INVENTORY = "HUD_PLAYER_TOGGLE_INVENTORY",
+    HUD_PLAYER_TOGGLE_PROFILE = "HUD_PLAYER_TOGGLE_PROFILE",
+}
+
+export interface InventoryEventPayload {
+    slots: number;
+    maxWeight: number;
+    currentWeight: number;
+    items: Map<number, ItemGroup>; // key: slotId
+    itemPositions: Map<number, { x: number; y: number; }>; // key: slotId
 }
 
 export interface HudPlayerInfoUpdate {

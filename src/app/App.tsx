@@ -4,13 +4,14 @@ import HudWrapper from './components/Hud/HudWrapper';
 import PlayerNameplate from './components/PlayerNameplate/PlayerNameplate';
 import PlayerDeadPopup from './components/PlayerDeadPopup/PlayerDeadPopup';
 import PlayerInfoProvider from './clientState/providers/PlayerInfoProvider/PlayerInfoProvider';
+import PlayerInventory from './components/PlayerInventory/PlayerInventory';
 
 export const App = () => {
   return (
     <PlayerInfoProvider>
-      <GameCanvas />
       <HudWrapper>
         <PlayerNameplate />
+        <PlayerInventory />
       </HudWrapper>
       <PlayerDeadPopup />
     </PlayerInfoProvider>

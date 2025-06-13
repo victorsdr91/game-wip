@@ -1,4 +1,4 @@
-import { CollisionType, Engine, EventEmitter, Scene } from "excalibur";
+import { CollisionType, Engine, EventEmitter, Scene, Vector } from "excalibur";
 import { playerInfoType, worldInfoType } from "./contract";
 import { Resources, worldLoader } from "./resources";
 import { PacificNpc } from "../../model/npc/PacificNpc";
@@ -9,7 +9,6 @@ import { Hud } from "../../ui/Hud";
 import { PlayerProps } from "../../model/Player/contract";
 
 
-
 export class Level extends Scene {
     private _playerInfo: playerInfoType;
     private hud: Hud;
@@ -17,6 +16,7 @@ export class Level extends Scene {
     private pacificNpcs: PacificNpc[];
     private agressiveNpcs: AgressiveNpc[];
     private eventEmitter: EventEmitter;
+    currentWorldPos: Vector = new Vector(0, 0);
 
     
     constructor (worldInfo: worldInfoType) {
@@ -26,6 +26,7 @@ export class Level extends Scene {
         this.agressiveNpcs = new Array<AgressiveNpc>();
         this.eventEmitter = new EventEmitter();
         this.hud = new Hud({eventEmitter: this.eventEmitter});
+
 
         worldInfo.pacificNPCs.forEach((npc) => {
             this.pacificNpcs.push(
@@ -66,6 +67,12 @@ export class Level extends Scene {
     onInitialize(engine: Engine): void {
         engine.start(worldLoader).then(() => {
             Resources.Level1Map.addToScene(this);
+        });
+
+         engine.input.pointers.on('down', (evt) => {
+            this.currentWorldPos = engine.screen.pageToWorldCoordinates(new Vector(evt.pagePos.x, evt.pagePos.y));
+            document.documentElement.style.setProperty('--pointer-x', evt.pagePos.x.toString() + 'px');
+            document.documentElement.style.setProperty('--pointer-y', evt.pagePos.y.toString() + 'px');
         });
     }
 

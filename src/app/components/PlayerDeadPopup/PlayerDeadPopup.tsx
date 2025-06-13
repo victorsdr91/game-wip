@@ -17,7 +17,7 @@ const PlayerDeadPopup = () => {
     const popupClassList = `excalibur-scale font-[PublicPixel] ${showPopup} player-dead-banner p-3 bg-amber-900 text-amber-200 text-xs border-amber-950 border-3 rounded-md`
 
     return (
-    <div id="player-dead-popup" className={popupClassList}>
+    <div className={popupClassList}>
         <div className="p-2">You are dead. Be careful with the monsters</div>
         <button id="player-revive-button" onClick={onRevive} className="block p-2 m-auto hover:bg-amber-950 border bg-amber-800 rounded-md">Revive</button>
     </div>

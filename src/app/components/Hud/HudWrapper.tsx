@@ -10,7 +10,7 @@ const HudWrapper = ({ children }) => {
         callback: ({show}) => setShowHud(show),
     });
 
-    const classList = `font-[PublicPixel] excalibur-scale absolute bg-amber-900 text-amber-200 text-xs ${showHud ? 'show' : 'hide'}`;
+    const classList = `font-[PublicPixel] excalibur-scale absolute text-amber-200 text-xs ${showHud ? 'show' : 'hide'}`;
 
     return (
     <div id="hud" className={ classList }>

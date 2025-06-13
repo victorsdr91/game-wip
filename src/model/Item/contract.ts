@@ -1,5 +1,4 @@
 import { SlotType } from "model/Player/types/SlotType.enum";
-import { Item } from "./Item";
 import { ItemType } from "./types/ItemTypes.enum";
 import { ItemClass } from "./types/ItemTypes";
 
@@ -17,6 +16,8 @@ export interface ItemIface {
     durability?: number;
     maxDurability?: number;
     stackSize?: number; // Optional property for stackable items
+    icon?: string;
+    sprite?: string; // Optional property for items with a sprite representation
 }
 
 export interface ItemGroupProps {

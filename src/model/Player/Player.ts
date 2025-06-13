@@ -1,9 +1,9 @@
 import { Animation, CollisionType, Engine, Keys, Vector, GraphicsGroup, CollisionGroupManager } from "excalibur";
-import { Config } from "../../state/Config";
+import { Config } from "../../state/config/Config";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { animationDirection, animationMode } from "../ExtendedActor/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
-import { keyboardType } from "../../contract";
+import { keyboardType } from "../../state/config/contract";
 import { PlayerProgressType, PlayerProps } from "./contract";
 import { Inventory } from "model/Inventory/Inventory";
 import { Game } from "services/Game";
@@ -11,13 +11,14 @@ import { HudPlayerEvents } from "state/helpers/PlayerEvents";
 import { PlayerEquipment } from "./PlayerEquipment";
 import { WereableItem } from "model/Item/WereableItem";
 import { SlotType } from "./types/SlotType.enum";
+import { KeyboardConfig, KeyboardConfigProps, KeyCallback, KeyMap } from "state/config/KeyboardConfig";
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
 
 export class Player extends ExtendedActor {
   private playerAnimation: PlayerAnimation;
-  private controlMap: Object = {};
+  private keyboardConfig: KeyboardConfig;
   private attackMode: number = 0;
   private progress: PlayerProgressType;
   private inventory: Inventory;
@@ -41,32 +42,35 @@ export class Player extends ExtendedActor {
     this.playerAnimation = new PlayerAnimation(this.frameSpeed);
     this.inventory = new Inventory(inventory);
     this.equipment = new PlayerEquipment({equipment});
-    const actionsMap = {
-      "movement" : {
-        "left" : () => { this.move(animationDirection.LEFT, animationMode.WALK)},
-        "right" : () => { this.move(animationDirection.RIGHT, animationMode.WALK)},
-        "up" : () => { this.move(animationDirection.UP, animationMode.WALK)},
-        "down" : () => { this.move(animationDirection.DOWN, animationMode.WALK)},
-        "run" : () => { this.run() },
-      },
-      "skills": {
-        "first": () => { this.isAttacking = true; }
-      }
-    };
 
-    const controls: keyboardType = Config.getControls().keyboard;
-    Object.keys(controls)
-    .forEach((type) => {
-      Object.keys(controls[type])
-      .forEach((key) => 
-        { 
-          this.controlMap[controls[type][key]] = actionsMap[type][key];
-        }
-      )
-    });
-
+    this.setKeyboardConfig();
     this.handleEvents();
 
+  }
+
+  private setKeyboardConfig() {
+    const keyCallbackMap: KeyboardConfigProps = {
+      movement: new Map<string, KeyCallback>(),
+      skills: new Map<string, KeyCallback>(),
+      shortcuts: new Map<string, KeyCallback>()
+    };
+
+    keyCallbackMap.movement.set("left", () => { this.move(animationDirection.LEFT, animationMode.WALK)});
+    keyCallbackMap.movement.set("right", () => { this.move(animationDirection.RIGHT, animationMode.WALK)});
+    keyCallbackMap.movement.set("up", () => { this.move(animationDirection.UP, animationMode.WALK)});
+    keyCallbackMap.movement.set("down", () => { this.move(animationDirection.DOWN, animationMode.WALK)});
+    keyCallbackMap.movement.set("run", () => { this.run() });
+
+    keyCallbackMap.skills.set("first", () => { this.isAttacking = true; });
+
+    keyCallbackMap.shortcuts.set("bag", () => { this.toggleHUD(HudPlayerEvents.HUD_PLAYER_TOGGLE_INVENTORY)});
+    keyCallbackMap.shortcuts.set("player", () => { this.toggleHUD(HudPlayerEvents.HUD_PLAYER_TOGGLE_PROFILE)});
+
+    this.keyboardConfig = new KeyboardConfig(keyCallbackMap);
+  }
+
+  toggleHUD(event: HudPlayerEvents) {
+      Game.getInstance().emit(event, {});
   }
 
   onInitialize() {
@@ -195,15 +199,8 @@ export class Player extends ExtendedActor {
       this.isRunning = false;
       this.movementMode = animationMode.WALK;
     }
-    Object.values(Keys)
-      .filter((key) => 
-        engine.input.keyboard.isHeld(key)
-      )
-      .forEach((key) => 
-        { 
-          this.controlMap[key] && this.controlMap[key]();
-        }
-      );
+
+    this.keyboardConfig.bindKeys(engine);
     let animationGraphic = this.playerGraphic(this.playerAnimation.usePlayerAnimation({ mode: this.movementMode, direction: this.direction}));
     
     if(this.isAttacking) {
