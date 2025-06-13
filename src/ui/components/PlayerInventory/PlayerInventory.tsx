@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";
 import { ItemGroup } from "model/Item/ItemGroup";
 import { Inventory } from "./contract";
-import { useGameEvent } from "app/clientState/hooks/useGameEvent/useGameEvent";
+import { useGameEvent } from "ui/clientState/hooks/useGameEvent/useGameEvent";
 import InventoryItemList from "./InventoryItemList";
 import Draggable from "../Common/Draggable";
 

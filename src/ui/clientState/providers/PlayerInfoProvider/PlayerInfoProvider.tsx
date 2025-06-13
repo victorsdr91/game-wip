@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGameEvent } from "app/clientState/hooks/useGameEvent/useGameEvent";
+import { useGameEvent } from "ui/clientState/hooks/useGameEvent/useGameEvent";
 import PlayerInfoContext, { PlayerInfo } from './PlayerInfoContext';
 import { HudPlayerEvents } from 'state/helpers/PlayerEvents';
 

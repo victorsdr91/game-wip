@@ -1,6 +1,6 @@
 
 
-import usePlayerInfo from 'app/clientState/providers/PlayerInfoProvider/usePlayerInfo';
+import usePlayerInfo from 'ui/clientState/providers/PlayerInfoProvider/usePlayerInfo';
 import React from 'react';
 const PlayerNameplate = () => {
   

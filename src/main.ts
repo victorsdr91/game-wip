@@ -1,6 +1,6 @@
 import { loader } from "./resources";
 import { agressiveNpcType, spriteSize, worldInfoType } from "./scenes/Level1/contract";
-import { calculateExPixelConversion } from "./ui/utils/calculateExPixelConversion";
+import { calculateExPixelConversion } from "./ui/utils/pixelRatioUtils";
 import { PacificNpcType } from "./model/npc/contract";
 import { playerInfo } from "./mocks/player";
 import { Game } from "services/Game";

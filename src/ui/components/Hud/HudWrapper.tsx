@@ -1,4 +1,4 @@
-import { useGameEvent } from 'app/clientState/hooks/useGameEvent/useGameEvent';
+import { useGameEvent } from 'ui/clientState/hooks/useGameEvent/useGameEvent';
 import React from 'react';
 import { GameEvents } from 'state/helpers/GameEvents';
 
