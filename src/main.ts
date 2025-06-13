@@ -21,14 +21,17 @@ const generateMonster = (x: number, y: number): agressiveNpcType => {
     },
     stats: {
       level: 2,
-      f_attack: 100,
+      f_attack: 2,
       f_defense: 2,
       m_attack: 2,
       m_defense: 2,
       speed: 3,
       cSpeed: 2,
       agi: 2,
-      con: 2
+      con: 2,
+      f_damage: 10,
+      m_damage: 10,
+      critical_rate: 2,
     }
   };
 };

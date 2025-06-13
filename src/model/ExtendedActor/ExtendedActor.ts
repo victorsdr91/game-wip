@@ -79,7 +79,7 @@ export abstract class ExtendedActor extends Actor {
   }
 
   protected receiveDamage (damage: number, actor: ExtendedActor): number {
-    const damageReceived = damage - this.stats.f_defense*this.stats.level;
+    const damageReceived = damage - this.stats.f_defense*this.stats.level*0.5;
     const totalDamage = damageReceived > 0 ? damageReceived : 0;
     this.setHealth(this.getHealth() - totalDamage);
     

@@ -3,7 +3,6 @@ import { Config } from "../../state/config/Config";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { animationDirection, animationMode } from "../ExtendedActor/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
-import { keyboardType } from "../../state/config/contract";
 import { PlayerProgressType, PlayerProps } from "./contract";
 import { Inventory } from "model/Inventory/Inventory";
 import { Game } from "services/Game";
@@ -43,12 +42,12 @@ export class Player extends ExtendedActor {
     this.inventory = new Inventory(inventory);
     this.equipment = new PlayerEquipment({equipment});
 
-    this.setKeyboardConfig();
+    this.keyboardConfig = new KeyboardConfig(this.getKeyCallbackMap());
     this.handleEvents();
 
   }
 
-  private setKeyboardConfig() {
+  private getKeyCallbackMap(): KeyboardConfigProps  {
     const keyCallbackMap: KeyboardConfigProps = {
       movement: new Map<string, KeyCallback>(),
       skills: new Map<string, KeyCallback>(),
@@ -66,7 +65,7 @@ export class Player extends ExtendedActor {
     keyCallbackMap.shortcuts.set("bag", () => { this.toggleHUD(HudPlayerEvents.HUD_PLAYER_TOGGLE_INVENTORY)});
     keyCallbackMap.shortcuts.set("player", () => { this.toggleHUD(HudPlayerEvents.HUD_PLAYER_TOGGLE_PROFILE)});
 
-    this.keyboardConfig = new KeyboardConfig(keyCallbackMap);
+    return keyCallbackMap;
   }
 
   toggleHUD(event: HudPlayerEvents) {
@@ -150,7 +149,7 @@ export class Player extends ExtendedActor {
     this.progress.exp = diffExp;
     this.progress.expNextLevel += (this.progress.expNextLevel*1.5)+50;
 
-    Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_LVL_UPDATE, {level: this.calculatedStats.level});
+    Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_LVL_UPDATE, {lvl: this.stats.level});
   }
 
   private playerBasicAttack() {
@@ -174,13 +173,13 @@ export class Player extends ExtendedActor {
       const levelDifference = this.stats.level - targetStats.level;
       
       if(levelDifference < 0) {
-        return this.calculatedStats.f_attack + (1.5*this.stats.level) - (levelDifference * 2);
+        return (this.calculatedStats.f_attack * this.calculatedStats.f_damage * 0.5) + (1.5*this.stats.level) - (levelDifference * 2);
       } else if(levelDifference > 0) {
-        return this.calculatedStats.f_attack + (1.5*this.stats.level) + (levelDifference * 2);
+        return (this.calculatedStats.f_attack * this.calculatedStats.f_damage * 0.5) + (1.5*this.stats.level) + (levelDifference * 2);
       }
     }
 
-    return this.calculatedStats.f_attack + (1.5*this.stats.level);
+    return (this.calculatedStats.f_attack * this.calculatedStats.f_damage * 0.5) + (1.5*this.stats.level);
   }
 
   private run(): void {

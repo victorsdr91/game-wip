@@ -1,6 +1,7 @@
 import { GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine, ActionContext, AnimationStrategy, Graphic, Text, Font, Color, TextAlign } from "excalibur";
 import { AgressiveNpc } from "./AgressiveNpc";
 import { AgressiveNpcType } from "./contract";
+import { ExtendedActor } from "model/ExtendedActor/ExtendedActor";
 
 export class Slime extends AgressiveNpc {
 
@@ -120,10 +121,25 @@ export class Slime extends AgressiveNpc {
       const eventData = {
         actor: this,
         pos: this.pos,
-        damage: this.stats.f_attack*this.stats.level,
+        damage: this.calculateDamage(),
       }
       this.eventManager.emit("npc-attack-basic", eventData);
       this.attacking = false;
+    }
+
+    protected calculateDamage(): number {
+      if(this.target) {
+        const targetStats = this.target.getStats();
+        const levelDifference = this.stats.level - targetStats.level;
+        
+        if(levelDifference < 0) {
+          return (this.calculatedStats.f_attack * this.calculatedStats.f_damage) + (1.5*this.stats.level) - (levelDifference * 2);
+        } else if(levelDifference > 0) {
+          return (this.calculatedStats.f_attack * this.calculatedStats.f_damage) + (1.5*this.stats.level) + (levelDifference * 2);
+        }
+      }
+
+      return (this.calculatedStats.f_attack * this.calculatedStats.f_damage) + (1.5*this.stats.level);
     }
 
     onPreUpdate(engine: Engine, elapsedMs: number): void {

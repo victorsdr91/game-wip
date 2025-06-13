@@ -34,4 +34,7 @@ export interface ItemStats {
     cSpeed?: number;
     agi?: number;
     con?: number;
+    f_damage?: number;
+    m_damage?: number;
+    critical_rate?: number;
 }

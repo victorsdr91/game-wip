@@ -21,10 +21,9 @@ const InventoryItem: React.FC<InventoryItemProps> = ({ itemGroup, position, dime
                 height: `${dimensions.height}px`
             }}
         >
-            {(isDragging) => (
                 <div 
                     className="flex flex-col items-center justify-center border-amber-950 border-2 rounded-sm w-full h-full group"
-                    style={{ zIndex: isDragging ? 20 : 10 }}
+                    style={{ zIndex: 10 }}
                 >
                     <img 
                         src={item.getIcon()?.data.src} 
@@ -43,9 +42,7 @@ const InventoryItem: React.FC<InventoryItemProps> = ({ itemGroup, position, dime
                         }) }
                         <div className="text-[6px]">Weight: {itemGroup.getWeight()}kg</div>
                     </div>
-                </div>
-            )}
-           
+                </div>           
         </Draggable>
     );
 };

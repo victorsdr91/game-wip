@@ -7,7 +7,7 @@ const getPixelRatio = (): number => {
   };
 
 interface DraggableProps {
-    children: (isDragging: boolean) => React.ReactNode;
+    children: React.ReactNode;
     initialPos: { x: number; y: number };
     onDragEnd?: (position: { x: number; y: number }) => void;
     className?: string;
@@ -37,8 +37,8 @@ const Draggable: FC<DraggableProps> = ({ children, initialPos, onDragEnd, classN
 
         // Guardar la posición inicial relativa al contenedor padre
         startPosRef.current = {
-            x: (rect.left - parentRect.left) / pixelRatio,
-            y: (rect.top - parentRect.top) / pixelRatio
+            x: (e.clientX - parentRect.left) / pixelRatio,
+            y: (e.clientY - parentRect.top)/ pixelRatio
         };
         
         setIsDragging(true);
@@ -112,7 +112,7 @@ const Draggable: FC<DraggableProps> = ({ children, initialPos, onDragEnd, classN
             }}
             onMouseDown={handleMouseDown}
         >
-            {children(isDragging)}
+            {children}
         </div>
     );
 };
