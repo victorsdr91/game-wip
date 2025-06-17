@@ -5,7 +5,7 @@ import { playerInfoType } from "scenes/Level1/contract";
 const playerItems: Map<number, InventoryItem> = new Map<number, InventoryItem>();
 playerItems.set(0, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
 playerItems.set(1, { itemId: 2, quantity: 20}); // Adding arrows with ID 2 and quantity 20
-playerItems.set(2, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
+playerItems.set(2, { itemId: 3, quantity: 1}); // Adding a sword with ID 1 and quantity 1
 playerItems.set(3, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
 playerItems.set(4, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
 playerItems.set(5, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1

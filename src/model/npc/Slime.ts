@@ -133,13 +133,13 @@ export class Slime extends AgressiveNpc {
         const levelDifference = this.stats.level - targetStats.level;
         
         if(levelDifference < 0) {
-          return (this.calculatedStats.f_attack * this.calculatedStats.f_damage) + (1.5*this.stats.level) - (levelDifference * 2);
+          return (this.stats.f_attack * this.stats.f_damage) + (1.5*this.stats.level) - (levelDifference * 2);
         } else if(levelDifference > 0) {
-          return (this.calculatedStats.f_attack * this.calculatedStats.f_damage) + (1.5*this.stats.level) + (levelDifference * 2);
+          return (this.stats.f_attack * this.stats.f_damage) + (1.5*this.stats.level) + (levelDifference * 2);
         }
       }
 
-      return (this.calculatedStats.f_attack * this.calculatedStats.f_damage) + (1.5*this.stats.level);
+      return (this.stats.f_attack * this.stats.f_damage) + (1.5*this.stats.level);
     }
 
     onPreUpdate(engine: Engine, elapsedMs: number): void {

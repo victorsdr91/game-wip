@@ -1,4 +1,5 @@
 import { ItemGroup } from "model/Item/ItemGroup";
+import { SlotType } from "model/Player/types/SlotType.enum";
 
 export enum HudPlayerEvents {
     HUD_PLAYER_INFO_UPDATE = 'hud_player_info_update',
@@ -14,6 +15,10 @@ export enum HudPlayerEvents {
     HUD_PLAYER_EQUIPMENT_ITEM_MOVED = "HUD_PLAYER_EQUIPMENT_ITEM_MOVED",
     HUD_PLAYER_TOGGLE_INVENTORY = "HUD_PLAYER_TOGGLE_INVENTORY",
     HUD_PLAYER_TOGGLE_PROFILE = "HUD_PLAYER_TOGGLE_PROFILE",
+    HUD_PLAYER_STATS_UPDATE = "HUD_PLAYER_STATS_UPDATE",
+    HUD_PLAYER_EQUIP_ITEM = 'hud_player_equip_item',
+    HUD_PLAYER_UNEQUIP_ITEM = 'hud_player_unequip_item',
+    HUD_PLAYER_DROP_ITEM_CONFIRM = 'hud_player_drop_item_confirm'
 }
 
 export interface InventoryEventPayload {
@@ -22,6 +27,19 @@ export interface InventoryEventPayload {
     currentWeight: number;
     items: Map<number, ItemGroup>; // key: slotId
     itemPositions: Map<number, { x: number; y: number; }>; // key: slotId
+    findFirstEmptySlot: () => number | null;
+}
+
+export interface EquipItemPayload {
+    fromSlot: number;
+    toSlot: SlotType;
+    itemGroup: ItemGroup;
+}
+
+export interface UnequipItemPayload {
+    fromSlot: SlotType;
+    toSlot: number;
+    itemGroup: ItemGroup;
 }
 
 export interface HudPlayerInfoUpdate {

@@ -77,12 +77,11 @@ export class Level extends Scene {
     }
 
     onActivate(): void {
-        this.loadPlayer();
+        this.loadPlayer().then(() => {  this.loadHUD(); });
         this.loadNpcs();
-        this.loadHUD();
     }
 
-    private loadPlayer(): void {
+    private async loadPlayer(): Promise<void> {
         const playerProps: PlayerProps = {
             pos: this._playerInfo.position,
             name: this._playerInfo.nickname,
@@ -112,9 +111,6 @@ export class Level extends Scene {
     }
 
     private loadHUD(): void {
-        if(this.player) {
-            this.hud.updatePlayerInfoHud(this.player);
-            this.hud.toogleShow();
-        }
+        this.hud.toogleShow();
     }
 }

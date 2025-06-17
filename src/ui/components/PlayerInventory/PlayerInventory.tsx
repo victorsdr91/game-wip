@@ -1,30 +1,18 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";
 import { ItemGroup } from "model/Item/ItemGroup";
-import { Inventory } from "./contract";
-import { useGameEvent } from "ui/clientState/hooks/useGameEvent/useGameEvent";
-import InventoryItemList from "./InventoryItemList";
-import Draggable from "../Common/Draggable";
+import GameWindow from "../Common/GameWindow";
+import InventoryGrid from "./InventoryGrid";
+import InventoryFooter from "./InventoryFooter";
+import { WereableItem } from "model/Item/WereableItem";
+import { Game } from "services/Game";
+import { useInventory } from "ui/clientState/providers/PlayerItemHandler/InventoryProvider";
+import ItemComponentList from "./ItemComponentList";
 
 const PlayerInventory = () => {
-    const [showIventory, setShowInventory] = useState<boolean>(false);
-
-    const [inventoryPosition, setInventoryPosition] = useState({
-        x: 750,
-        y: 150,
-    });
-
-    const handleInventoryDragEnd = (newPosition: { x: number; y: number }) => {
-        setInventoryPosition(newPosition);
-    };
-    
-    const [inventory, setInventory] = useState<Inventory>({ 
-        items: new Map<number, ItemGroup>(), 
-        itemPositions: new Map<number, { x: number, y: number }>(),
-        slots: 32, 
-        maxWeight: 0, 
-        currentWeight: 0
-    });
+    const invRef = useRef<HTMLDivElement>(null);
+    const { inventory } = useInventory();
+    const [showDropPopup, setShowDropPopup] = useState<boolean>(false);
 
     const calculateInventoryDimensions = () => {
         const positions = Array.from(inventory.itemPositions.values());
@@ -40,81 +28,72 @@ const PlayerInventory = () => {
         };
     };
 
-    useGameEvent({
-        event: HudPlayerEvents.HUD_PLAYER_INVENTORY_UPDATE,
-        callback: (newInventory) => {
-            setInventory(newInventory);
-        }
-    });
+    const handleItemEquip = (itemGroup: ItemGroup) => {
+        if (!(itemGroup.getItem() instanceof WereableItem)) return;
+        
+        const item = itemGroup.getItem() as WereableItem;
+        const slot = item.getSlot();
+        const fromSlot = findItemSlot(itemGroup);
 
-    useGameEvent({
-        event: HudPlayerEvents.HUD_PLAYER_TOGGLE_INVENTORY,
-        callback: ({ isPressed }) => {
-            isPressed = true;
-            setShowInventory(!showIventory);
+        if (fromSlot !== null) {
+            Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_EQUIP_ITEM, {
+                fromSlot,
+                toSlot: slot,
+                itemGroup
+            });
         }
-    });
+    };
 
-    const closeInventory = (e) => {
-        setShowInventory(false);
-        e.stopPropagation();
-    }
+    const handleItemDrop = (fromSlot: number) => {
+        const shouldDrop = window.confirm('¿Deseas eliminar este objeto?');
+        if (shouldDrop) {
+            Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_INVENTORY_ITEM_DROPPED, {
+                fromSlot
+            });
+        }
+        return;
+
+    };
+
+    const findItemSlot = (itemGroup: ItemGroup): number | null => {
+        for (const [slotId, group] of inventory.items.entries()) {
+            if (group === itemGroup) {
+                return slotId;
+            }
+        }
+        return null;
+    };
+
+    const isWithinWindow = (position: { x: number, y: number }): boolean => {
+        if (!invRef.current) return false;
+        const rect = invRef.current.getBoundingClientRect();
+        return position.x >= 0 && position.x <= rect.width &&
+            position.y >= -50 && position.y <= rect.height+50;
+    };
 
     const dimensions = calculateInventoryDimensions();
 
     return (
-        <Draggable
-            initialPos={inventoryPosition}
-            onDragEnd={handleInventoryDragEnd}
-            className="absolute"
-            style={{
-                left: `${inventoryPosition.x}px`,
-                top: `${inventoryPosition.y}px`,
-            }}
-            >
-                <div 
-                    className={`${showIventory ? "block" : "hidden"} p-3 bg-amber-900 text-amber-200 text-[8px] border-amber-950 border-3 rounded-md cursor-default`}
-                    onMouseDown={(e) => {
-                        // Detener la propagación si el clic no es en la cabecera
-                        const target = e.target as HTMLElement;
-                        if (!target.closest('.inventory-header') || target.closest('.close-inventory')) {
-                            e.stopPropagation();
-                        }
-                    }}
-                >
-                    <div className="inventory-header flex flex-row justify-between border-b-2 border-b-amber-950 pb-1 cursor-grab">
-                        <div className="flex p-1">Bag</div>
-                        <div className="flex"><button className="close-inventory py-1 px-2 rounded-xs bg-amber-800 border-amber-700 border-[1px] cursor-pointer" onClick={closeInventory} >X</button></div>
-                    </div>
+            <GameWindow
+                windowHeader={"Bag"}
+                playerEvent={HudPlayerEvents.HUD_PLAYER_TOGGLE_INVENTORY}
+                initialPosition={{
+                    x: 750,
+                    y: 150,
+                }}
+            >   <div ref={invRef}>
                     <div className="relative my-2" style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}>
-                        {/* Grid de slots vacíos */}
-                        <div className="absolute inset-0">
-                            {Array.from(inventory.itemPositions.entries()).map(([slotId, position]) => (
-                                <div 
-                                    key={`slot-${slotId}`}
-                                    className={`absolute w-8 h-8 border ${
-                                        inventory.items.has(slotId) 
-                                            ? 'border-amber-950 opacity-10' 
-                                            : 'border-amber-800 opacity-25'
-                                    }`}
-                                    style={{
-                                        left: `${position.x}px`,
-                                        top: `${position.y}px`,
-                                        pointerEvents: 'none' // Importante: permite que los eventos pasen a través
-                                    }}
-                                />
-                            ))}
-                        </div>
-
-                        {/* Items */}
-                        <InventoryItemList inventory={inventory} />
+                        <InventoryGrid inventory={inventory} />
+                        <ItemComponentList 
+                            inventory={inventory}
+                            onItemRightClick={handleItemEquip}
+                            onItemDrop={handleItemDrop}
+                            isWithinWindow={isWithinWindow}
+                        />
                     </div>
-                    <div className="flex flex-row justify-between border-t-2 border-t-amber-950 pt-2">
-                        <div className="flex">{inventory.items.size}/{inventory.slots}</div>
-                        <div className="flex">{inventory.currentWeight}/{inventory.maxWeight} Kg</div>
-                    </div>
+                    <InventoryFooter inventory={inventory} />
                 </div>
-        </Draggable>
+            </GameWindow>
     );
 };
 

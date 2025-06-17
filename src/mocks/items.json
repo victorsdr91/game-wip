@@ -34,5 +34,23 @@
         "maxDurability": 100,
         "icon": "no_icon",
         "sprite": null
+    },
+    {
+        "id": 3,
+        "name": "Wooden Shield",
+        "description": "An small shield made with wood for novice adventurers",
+        "cooldown": 0,
+        "type": "wereable",
+        "agruppable": false,
+        "weight": 25,
+        "slot": "second_hand",
+        "stackSize": 1,
+        "stats": {
+          "f_defense": 20
+        },
+        "durability": 100,
+        "maxDurability": 100,
+        "icon": "no_icon",
+        "sprite": null
     }
 ]

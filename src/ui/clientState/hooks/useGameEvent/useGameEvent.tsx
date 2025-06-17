@@ -6,7 +6,7 @@ export interface useGameEventProps {
     callback: (...args: any[]) => void;
 };
 
-export const useGameEvent = async ({ event, callback }: useGameEventProps) => {
+export const useGameEvent = ({ event, callback }: useGameEventProps) => {
     useEffect(() => {
         const game = Game.getInstance();
         const subscription = game.on(event, callback);

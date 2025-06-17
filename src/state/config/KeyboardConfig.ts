@@ -20,7 +20,6 @@ export class KeyboardConfig {
         this.controlMap = new Map<string, KeyCallback>();
         this.shortcutMap = new Map<string, KeyCallback>();
         
-
         this.mapKeys("shortcuts", shortcuts, this.shortcutMap);
         this.mapKeys("movement", movement, this.controlMap);
         this.mapKeys("skills", skills, this.controlMap);

@@ -5,7 +5,6 @@ export abstract class ExtendedActor extends Actor {
   protected nameTextGraphic: Text;
 
   protected stats: ActorStats;
-  protected calculatedStats: ActorStats;
   protected speed: number = 16;
   protected movementSpeed: number = 0;
   protected frameSpeed: number = 200; // ms
@@ -34,7 +33,6 @@ export abstract class ExtendedActor extends Actor {
     this.name = name;
     this.nameTextGraphic = new Text({ text: this.name, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
     this.stats = Object.assign({}, stats);
-    this.calculatedStats = Object.assign({}, stats);
     this.eventManager = eventEmitter;
     this.maxHealth = maxHealth;
     this.currentHealth = currentHealth || maxHealth;

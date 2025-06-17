@@ -20,9 +20,11 @@ export class Hud {
     }
 
     public updatePlayerInfoHud(player: Player) {
-        const data: HudPlayerInfoUpdate = {
+        const data = {
             nickname: player.name,
-            lvl: player.getStats().level,
+            stats: player.getStats(),
+            equipment: player.getEquipment().equipment,
+            equipmentSlots: player.getEquipment().equipmentSlots,
             totalHP: player.getMaxHealth(),
             remainingHP: player.getHealth()
         };

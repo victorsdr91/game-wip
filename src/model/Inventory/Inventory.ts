@@ -39,7 +39,7 @@ export class Inventory {
         this.emitInventoryUpdate();
     }
 
-     private addItemToSlot(itemId: number, quantity: number, slotId: number): boolean {
+     public addItemToSlot(itemId: number, quantity: number, slotId: number): boolean {
         const item = ItemFactory.getItemById(itemId);
         if (!item) {
             throw new Error(`Item with ID ${itemId} not found.`);
@@ -65,18 +65,20 @@ export class Inventory {
         });
 
         this.game.on(HudPlayerEvents.HUD_PLAYER_INVENTORY_ITEM_DROPPED, (event: unknown) => {
-            const { itemId } = event as { itemId: number; position: { x: number; y: number; }};
-            this.removeItemFromInventory(itemId);
-        });
+        const { fromSlot } = event as { fromSlot: number };
+        this.removeItem(fromSlot);
+        this.emitInventoryUpdate();
+    });
     }
 
-    private emitInventoryUpdate(): void {
+    public emitInventoryUpdate(): void {
         const payload: InventoryEventPayload = {
             slots: this.slots,
             maxWeight: this.maxWeight,
             currentWeight: this.currentWeight,
             items: this.items,
-            itemPositions: this.itemPositions
+            itemPositions: this.itemPositions,
+            findFirstEmptySlot: () => { return this.findFirstEmptySlot() },
         };
         
         this.game.emit(HudPlayerEvents.HUD_PLAYER_INVENTORY_UPDATE, payload);
@@ -114,8 +116,27 @@ export class Inventory {
         return null;
     }
 
-    public moveItemToEquipment(itemId: number, slotType: string): void {
-        // Implementar lógica para mover item al equipamiento
+    public removeItem(slotId: number): void {
+        this.items.delete(slotId);
+        this.emitInventoryUpdate();
+    }
+
+    public addItemToFirstEmptySlot(itemGroup: ItemGroup): boolean {
+        const emptySlot = this.findFirstEmptySlot();
+        if (emptySlot === null) return false;
+
+        this.items.set(emptySlot, itemGroup);
+        this.emitInventoryUpdate();
+        return true;
+    }
+
+    private findItemSlot(itemGroup: ItemGroup): number | null {
+        for (const [slotId, group] of this.items.entries()) {
+            if (group === itemGroup) {
+                return slotId;
+            }
+        }
+        return null;
     }
 
     public dropItem(itemId: number): void {
@@ -160,36 +181,6 @@ export class Inventory {
         });
         return undefined;
 
-    }
-
-    private removeItemFromInventory(itemId: number): void {
-        if (this.items.has(itemId)) {
-            const item = this.items.get(itemId);
-            this.items.delete(itemId);
-            this.itemPositions.delete(itemId);
-            
-            // Emitir evento para que el item aparezca en el mundo
-            this.game.emit(HudPlayerEvents.HUD_PLAYER_ITEM_DROPPED_IN_WORLD, {
-                itemId,
-                item
-            });
-
-            this.emitInventoryUpdate();
-        }
-    };
-    public removeItem(itemId: number, quantity: number): boolean {
-        const itemGroup = this.findItemById(itemId)!;
-        if (itemGroup) {
-            itemGroup.removeQuantity(quantity);
-            const itemWeight = itemGroup.getItem().getWeight() * quantity;
-            this.currentWeight -= itemWeight;
-
-            if (itemGroup.getQuantity() <= 0) {
-                this.items.delete(itemId);
-            }
-            return true;
-        }
-        return false;
     }
 
     public listItems(): (ItemGroup | null)[] {

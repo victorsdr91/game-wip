@@ -15,15 +15,12 @@ export interface Inventory {
         columns: number;
         rows: number;
     };
+    findFirstEmptySlot: () => number | null;
 }
 
-export interface InventoryItemProps {
-    itemGroup: ItemGroup;
-    position: { x: number, y: number };
-    dimensions: {
-        width: number;
-        height: number;
-        gap: number;
-    };
-    onDragEnd?: (position: { x: number, y: number }) => void;
+export interface ItemComponentListProps {
+    inventory: Inventory;
+    onItemRightClick: (itemGroup: ItemGroup) => void;
+    onItemDrop: (fromSlot: number) => void;
+    isWithinWindow: (position: { x: number, y: number }) => boolean;
 }

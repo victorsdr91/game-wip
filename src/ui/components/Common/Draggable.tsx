@@ -22,7 +22,7 @@ const Draggable: FC<DraggableProps> = ({ children, initialPos, onDragEnd, classN
     const pixelRatio = getPixelRatio();
 
     const handleMouseDown = (e: React.MouseEvent) => {
-        if (!dragRef.current) return;
+        if (!dragRef.current || e.button !== 0) return;
 
         const rect = dragRef.current.getBoundingClientRect();
         const parentRect = dragRef.current.parentElement?.getBoundingClientRect();

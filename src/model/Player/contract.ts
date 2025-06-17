@@ -20,6 +20,9 @@ export type EquipmentPropsType = Partial<Record<SlotType, EquipmentProps>>;
 
 export type EquipmentType = Partial<Record<SlotType, ItemGroup>>;
 
+export type EquipmentSlotsType = Map<SlotType, { x: number, y: number }>;
+
+
 export type PlayerProgressType = {
     exp: number;
     expNextLevel: number;

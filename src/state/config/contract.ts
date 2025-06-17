@@ -7,8 +7,7 @@ export interface controlsType {
 }
 
 export interface keyboardType {
-    movement: keyboardMovement
-        
+    movement: keyboardMovement;
     skills: keyboardSkill;
     shortcuts: keyboardShortcuts;
 }

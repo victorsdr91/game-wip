@@ -6,11 +6,14 @@ import { PlayerAnimation } from "./PlayerAnimations";
 import { PlayerProgressType, PlayerProps } from "./contract";
 import { Inventory } from "model/Inventory/Inventory";
 import { Game } from "services/Game";
-import { HudPlayerEvents } from "state/helpers/PlayerEvents";
+import { EquipItemPayload, HudPlayerEvents, UnequipItemPayload } from "state/helpers/PlayerEvents";
 import { PlayerEquipment } from "./PlayerEquipment";
 import { WereableItem } from "model/Item/WereableItem";
+import { KeyboardConfig, KeyboardConfigProps, KeyCallback } from "state/config/KeyboardConfig";
 import { SlotType } from "./types/SlotType.enum";
-import { KeyboardConfig, KeyboardConfigProps, KeyCallback, KeyMap } from "state/config/KeyboardConfig";
+import { SlotValidator } from "model/Item/SlotValidator";
+import { ItemGroup } from "model/Item/ItemGroup";
+import { ItemInterface } from "model/Item/interface/ItemInterface";
 
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
@@ -23,6 +26,7 @@ export class Player extends ExtendedActor {
   private inventory: Inventory;
   private deathMessageShown: boolean = false;
   private equipment: PlayerEquipment;
+  private game: Game;
 
   constructor({pos, name, currentHealth, maxHealth, progress, stats, inventory, equipment, eventEmitter}: PlayerProps) {
     super({
@@ -41,6 +45,7 @@ export class Player extends ExtendedActor {
     this.playerAnimation = new PlayerAnimation(this.frameSpeed);
     this.inventory = new Inventory(inventory);
     this.equipment = new PlayerEquipment({equipment});
+    this.game = Game.getInstance();
 
     this.keyboardConfig = new KeyboardConfig(this.getKeyCallbackMap());
     this.handleEvents();
@@ -76,11 +81,9 @@ export class Player extends ExtendedActor {
     this.playerAnimation.initialize();
     const attacks = this.playerAnimation.getAttackAnimations();
     console.log("Player inventory loaded: \n", this.inventory);
-
-    this.calculateStats();
+    this.loadEquipmentStats();
+    this.updatePlayerInfoHud(this);
     console.log("Player equipment loaded: \n", this.equipment.equipment);
-    console.log("Player original stats: \n", this.stats);
-    console.log("Player calculated stats: \n", this.calculatedStats);
 
     Object.values(attacks).forEach((attackDirection) => {
       attackDirection.forEach((attack) => {
@@ -92,9 +95,66 @@ export class Player extends ExtendedActor {
     });
   }
 
+  loadEquipmentStats() {
+    const equipment = this.equipment.equipment;
+
+    for(const [key, value] of Object.entries(equipment)) {
+      const item = value.getItem();
+      this.addEquipmentStats(item);
+    }
+  }
+
   handleEvents() {
     this.handleNpcBasicAttack();
     this.handleMonsterRewards();
+    this.handleEquipItem();
+    this.handleRemoveEquipment();    
+  }
+
+  private swapEquipment(fromSlot: number, toSlot: SlotType, itemGroup: ItemGroup): void {
+    this.inventory.removeItem(fromSlot);
+    
+    const currentEquipped = this.equipment.getEquipment(toSlot);
+    if (currentEquipped) {
+        this.inventory.addItemToFirstEmptySlot(currentEquipped);
+    }
+    
+    this.equipment.setEquipment(toSlot, itemGroup);
+    this.addEquipmentStats(itemGroup.getItem());
+    
+    this.inventory.emitInventoryUpdate();
+    this.updatePlayerInfoHud(this);
+  }
+
+  handleEquipItem() {
+    this.game.on(HudPlayerEvents.HUD_PLAYER_EQUIP_ITEM, (event: unknown) => {
+        const { fromSlot, toSlot, itemGroup } = event as EquipItemPayload;
+        
+        if (!(itemGroup.getItem() instanceof WereableItem)) return;
+            const item = itemGroup.getItem() as WereableItem;
+            // Verificar si el slot es válido
+            if (!SlotValidator.isValidSlot(item.getSlot(), toSlot)) {
+                return;
+            }
+            
+            this.swapEquipment(fromSlot, toSlot, itemGroup);
+    });
+  }
+
+  handleRemoveEquipment() {
+    this.game.on(HudPlayerEvents.HUD_PLAYER_UNEQUIP_ITEM, (event: unknown) => {
+        const { fromSlot, itemGroup } = event as UnequipItemPayload;
+        
+        this.equipment.removeEquipment(fromSlot);
+        const emptySlot = this.inventory.findFirstEmptySlot();
+        if (emptySlot !== null) {
+            this.inventory.addItemToSlot(itemGroup.getItem().getId(), itemGroup.getQuantity(), emptySlot);
+        }
+        this.removeEquipmentStats(itemGroup);
+
+        this.inventory.emitInventoryUpdate();
+        this.updatePlayerInfoHud(this);
+    });
   }
 
   handleNpcBasicAttack() {
@@ -120,20 +180,29 @@ export class Player extends ExtendedActor {
     });
   }
 
-  private calculateStats(): void {
-    const equipment = this.equipment.equipment;
+  private addEquipmentStats(item: ItemInterface): void {
+    if(item instanceof WereableItem && item.getStats() && item.getSlot() !== SlotType.BULLET) {
+      const itemStats = item.getStats();
+      if(itemStats) {
+        Object.keys(itemStats).forEach((statKey) => {
+          if(this.stats[statKey]) {
+            this.stats[statKey] += itemStats[statKey];
+          }
+        });
+      }
+    }
+  }
 
-    for(const [key, value] of Object.entries(equipment)) {
-      const item = value.getItem();
-      if(item instanceof WereableItem && item.getStats() && key !== SlotType.BULLET) {
-        const itemStats = item.getStats();
-        if(itemStats) {
-          Object.keys(itemStats).forEach((statKey) => {
-            if(this.calculatedStats[statKey]) {
-              this.calculatedStats[statKey] += itemStats[statKey];
-            } 
-          });
-        }
+  private removeEquipmentStats(itemGroup: ItemGroup): void {
+    const item = itemGroup.getItem();
+    if(item instanceof WereableItem && item.getStats() && item.getSlot() !== SlotType.BULLET) {
+      const itemStats = item.getStats();
+      if(itemStats) {
+        Object.keys(itemStats).forEach((statKey) => {
+          if(this.stats[statKey]) {
+            this.stats[statKey] -= itemStats[statKey];
+          }
+        });
       }
     }
   }
@@ -149,7 +218,7 @@ export class Player extends ExtendedActor {
     this.progress.exp = diffExp;
     this.progress.expNextLevel += (this.progress.expNextLevel*1.5)+50;
 
-    Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_LVL_UPDATE, {lvl: this.stats.level});
+    Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_STATS_UPDATE, {stats: this.stats});
   }
 
   private playerBasicAttack() {
@@ -173,13 +242,13 @@ export class Player extends ExtendedActor {
       const levelDifference = this.stats.level - targetStats.level;
       
       if(levelDifference < 0) {
-        return (this.calculatedStats.f_attack * this.calculatedStats.f_damage * 0.5) + (1.5*this.stats.level) - (levelDifference * 2);
+        return (this.stats.f_attack * this.stats.f_damage * 0.5) + (1.5*this.stats.level) - (levelDifference * 2);
       } else if(levelDifference > 0) {
-        return (this.calculatedStats.f_attack * this.calculatedStats.f_damage * 0.5) + (1.5*this.stats.level) + (levelDifference * 2);
+        return (this.stats.f_attack * this.stats.f_damage * 0.5) + (1.5*this.stats.level) + (levelDifference * 2);
       }
     }
 
-    return (this.calculatedStats.f_attack * this.calculatedStats.f_damage * 0.5) + (1.5*this.stats.level);
+    return (this.stats.f_attack * this.stats.f_damage * 0.5) + (1.5*this.stats.level);
   }
 
   private run(): void {
@@ -251,4 +320,25 @@ export class Player extends ExtendedActor {
     this.deathMessageShown = false;
     this.updateHealth(this.getMaxHealth());
   }
+
+  public getEquipment(): PlayerEquipment {
+    return this.equipment;
+  }
+
+   public getProgress(): PlayerProgressType {
+    return this.progress;
+  }
+
+  public updatePlayerInfoHud(player: Player) {
+        const data = {
+            nickname: player.name,
+            stats: player.getStats(),
+            equipment: player.getEquipment().equipment,
+            equipmentSlots: player.getEquipment().equipmentSlots,
+            totalHP: player.getMaxHealth(),
+            remainingHP: player.getHealth()
+        };
+
+        Game.getInstance().emit(HudPlayerEvents.HUD_PLAYER_INFO_UPDATE, data);
+    }
 }

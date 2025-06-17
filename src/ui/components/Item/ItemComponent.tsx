@@ -1,13 +1,20 @@
+import { WereableItem } from "model/Item/WereableItem";
 import Draggable from "../Common/Draggable";
-import { InventoryItemProps } from "./contract";
+import { ItemComponentProps } from "./contract";
 
-const InventoryItem: React.FC<InventoryItemProps> = ({ itemGroup, position, dimensions, onDragEnd }) => {
+const ItemComponent: React.FC<ItemComponentProps> = ({ itemGroup, position, dimensions, onDragEnd, onRightClick }) => {
     const item = itemGroup.getItem();
     let itemStats: string[] = [];
     if(item.getStats?.()){
        itemStats = Object.keys(item.getStats());
     }
-    
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (item instanceof WereableItem && onRightClick) {
+            onRightClick(itemGroup);
+        }
+    };
     
     return (
        <Draggable 
@@ -18,12 +25,13 @@ const InventoryItem: React.FC<InventoryItemProps> = ({ itemGroup, position, dime
                 left: `${position.x}px`,
                 top: `${position.y}px`,
                 width: `${dimensions.width}px`,
-                height: `${dimensions.height}px`
+                height: `${dimensions.height}px`,
+                zIndex: 20
             }}
         >
                 <div 
                     className="flex flex-col items-center justify-center border-amber-950 border-2 rounded-sm w-full h-full group"
-                    style={{ zIndex: 10 }}
+                    onContextMenu={handleContextMenu}
                 >
                     <img 
                         src={item.getIcon()?.data.src} 
@@ -47,4 +55,4 @@ const InventoryItem: React.FC<InventoryItemProps> = ({ itemGroup, position, dime
     );
 };
 
-export default InventoryItem;
+export default ItemComponent;
