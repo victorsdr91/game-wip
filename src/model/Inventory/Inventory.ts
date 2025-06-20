@@ -1,25 +1,24 @@
 import { ItemGroup } from "model/Item/ItemGroup";
 import { InventoryProps } from "./contract";
 import { ItemFactory } from "../../factory/Item/ItemFactory";
-import { Game } from "services/Game";
-import { HudPlayerEvents, InventoryEventPayload } from "state/helpers/PlayerEvents";
+import InventoryEventsHandler from "services/EventsHandler/InventoryEventsHandler";
 
 export class Inventory {
 
     private items: Map<number, ItemGroup>;
     private itemPositions: Map<number, { x: number, y: number }>;
-    private game: Game;
     private slots: number;
     private maxWeight: number;
     private currentWeight: number;
+    private inventoryEventsHandler: InventoryEventsHandler;
 
     constructor({slots, maxWeight, items}: InventoryProps) {
-        this.game = Game.getInstance();
         this.slots = slots;
         this.maxWeight = maxWeight;
         this.items = new Map();
         this.itemPositions = new Map();
         this.currentWeight = 0;
+        this.inventoryEventsHandler = new InventoryEventsHandler({inventory: this});
 
         for (let slotIndex = 0; slotIndex < this.slots; slotIndex++) {
             this.itemPositions.set(slotIndex, {
@@ -34,9 +33,7 @@ export class Inventory {
             }
         });
 
-        this.setupEventListeners();
-
-        this.emitInventoryUpdate();
+        this.inventoryEventsHandler.initialize();
     }
 
      public addItemToSlot(itemId: number, quantity: number, slotId: number): boolean {
@@ -52,37 +49,20 @@ export class Inventory {
 
         this.items.set(slotId, new ItemGroup({ item, quantity }));
         this.currentWeight += itemWeight;
+
+        this.inventoryEventsHandler.emitInventoryUpdate();
         return true;
     }
 
-    private setupEventListeners(): void {
-        this.game.on(HudPlayerEvents.HUD_PLAYER_INVENTORY_ITEM_MOVED, (event: unknown) => {
-            const { fromSlot, toSlot } = event as { 
-                fromSlot: number;
-                toSlot: number;
-            };
-            this.updateItemPosition(fromSlot, toSlot);
-        });
+    public addItemToFirstEmptySlot(itemGroup: ItemGroup): boolean {
+        const emptySlot = this.findFirstEmptySlot();
+        if (emptySlot === null) return false;
 
-        this.game.on(HudPlayerEvents.HUD_PLAYER_INVENTORY_ITEM_DROPPED, (event: unknown) => {
-        const { fromSlot } = event as { fromSlot: number };
-        this.removeItem(fromSlot);
-        this.emitInventoryUpdate();
-    });
+        this.items.set(emptySlot, itemGroup);
+        this.inventoryEventsHandler.emitInventoryUpdate();
+        return true;
     }
 
-    public emitInventoryUpdate(): void {
-        const payload: InventoryEventPayload = {
-            slots: this.slots,
-            maxWeight: this.maxWeight,
-            currentWeight: this.currentWeight,
-            items: this.items,
-            itemPositions: this.itemPositions,
-            findFirstEmptySlot: () => { return this.findFirstEmptySlot() },
-        };
-        
-        this.game.emit(HudPlayerEvents.HUD_PLAYER_INVENTORY_UPDATE, payload);
-    }
 
     public updateItemPosition(fromSlot: number, toSlot: number): void {
         if (fromSlot === toSlot) return;
@@ -104,7 +84,7 @@ export class Inventory {
         // Importante: No necesitamos actualizar itemPositions porque las posiciones
         // están asociadas a los slots, no a los items
         
-        this.emitInventoryUpdate();
+        this.inventoryEventsHandler.emitInventoryUpdate();
     }
 
     public findFirstEmptySlot(): number | null {
@@ -118,73 +98,7 @@ export class Inventory {
 
     public removeItem(slotId: number): void {
         this.items.delete(slotId);
-        this.emitInventoryUpdate();
-    }
-
-    public addItemToFirstEmptySlot(itemGroup: ItemGroup): boolean {
-        const emptySlot = this.findFirstEmptySlot();
-        if (emptySlot === null) return false;
-
-        this.items.set(emptySlot, itemGroup);
-        this.emitInventoryUpdate();
-        return true;
-    }
-
-    private findItemSlot(itemGroup: ItemGroup): number | null {
-        for (const [slotId, group] of this.items.entries()) {
-            if (group === itemGroup) {
-                return slotId;
-            }
-        }
-        return null;
-    }
-
-    public dropItem(itemId: number): void {
-        if (this.items.has(itemId)) {
-            this.items.delete(itemId);
-            this.itemPositions.delete(itemId);
-            this.emitInventoryUpdate();
-        }
-    }
-
-    public addItem(itemId: number, quantity: number): boolean {
-        const item = ItemFactory.getItemById(itemId);
-        if (!item) return false;
-
-        // Si el item es agrupable, buscar slots con el mismo tipo de item
-        if (item.isAgruppable()) {
-            for (const [slotId, itemGroup] of this.items) {
-                if (itemGroup.getItem().getId() === itemId) {
-                    const remainingQuantity = itemGroup.addQuantity(quantity);
-                    if (remainingQuantity <= 0) {
-                        return true;
-                    }
-                    quantity = remainingQuantity; // actualizar cantidad restante
-                }
-            }
-        }
-
-        // Si llegamos aquí, necesitamos un nuevo slot
-        const emptySlot = this.findFirstEmptySlot();
-        if (emptySlot === null) return false;
-
-        return this.addItemToSlot(itemId, quantity, emptySlot);
-    }
-
-    public findItemById(itemId: number): ItemGroup | undefined {
-        this.items.forEach((itemGroup) => {
-            if(itemGroup) {
-                if(itemGroup.getItem().getId() === itemId) {
-                    return itemGroup;
-                }
-            }
-        });
-        return undefined;
-
-    }
-
-    public listItems(): (ItemGroup | null)[] {
-        return Array.from(this.items.values());
+        this.inventoryEventsHandler.emitInventoryUpdate();
     }
 
     public getCurrentWeight(): number {
@@ -194,4 +108,17 @@ export class Inventory {
     public getWeightLimit(): number {
         return this.maxWeight;
     }
+
+    public getSlots(): number {
+        return this.slots;
+    }
+
+    public getItems(): Map<number, ItemGroup> {
+        return this.items;
+    }
+
+    public getItemPositions(): Map<number, { x: number, y: number }> {
+        return this.itemPositions;
+    }
+    
 }

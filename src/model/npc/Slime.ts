@@ -1,7 +1,8 @@
-import { GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine, ActionContext, AnimationStrategy, Graphic, Text, Font, Color, TextAlign } from "excalibur";
+import { GraphicsGroup, range, SpriteSheet, Vector, Animation, Engine, AnimationStrategy, Graphic, Debug, Color } from "excalibur";
 import { AgressiveNpc } from "./AgressiveNpc";
 import { AgressiveNpcType } from "./contract";
-import { ExtendedActor } from "model/ExtendedActor/ExtendedActor";
+import { AnimationDirection, Attack } from "model/ExtendedActor/contract";
+import { AttackType, DamageType, ElementType } from "model/ExtendedActor/types/AttackType.enum";
 
 export class Slime extends AgressiveNpc {
 
@@ -21,10 +22,6 @@ export class Slime extends AgressiveNpc {
     }
 
     onInitialize() {
-      let animationMode = "idle";
-      if(this.isAttacking) {
-        animationMode = "attack";
-      }
       const spriteSheet = SpriteSheet.fromImageSource({
         image: this.sprite,
         grid: {
@@ -101,7 +98,7 @@ export class Slime extends AgressiveNpc {
     }
 
     handlePlayerAttackEvent() {
-      this.eventManager.on("player-attack-basic", ({ pos, range, direction, damage, actor}) => {
+      this.eventManager.on("player-attack", ({ pos, range, direction, damage, from}: Attack) => {
         let diff = this.pos.sub(pos);
         if (diff.distance() > range) {
           return;
@@ -112,18 +109,30 @@ export class Slime extends AgressiveNpc {
         const attackFromBottom = pos.y < this.pos.y && direction === "down";
   
         if (attackFromRight || attackFromLeft || attackFromBottom || attackFromTop) {
-          this.receiveDamageFromPlayer(damage, actor);
+          this.receiveDamageFromPlayer(damage, from);
         }
       });
     }
 
     handleAttack() {
-      const eventData = {
-        actor: this,
+      const eventData: Attack = {
+        from: this,
         pos: this.pos,
         damage: this.calculateDamage(),
+        direction: AnimationDirection.UP,
+        damageType: DamageType.SINGLE,
+        type: AttackType.PHYSICAL,
+        element: ElementType.NORMAL,
+        range: 20
+      };
+      if(this.isAttacking) {
+        Debug.drawCircle(this.pos, eventData.range, {
+            color: Color.Transparent,
+            strokeColor: Color.Green,
+            width: 0.5
+        });
       }
-      this.eventManager.emit("npc-attack-basic", eventData);
+      this.eventManager.emit("npc-attack", eventData);
       this.attacking = false;
     }
 

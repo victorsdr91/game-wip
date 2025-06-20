@@ -1,5 +1,5 @@
 import { Actor, Color, EventEmitter, Font, Text, TextAlign, Vector } from "excalibur";
-import { ActorStats, animationDirection, animationMode, ExtendedActorType } from "./contract";
+import { ActorStats, AnimationDirection, AnimationMode, ExtendedActorType } from "./contract";
 
 export abstract class ExtendedActor extends Actor {
   protected nameTextGraphic: Text;
@@ -15,8 +15,8 @@ export abstract class ExtendedActor extends Actor {
   protected originalPosition: Vector;
   protected originalSpeed: number;
 
-  protected movementMode: animationMode = animationMode.IDLE;
-  protected direction: animationDirection = animationDirection.DOWN;
+  protected movementMode: AnimationMode = AnimationMode.IDLE;
+  protected direction: AnimationDirection = AnimationDirection.DOWN;
 
   protected isAttacking: boolean = false;
   protected isRunning: boolean = false;
@@ -76,7 +76,7 @@ export abstract class ExtendedActor extends Actor {
     this.target = undefined;
   }
 
-  protected receiveDamage (damage: number, actor: ExtendedActor): number {
+  public receiveDamage (damage: number, actor: ExtendedActor): number {
     const damageReceived = damage - this.stats.f_defense*this.stats.level*0.5;
     const totalDamage = damageReceived > 0 ? damageReceived : 0;
     this.setHealth(this.getHealth() - totalDamage);
@@ -88,17 +88,25 @@ export abstract class ExtendedActor extends Actor {
     return this.getHealth();
   }
 
-  protected move(direction: animationDirection, mode: animationMode): void {
-    this.movementMode = this.movementMode !== animationMode.RUN ? mode : this.movementMode;
+  protected setDirection(direction: AnimationDirection) {
     this.direction = direction;
-    const isXMovement = this.direction === animationDirection.RIGHT || this.direction === animationDirection.LEFT;
+  }
+
+  public getDirection(): AnimationDirection {
+    return structuredClone(this.direction);
+  }
+
+  protected move(direction: AnimationDirection, mode: AnimationMode): void {
+    this.movementMode = this.movementMode !== AnimationMode.RUN ? mode : this.movementMode;
+    this.setDirection(direction);
+    const isXMovement = this.direction === AnimationDirection.RIGHT || this.direction === AnimationDirection.LEFT;
     let x = 0;
     let y = 0;
     if(isXMovement) {
-      x = direction === animationDirection.RIGHT ? this.movementSpeed : -this.movementSpeed;
+      x = direction === AnimationDirection.RIGHT ? this.movementSpeed : -this.movementSpeed;
     }
     else {
-      y = direction === animationDirection.DOWN ? this.movementSpeed : -this.movementSpeed;
+      y = direction === AnimationDirection.DOWN ? this.movementSpeed : -this.movementSpeed;
     }
 
     this.vel = new Vector(x, y);

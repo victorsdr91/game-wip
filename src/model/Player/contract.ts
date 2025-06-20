@@ -1,5 +1,5 @@
-import { Sprite, Animation, Vector, EventEmitter } from "excalibur";
-import { ActorStats } from "../ExtendedActor/contract";
+import { Sprite, Animation, Vector, EventEmitter, Actor } from "excalibur";
+import { ActorStats, AnimationDirection } from "../ExtendedActor/contract";
 import { InventoryProps } from "model/Inventory/contract";
 import { SlotType } from "./types/SlotType.enum";
 import { ItemGroup } from "model/Item/ItemGroup";

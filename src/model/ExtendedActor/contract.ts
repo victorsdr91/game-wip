@@ -1,4 +1,7 @@
 import { Vector, CollisionType, CollisionGroup, EventEmitter } from "excalibur";
+import { AttackType, DamageType, ElementType } from "./types/AttackType.enum";
+import { ExtendedActor } from "./ExtendedActor";
+
 
 export interface ActorStats {
     level: number;
@@ -28,7 +31,7 @@ export interface ExtendedActorType {
     eventEmitter: EventEmitter;
 }
 
-export enum animationMode {
+export enum AnimationMode {
     IDLE = "idle",
     WALK = "walk",
     RUN = "run",
@@ -36,7 +39,7 @@ export enum animationMode {
     DIE = "die"
 }
 
-export enum animationDirection {
+export enum AnimationDirection {
     UP = "up",
     DOWN = "down",
     LEFT = "left",
@@ -44,6 +47,18 @@ export enum animationDirection {
 }
 
 export interface useAnimationInput {
-    mode: animationMode,
-    direction: animationDirection,
+    mode: AnimationMode,
+    direction: AnimationDirection,
+}
+
+export interface Attack {
+    from: ExtendedActor;
+    pos: Vector;
+    direction: AnimationDirection;
+    damageType: DamageType;
+    type: AttackType;
+    element: ElementType;
+    range: number;
+    damage: number;
+    effect?: () => void;
 }
