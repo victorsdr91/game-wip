@@ -2,7 +2,7 @@ import React, { FC, useState } from "react";
 import { ItemComponentListProps } from "./contract";
 import { Game } from "services/Game";
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";
-import ItemComponent from "../Item/ItemComponent";
+import ItemComponent from "../../Item/ItemComponent";
 import DropItemPopup from "./DropItemPopUp";
 
 

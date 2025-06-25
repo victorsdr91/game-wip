@@ -1,6 +1,6 @@
 import React, { createContext, useContext, FC, ReactNode } from 'react';
 import { ItemGroup } from 'model/Item/ItemGroup';
-import { Inventory } from 'ui/components/PlayerInventory/contract';
+import { Inventory } from 'ui/components/PlayerHud/PlayerInventory/contract';
 import { HudPlayerEvents } from 'state/helpers/PlayerEvents';
 import { SlotType } from 'model/Player/types/SlotType.enum';
 import { useGameEvent } from 'ui/clientState/hooks/useGameEvent/useGameEvent';

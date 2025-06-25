@@ -48,3 +48,12 @@ html,body {
     top: 50%;
     transform: translate(-50%, -50%);
 }
+
+.blink {
+    animation: blinker .75s linear infinite;
+}
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
