@@ -41,6 +41,7 @@ export class KeyboardConfig {
     public bindKeys(engine: Engine) {
         this.bindControls(engine);
         this.bindShortCuts(engine);
+        this.setUpEscapeControl(engine);
     }
 
     public bindControls(engine: Engine) {
@@ -66,6 +67,13 @@ export class KeyboardConfig {
             }
             );
     }
+
+    public setUpEscapeControl (engine: Engine) {
+    if(engine.input.keyboard.wasPressed(Keys.Escape) && engine.screen.isFullscreen) {
+      engine.screen.exitFullscreen();
+      engine.screen.applyResolutionAndViewport();
+    }
+  }
 
     public getControlMap(): KeyMap {
         return this.controlMap;

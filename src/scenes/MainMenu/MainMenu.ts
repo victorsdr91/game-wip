@@ -1,4 +1,4 @@
-import { Engine, Scene } from "excalibur";
+import { DisplayMode, Engine, Scene } from "excalibur";
 import { Button } from "./ui/Button";
 import { GameText } from "./ui/GameText";
 import { Background } from "./ui/Background";
@@ -72,8 +72,10 @@ export class MainMenu extends Scene {
     private setFullScreen(engine: Engine) {
         if(engine.screen.isFullscreen) {
             engine.screen.exitFullscreen();
+            engine.screen.applyResolutionAndViewport();
         } else {
             engine.screen.enterFullscreen("app");
+            engine.screen.applyResolutionAndViewport();
         }
     }
 

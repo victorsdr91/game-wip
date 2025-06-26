@@ -1,7 +1,7 @@
 import { CollisionGroupManager, ImageSource } from "excalibur";
 import { Npc } from "./Npc";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
-import { RewardType } from "../../scenes/Level1/contract";
+import { RewardType } from "../../scenes/Test/contract";
 import { AgressiveNpcType } from "./contract";
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";
 

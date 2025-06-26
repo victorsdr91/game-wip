@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import HudWrapper from './components/Hud/HudWrapper';
 import PlayerNameplate from './components/PlayerHud/PlayerNameplate/PlayerNameplate';
 import PlayerDeadPopup from './components/PlayerHud/PlayerDeadPopup/PlayerDeadPopup';
@@ -8,44 +8,21 @@ import PlayerProfile from './components/PlayerHud/PlayerInformation/PlayerProfil
 import { InventoryProvider } from './clientState/providers/PlayerItemHandler/InventoryProvider';
 import Dialogue from './components/Dialogue/Dialogue';
 
-const textsMocks = [
-  {
-    actor: "Actor 1",
-    texts: [
-      "Hola, como estás <span style='color:red'>Actor 2</span>, sin color", "Que tal?, vamos a meter un texto de mas de dos lineas, a ver como queda, no quiero que se vea feo. Espero que no pase. Se verá bonito? yo creo que es demasiado texto."
-    ],
-  },
-  {
-    actor: "Actor 2",
-    texts: [
-      "Muy bien, y tu?"
-    ],
-  },
-  {
-    actor: "Actor 1",
-    texts: [
-      "Bien gracias"
-    ],
-  },
-  {
-    actor: "Actor 3",
-    texts: [
-      "Que hacemos aqui?"
-    ],
-  },
-];
+
 
 
 export const UI = () => {
+  const [isPlayerInteracting, setIsPlayerInteracting] = useState<boolean>(false);
+
   return (
     <PlayerInfoProvider>
       <InventoryProvider>
-        <HudWrapper>
+        <HudWrapper setIsPlayerInteracting={setIsPlayerInteracting}>
           <PlayerNameplate />
           <PlayerInventory />
           <PlayerProfile />
+          <Dialogue isPlayerInteracting={isPlayerInteracting}/>
         </HudWrapper>
-        <Dialogue conversation={textsMocks} onFinishConversation={() => { console.log("conversation end")}}/>
         <DevDisclaimer />
         <ControlsHelp />
         <PlayerDeadPopup />

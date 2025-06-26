@@ -21,6 +21,10 @@ export enum HudPlayerEvents {
     HUD_PLAYER_DROP_ITEM_CONFIRM = 'hud_player_drop_item_confirm'
 }
 
+export enum GamePlayerEvents {
+    PLAYER_NPC_INTERACTION_START = 'player:npc:interaction:start',
+}
+
 export interface InventoryEventPayload {
     slots: number;
     maxWeight: number;

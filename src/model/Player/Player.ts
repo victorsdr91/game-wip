@@ -66,6 +66,7 @@ export class Player extends ExtendedActor {
 
     keyCallbackMap.shortcuts.set("bag", () => { this.playerEventHandler.toggleInventory() });
     keyCallbackMap.shortcuts.set("player", () => { this.playerEventHandler.toggleProfile() });
+    keyCallbackMap.shortcuts.set("interact", () => { this.playerEventHandler.interact() });
 
     return keyCallbackMap;
   }

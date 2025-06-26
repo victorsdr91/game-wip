@@ -1,7 +1,7 @@
 import { SpriteSheet, Animation, range, AnimationStrategy } from "excalibur";
 import { PlayerResources } from "../../resources";
 import { AttackPlayerAnimations, PlayerAnimations } from "./contract";
-import { animationDirection, useAnimationInput } from "../ExtendedActor/contract";
+import { AnimationDirection, useAnimationInput } from "../ExtendedActor/contract";
 
 
 export class PlayerAnimation {
@@ -110,7 +110,7 @@ export class PlayerAnimation {
         return this.attackAnimations;
     }
 
-    public useAttackAnimation(direction: animationDirection, attackMode: number): Animation {
+    public useAttackAnimation(direction: AnimationDirection, attackMode: number): Animation {
         return this.attackAnimations[direction][attackMode];
     }
 

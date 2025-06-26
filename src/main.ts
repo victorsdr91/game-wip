@@ -1,9 +1,9 @@
 import { loader } from "./resources";
-import { agressiveNpcType, spriteSize, worldInfoType } from "./scenes/Level1/contract";
+import { agressiveNpcType, PacificNpcType, spriteSize, worldInfoType } from "./scenes/Test/contract";
 import { calculateExPixelConversion } from "./ui/utils/pixelRatioUtils";
-import { PacificNpcType } from "./model/npc/contract";
 import { playerInfo } from "./mocks/player";
 import { Game } from "services/Game";
+import { pacificNpcMock } from "./mocks/pacificNpc";
 
 const generateMonster = (x: number, y: number): agressiveNpcType => {
   return { 
@@ -45,10 +45,13 @@ for(let i = 0; i < 5; i++) {
   ));
 }
 
+const pacificNPCs =new Array<PacificNpcType>();
+pacificNPCs.push(pacificNpcMock);
+
 const worldInfo: worldInfoType = {
   playerInfo,
   agressiveNPCs,
-  pacificNPCs: new Array<PacificNpcType>(),
+  pacificNPCs,
 };
 
 export const game = Game.getInstance();
