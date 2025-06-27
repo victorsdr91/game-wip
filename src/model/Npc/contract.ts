@@ -1,6 +1,7 @@
 import { CollisionGroup, CollisionType, EventEmitter, ImageSource, Vector } from "excalibur";
-import { RewardType } from "../../scenes/Level1/contract";
+import { RewardType } from "../../scenes/Test/contract";
 import { ActorStats } from "../ExtendedActor/contract";
+import { EventMap } from "model/EventManager/contract";
 
 export interface NpcType {
     name: string;
@@ -19,6 +20,7 @@ export interface NpcType {
     stats: ActorStats;
     currentHealth?: number;
     maxHealth: number;
+    events?: EventMap;
     eventEmitter: EventEmitter;
 }
 
@@ -38,8 +40,8 @@ export interface PacificNpcType {
     stats: ActorStats;
     currentHealth?: number;
     maxHealth: number;
+    events?: EventMap;
     eventEmitter: EventEmitter;
-    dialogue: string[];
 }
 
 export interface AgressiveNpcType {
@@ -58,6 +60,7 @@ export interface AgressiveNpcType {
     stats: ActorStats;
     currentHealth?: number;
     maxHealth: number;
+    events?: EventMap;
     eventEmitter: EventEmitter;
     rewards: RewardType;
 }

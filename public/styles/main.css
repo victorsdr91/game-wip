@@ -48,3 +48,19 @@ html,body {
     top: 50%;
     transform: translate(-50%, -50%);
 }
+
+.blink {
+    animation: blinker .75s linear infinite;
+}
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+.imageStroke {
+    -webkit-filter: drop-shadow(2px 2px 0 white)
+                    drop-shadow(-2px -2px 0 white);
+    filter: drop-shadow(2px 2px 0 white) 
+            drop-shadow(-2px -2px 0 white);
+}

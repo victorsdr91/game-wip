@@ -11,7 +11,7 @@ export abstract class ExtendedActor extends Actor {
   protected currentHealth: number;
   protected maxHealth: number;
   protected target: ExtendedActor | undefined;
-  protected eventManager: EventEmitter;
+  protected eventEmitter: EventEmitter;
   protected originalPosition: Vector;
   protected originalSpeed: number;
 
@@ -33,7 +33,7 @@ export abstract class ExtendedActor extends Actor {
     this.name = name;
     this.nameTextGraphic = new Text({ text: this.name, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
     this.stats = Object.assign({}, stats);
-    this.eventManager = eventEmitter;
+    this.eventEmitter = eventEmitter;
     this.maxHealth = maxHealth;
     this.currentHealth = currentHealth || maxHealth;
     this.originalPosition = pos;

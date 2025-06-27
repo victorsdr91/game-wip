@@ -1,6 +1,6 @@
 import { Vector } from "excalibur";
 import { InventoryItem } from "model/Inventory/contract";
-import { playerInfoType } from "scenes/Level1/contract";
+import { playerInfoType } from "scenes/Test/contract";
 
 const playerItems: Map<number, InventoryItem> = new Map<number, InventoryItem>();
 playerItems.set(0, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
@@ -16,7 +16,7 @@ playerItems.set(25, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and 
 export const playerInfo: playerInfoType = {
   nickname: "TrianMARC",
   position: new Vector(123, 485),
-  zIndex: 8,
+  zIndex: 10,
   currentHealth: 128,
   maxHealth: 128,
   progress: {

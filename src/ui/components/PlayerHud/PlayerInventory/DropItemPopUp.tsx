@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
-import GameWindow from "../Common/GameWindow"
-import { Coordinates } from "../Common/contract";
+import GameWindow from "../../Common/GameWindow"
+import { Coordinates } from "../../Common/contract";
 
 interface DropItemPopUpProps {
     callback: (fromSlot: number) => void;

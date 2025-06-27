@@ -1,7 +1,7 @@
 import { SlotValidator } from "model/Item/SlotValidator";
 import { WereableItem } from "model/Item/WereableItem";
 import { Player } from "model/Player/Player";
-import { EquipItemPayload, HudPlayerEvents, UnequipItemPayload } from "state/helpers/PlayerEvents";
+import { EquipItemPayload, GamePlayerEvents, HudPlayerEvents, UnequipItemPayload } from "state/helpers/PlayerEvents";
 import ex, { EventEmitter } from "excalibur";
 import { ActorStats, Attack } from "model/ExtendedActor/contract";
 import EventsHandler from "./EventsHandler";
@@ -55,9 +55,10 @@ class PlayerEventsHandler extends EventsHandler {
     }
 
     handleNpcAttack() {
-        this.levelEventHandler.on("npc-attack", ({ pos, range, damage, from}) => {
+         const subscription = this.levelEventHandler.on("npc-attack", ({ pos, range, damage, from}) => {
             let diff = this.player.pos.sub(pos);
             if (diff.distance() > range) {
+                subscription.close();
                 return;
             }
             const healthAfterDamage = this.player.receiveDamage(damage, from);
@@ -66,12 +67,12 @@ class PlayerEventsHandler extends EventsHandler {
     }
 
     handleMonsterRewards() {
-        this.levelEventHandler.on("npc-aggresive-died", ({ actor, rewards}) => {
+        const subscription = this.levelEventHandler.on("npc-aggresive-died", ({ actor, rewards}) => {
             if(this.player.name === actor.name) {
-            if(rewards.exp) {
-                this.player.updateExp(rewards.exp);
-                
-            }
+                if(rewards.exp) {
+                    this.player.updateExp(rewards.exp);
+                    subscription.close();
+                }
             }
         });
     }
@@ -120,6 +121,11 @@ class PlayerEventsHandler extends EventsHandler {
 
     private toggleHUD(event: HudPlayerEvents) {
         this.gameHandler.emit(event, {});
+    }
+
+    interact() {
+         this.levelEventHandler.emit(GamePlayerEvents.PLAYER_NPC_INTERACTION_START, {pos: this.player.pos, direction: this.player.getDirection() });
+         console.log("player looking for interaction");
     }
 }
 

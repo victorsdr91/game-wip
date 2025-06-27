@@ -1,5 +1,5 @@
 import { SlotType } from "model/Player/types/SlotType.enum";
-import ItemComponent from "../Item/ItemComponent";
+import ItemComponent from "../../Item/ItemComponent";
 import { EquipmentSlotsType, EquipmentType } from "model/Player/contract";
 import { ItemGroup } from "model/Item/ItemGroup";
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";

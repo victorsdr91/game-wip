@@ -1,5 +1,5 @@
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";
-import GameWindow from "../Common/GameWindow";
+import GameWindow from "../../Common/GameWindow";
 import usePlayerInfo from "ui/clientState/providers/PlayerInfoProvider/usePlayerInfo";
 import SlotsGrid from "./SlotsGrid";
 import EquipmentInSlots from "./EquipmentInSlots";

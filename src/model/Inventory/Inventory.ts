@@ -58,7 +58,7 @@ export class Inventory {
         const emptySlot = this.findFirstEmptySlot();
         if (emptySlot === null) return false;
 
-        this.items.set(emptySlot, itemGroup);
+        this.addItemToSlot(itemGroup.getItem().getId(), itemGroup.getQuantity(), emptySlot);
         this.inventoryEventsHandler.emitInventoryUpdate();
         return true;
     }
@@ -97,7 +97,9 @@ export class Inventory {
     }
 
     public removeItem(slotId: number): void {
+        const itemGroup: ItemGroup | undefined = this.items.get(slotId);
         this.items.delete(slotId);
+        this.currentWeight -= itemGroup?.getWeight() || 0;
         this.inventoryEventsHandler.emitInventoryUpdate();
     }
 

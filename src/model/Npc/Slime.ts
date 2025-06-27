@@ -58,7 +58,7 @@ export class Slime extends AgressiveNpc {
       this.graphics.add("idle-down", this.animations.idle.down);
       this.animations.die && this.graphics.add("die", this.animations.die);
       (this.animations.die as Animation).events.on("end", () => { 
-        this.eventManager.emit("npc-aggresive-died", { rewards: this.rewards, actor: this.target});
+        this.eventEmitter.emit("npc-aggresive-died", { npc: this, rewards: this.rewards, actor: this.target});
         this.actions.clearActions();
         setTimeout(() => { this.kill(); }, 1000*10);
       });
@@ -98,17 +98,13 @@ export class Slime extends AgressiveNpc {
     }
 
     handlePlayerAttackEvent() {
-      this.eventManager.on("player-attack", ({ pos, range, direction, damage, from}: Attack) => {
+      this.eventEmitter.on("player-attack", ({ pos, range, direction, damage, from}: Attack) => {
         let diff = this.pos.sub(pos);
         if (diff.distance() > range) {
           return;
         }
-        const attackFromRight = pos.x < this.pos.x && direction === "right";
-        const attackFromLeft = pos.x > this.pos.x && direction === "left";
-        const attackFromTop = pos.y > this.pos.y && direction === "up";
-        const attackFromBottom = pos.y < this.pos.y && direction === "down";
   
-        if (attackFromRight || attackFromLeft || attackFromBottom || attackFromTop) {
+        if (this.hasDirectInteraction(pos, direction)) {
           this.receiveDamageFromPlayer(damage, from);
         }
       });
@@ -132,7 +128,7 @@ export class Slime extends AgressiveNpc {
             width: 0.5
         });
       }
-      this.eventManager.emit("npc-attack", eventData);
+      this.eventEmitter.emit("npc-attack", eventData);
       this.attacking = false;
     }
 

@@ -1,15 +1,16 @@
 import { CollisionType, Engine, EventEmitter, Scene, Vector } from "excalibur";
 import { playerInfoType, worldInfoType } from "./contract";
 import { Resources, worldLoader } from "./resources";
-import { PacificNpc } from "../../model/npc/PacificNpc";
-import { AgressiveNpc } from "../../model/npc/AgressiveNpc";
-import { Slime } from "../../model/npc/Slime";
+import { PacificNpc } from "../../model/Npc/PacificNpc";
+import { AgressiveNpc } from "../../model/Npc/AgressiveNpc";
+import { Slime } from "../../model/Npc/Slime";
 import { Player } from "../../model/Player/Player";
 import { Hud } from "../../ui/Hud";
 import { PlayerProps } from "../../model/Player/contract";
+import { EventManager } from "model/EventManager/EventManager";
 
 
-export class Level extends Scene {
+export class TestLevel extends Scene {
     private _playerInfo: playerInfoType;
     private hud: Hud;
     private player: Player | undefined;
@@ -33,14 +34,14 @@ export class Level extends Scene {
                 new PacificNpc({
                     name: npc.name,
                     pos: npc.pos,
-                    sprite: Resources[npc.sprite],
                     spriteSize: npc.spriteSize,
-                    dialogue: npc.dialogue || [""],
+                    sprite: npc.sprite,
+                    events: npc.events,
                     collisionType: CollisionType.Fixed,
                     stats: npc.stats,
                     currentHealth: npc.currentHealth,
                     maxHealth: npc.maxHealth,
-                    eventEmitter: this.eventEmitter,
+                    eventEmitter: this.events,
                 })
             );
         });
@@ -53,18 +54,28 @@ export class Level extends Scene {
                     spriteSize: npc.spriteSize,
                     sprite: npc.sprite,
                     collisionType: CollisionType.Active,
+                    events: npc.events,
                     stats: npc.stats,
                     currentHealth: npc.currentHealth,
                     maxHealth: npc.maxHealth,
                     rewards: npc.rewards || { exp: 0 },
-                    eventEmitter: this.eventEmitter,
+                    eventEmitter: this.events,
                 });
                 this.agressiveNpcs.push(npcToPush);
             }
         });
+
+        this.events.on('npc-agressive-died', (event: unknown) => {
+            const { npc } = event as { npc: AgressiveNpc };
+            setTimeout(() => { 
+                console.log(npc.name + "is regenerating");
+                this.add(npc);
+            }, 20000);
+        });
     }
 
     onInitialize(engine: Engine): void {
+        EventManager.levelEventEmitter = this.eventEmitter;
         engine.start(worldLoader).then(() => {
             Resources.Level1Map.addToScene(this);
         });
@@ -89,7 +100,7 @@ export class Level extends Scene {
             inventory: this._playerInfo.inventory,
             equipment: this._playerInfo.equipment,
             stats: this._playerInfo.stats,
-            eventEmitter: this.eventEmitter,
+            eventEmitter: this.events,
             currentHealth: this._playerInfo.currentHealth,
             maxHealth: this._playerInfo.maxHealth,
         };

@@ -1,8 +1,9 @@
 import { useGameEvent } from 'ui/clientState/hooks/useGameEvent/useGameEvent';
 import React from 'react';
 import { GameEvents } from 'state/helpers/GameEvents';
+import keyboard from "../../../../public/config/keyboard.json";
 
-const HudWrapper = ({ children }) => {
+const HudWrapper = ({ children, setIsPlayerInteracting }) => {
     const [ showHud, setShowHud ] = React.useState(false);
 
     useGameEvent({
@@ -10,10 +11,22 @@ const HudWrapper = ({ children }) => {
         callback: ({show}) => setShowHud(show),
     });
 
-    const classList = `font-[PublicPixel] excalibur-scale absolute text-amber-200 text-xs ${showHud ? 'show' : 'hide'}`;
+    const onKeyDown = (event) => {
+        event.preventDefault();
+        if(event.code === keyboard.shortcuts.interact) {
+            setIsPlayerInteracting(true);
+        }
+    }
+
+    const onKeyUp = (event) => {
+        if(event.code === keyboard.shortcuts.interact) {
+            event.preventDefault();
+            setIsPlayerInteracting(false);
+        }
+    }
 
     return (
-    <div id="hud" className={ classList }>
+    <div id="hud" className={ `font-[PublicPixel] excalibur-scale absolute text-amber-200 text-xs ${showHud ? 'show' : 'hide'} h-svh w-full` } onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}>
         {children}
     </div>);
 };

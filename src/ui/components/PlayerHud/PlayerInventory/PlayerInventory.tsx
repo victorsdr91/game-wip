@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { HudPlayerEvents } from "state/helpers/PlayerEvents";
 import { ItemGroup } from "model/Item/ItemGroup";
-import GameWindow from "../Common/GameWindow";
+import GameWindow from "../../Common/GameWindow";
 import InventoryGrid from "./InventoryGrid";
 import InventoryFooter from "./InventoryFooter";
 import { WereableItem } from "model/Item/WereableItem";

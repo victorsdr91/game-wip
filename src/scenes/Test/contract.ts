@@ -1,9 +1,9 @@
 import { Vector } from "excalibur";
 import { ActorStats } from "../../model/ExtendedActor/contract";
 import { EquipmentPropsType, PlayerProgressType } from "../../model/Player/contract";
-import { PacificNpcType } from "../../model/npc/contract";
 import { InventoryProps } from "model/Inventory/contract";
 import { ItemProps } from "model/Item/types/ItemTypes";
+import { EventMap } from "model/EventManager/contract";
 
 export interface playerInfoType {
     equipment?: EquipmentPropsType;
@@ -33,6 +33,7 @@ export interface agressiveNpcType {
     currentHealth?: number;
     maxHealth: number;
     rewards: RewardType;
+    events?: EventMap;
 }
 
 export interface HealthType {
@@ -53,13 +54,33 @@ export interface NPC {
         y: number,
         z?: number
     };
-    health: number;
+    currentHealth?: number;
+    maxHealth: number;
     sprite: string;
+    events?: EventMap;
     spriteSize: {
         width: spriteSize;
         height: spriteSize;
     }
-    dialogue?: Array<string>;
+    rewards?: RewardType;
+    stats: ActorStats;    
+}
+
+export interface PacificNpcType {
+    name: string;
+    pos: {
+        x: number,
+        y: number,
+        z?: number
+    };
+    currentHealth?: number;
+    maxHealth: number;
+    sprite: string;
+    events?: EventMap;
+    spriteSize: {
+        width: spriteSize;
+        height: spriteSize;
+    }
     rewards?: RewardType;
     stats: ActorStats;    
 }

@@ -27,4 +27,5 @@ interface keyboardSkill {
 interface keyboardShortcuts {
     bag: string;
     player: string;
+    interact: string;
 }
