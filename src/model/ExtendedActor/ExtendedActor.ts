@@ -1,28 +1,23 @@
-import { Actor, Color, EventEmitter, Font, Text, TextAlign, Vector } from "excalibur";
-import { ActorStats, AnimationDirection, AnimationMode, ExtendedActorType } from "./contract";
+import { Actor, CollisionGroup, Color, EventEmitter, Font, Text, TextAlign, Vector } from "excalibur";
+import { ExtendedActorType } from "./contract";
+import HealthComponent from "services/systems/Health/components/HealthComponent";
+import StatsComponent from "services/systems/common/components/StatsComponent";
+import { ExperienceComponent } from "services/systems/common/components/ExperienceComponent";
+import { MovementComponent } from "services/systems/Movement/components/MovementComponent";
+import { MovementDirection, MovementMode } from "services/systems/Movement/types/movement.enum";
+import { StatsEnum } from "services/systems/common/components/types/stats.enum";
 
 export abstract class ExtendedActor extends Actor {
   protected nameTextGraphic: Text;
 
-  protected stats: ActorStats;
-  protected speed: number = 16;
-  protected movementSpeed: number = 0;
-  protected frameSpeed: number = 200; // ms
-  protected currentHealth: number;
-  protected maxHealth: number;
-  protected target: ExtendedActor | undefined;
-  protected eventEmitter: EventEmitter;
-  protected originalPosition: Vector;
-  protected originalSpeed: number;
+  protected stats: StatsComponent;
+  protected health: HealthComponent;
+  protected experience: ExperienceComponent;
+  protected movement: MovementComponent;
 
-  protected movementMode: AnimationMode = AnimationMode.IDLE;
-  protected direction: AnimationDirection = AnimationDirection.DOWN;
+  readonly _group: CollisionGroup;
 
-  protected isAttacking: boolean = false;
-  protected isRunning: boolean = false;
-  protected isDead: boolean;
-
-  constructor({ name, pos, width, height, collisionType, collisionGroup, stats, maxHealth, currentHealth, eventEmitter}: ExtendedActorType) {
+  constructor({ name, pos, width, height, collisionType, collisionGroup, stats, maxHealth, currentHealth}: ExtendedActorType) {
     super({
       pos,
       width,
@@ -32,88 +27,61 @@ export abstract class ExtendedActor extends Actor {
     });
     this.name = name;
     this.nameTextGraphic = new Text({ text: this.name, font: new Font({size: 8, color: Color.White, textAlign: TextAlign.Center})});
-    this.stats = Object.assign({}, stats);
-    this.eventEmitter = eventEmitter;
-    this.maxHealth = maxHealth;
-    this.currentHealth = currentHealth || maxHealth;
-    this.originalPosition = pos;
-    this.originalSpeed = this.speed * this.stats.speed;
-    this.isDead = this.currentHealth <= 0;
-  }
-
-  public setHealth(health: number) {
-    const maxHealth =  this.getMaxHealth();
-    if(health >= maxHealth) {
-      this.currentHealth = maxHealth;
-    } else if(health <= 0) {
-      this.currentHealth = 0;
-    } else {
-      this.currentHealth = health;
+    this.stats = new StatsComponent();
+    for(const [key, value] of Object.entries(stats)) {
+      this.stats.setStat(StatsEnum[key as keyof typeof StatsEnum], value);
     }
+    this.movement = new MovementComponent(16 * this.stats.getStat(StatsEnum.speed), pos);
+    this.experience = new ExperienceComponent();
+    this.experience.level = stats.level;
+    this.health = new HealthComponent();
+    this.health.maxHealth = maxHealth;
+    this.health.health = currentHealth || maxHealth;
+
+    this._group = collisionGroup;
+
+    this.addComponent(this.stats);
+    this.addComponent(this.health);
+    this.addComponent(this.experience);
+    this.addComponent(this.movement);
   }
 
-  public getHealth(): number {
-    return this.currentHealth;
-  }
-
-  public getStats(): ActorStats {
+  public getStats(): StatsComponent {
     return this.stats;
   }
 
+  public getExperience(): ExperienceComponent {
+    return this.experience;
+  }
+
   public getMaxHealth(): number {
-    return this.maxHealth;
+    return this.health.maxHealth;
   }
 
-  protected returnToOriginalPosition(): void {
-      this.actions.moveTo(this.originalPosition, this.speed*this.stats.speed);
+  public getHealth(): number {
+    return this.health.health;
   }
 
-  protected setTarget(actor: ExtendedActor): void {
-    this.target = actor;
+  protected move(direction: MovementDirection, mode: MovementMode): void {
+    this.setMovementDirection(direction);
+    this.setMovementMode(mode);
+    this.movement.speed = this.movement.baseSpeed * this.stats.getStat(StatsEnum.speed);
   }
 
-  protected removeTarget(): void {
-    this.target = undefined;
+  protected setMovementDirection(direction: MovementDirection) {
+    this.movement.direction = direction;
   }
 
-  public receiveDamage (damage: number, actor: ExtendedActor): number {
-    const damageReceived = damage - this.stats.f_defense*this.stats.level*0.5;
-    const totalDamage = damageReceived > 0 ? damageReceived : 0;
-    this.setHealth(this.getHealth() - totalDamage);
-    
-    if(this.getHealth() <= 0) {
-      this.die();
-    }
-
-    return this.getHealth();
+  protected setMovementMode(mode: MovementMode) {
+    this.movement.mode = mode;
   }
 
-  protected setDirection(direction: AnimationDirection) {
-    this.direction = direction;
+  public getDirection(): MovementDirection {
+    return this.movement.direction;
   }
 
-  public getDirection(): AnimationDirection {
-    return structuredClone(this.direction);
-  }
-
-  protected move(direction: AnimationDirection, mode: AnimationMode): void {
-    this.movementMode = this.movementMode !== AnimationMode.RUN ? mode : this.movementMode;
-    this.setDirection(direction);
-    const isXMovement = this.direction === AnimationDirection.RIGHT || this.direction === AnimationDirection.LEFT;
-    let x = 0;
-    let y = 0;
-    if(isXMovement) {
-      x = direction === AnimationDirection.RIGHT ? this.movementSpeed : -this.movementSpeed;
-    }
-    else {
-      y = direction === AnimationDirection.DOWN ? this.movementSpeed : -this.movementSpeed;
-    }
-
-    this.vel = new Vector(x, y);
-  }
-
-  protected die(): void {
-    this.isDead = true;
+  public getLevel(): number {
+    return this.experience.level;
   }
 
   public equals(actor: ExtendedActor): boolean {

@@ -9,6 +9,7 @@ const PlayerInfoProvider = ({children}) => {
   const [nickname, setNickname] = useState('Player');
   const [stats, setStats] = useState<ActorStats>(defaultStats);
   const [level, setLevel] = useState<number>(1);
+  const [experience, setExperience] = useState<number>(1);
   const [equipment, setEquipment] = useState<EquipmentType>({});
   const [equipmentSlots, setEquipmentSlots] = useState<EquipmentSlotsType>(defaultEquipmentSlots);
   const [remainingHP, setRemainingHP] = useState(50);
@@ -16,9 +17,10 @@ const PlayerInfoProvider = ({children}) => {
   const [isDead, setIsDead] = useState(false);
   const [isDeadPopupCallback, setIsDeadPopupCallback] = useState<() => void>(() => {});
 
-  const handlePlayerInfoUpdate = useCallback(({ nickname, stats, equipment, equipmentSlots, remainingHP, totalHP }: PlayerInfo) => {
+  const handlePlayerInfoUpdate = useCallback(({ nickname, stats, level, experience, equipment, equipmentSlots, remainingHP, totalHP }: PlayerInfo) => {
         setNickname(nickname);
-        setLevel(stats.level);
+        setLevel(level);
+        setExperience(experience);
         setStats({ ...stats});
         setEquipment(equipment);
         setEquipmentSlots(equipmentSlots);
@@ -62,6 +64,7 @@ const PlayerInfoProvider = ({children}) => {
       {
         nickname,
         level,
+        experience,
         stats,
         equipment,
         equipmentSlots,

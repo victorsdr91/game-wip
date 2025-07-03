@@ -1,8 +1,9 @@
-import { Sprite, Animation, Vector, EventEmitter, Actor } from "excalibur";
-import { ActorStats, AnimationDirection } from "../ExtendedActor/contract";
+import { Sprite, Animation, Vector } from "excalibur";
+import { ActorStats } from "../ExtendedActor/contract";
 import { InventoryProps } from "model/Inventory/contract";
 import { SlotType } from "./types/SlotType.enum";
 import { ItemGroup } from "model/Item/ItemGroup";
+import { Skill } from "services/systems/Combat/types/skill.type";
 
 export interface PlayerProps {
   pos: Vector;
@@ -11,9 +12,9 @@ export interface PlayerProps {
   stats: ActorStats;
   inventory: InventoryProps;
   equipment?: EquipmentPropsType;
-  eventEmitter: EventEmitter;
   currentHealth;
   maxHealth;
+  skills: Skill[];
 }
 
 export type EquipmentPropsType = Partial<Record<SlotType, EquipmentProps>>;

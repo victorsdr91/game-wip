@@ -8,6 +8,7 @@ export interface PlayerInfo {
   stats: ActorStats,
   equipment: EquipmentType,
   equipmentSlots: EquipmentSlotsType,
+  experience: number,
   totalHP: number,
   remainingHP: number,
   isDead: boolean;
@@ -35,6 +36,7 @@ export const defaultEquipmentSlots: EquipmentSlotsType = new Map();
 const playerInfo: PlayerInfo = {
   nickname: 'Player',
   level: 0,
+  experience: 0,
   stats: defaultStats,
   equipment: defaultEquipment,
   equipmentSlots: defaultEquipmentSlots,

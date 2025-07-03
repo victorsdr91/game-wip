@@ -1,12 +1,15 @@
-import { PacificNpcType } from "scenes/Test/contract";
+import { NpcInterface } from "scenes/Test/contract";
 import { spriteSize } from "scenes/Test/contract";
 import { PacificNpcEventMap } from "./events";
+import { NpcType } from "model/Npc/contract";
 
-export const pacificNpcMock: PacificNpcType = {
+export const pacificNpcMock: NpcInterface = {
     name: "NPC TEST",
-    pos: { x:27 , y:373, z: 10 },
-    currentHealth: 128,
-    maxHealth: 128,
+    pos: { x: 27, y: 373, z: 10 },
+    type: NpcType.ALLY,
+    health: {
+        total: 128,
+    },
     sprite: "monster_001",
     spriteSize: {
         width: spriteSize.small,
@@ -27,4 +30,5 @@ export const pacificNpcMock: PacificNpcType = {
         critical_rate: 2,
     },
     events: PacificNpcEventMap,
+    skills: []
 };

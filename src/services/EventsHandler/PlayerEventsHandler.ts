@@ -2,10 +2,9 @@ import { SlotValidator } from "model/Item/SlotValidator";
 import { WereableItem } from "model/Item/WereableItem";
 import { Player } from "model/Player/Player";
 import { EquipItemPayload, GamePlayerEvents, HudPlayerEvents, UnequipItemPayload } from "state/helpers/PlayerEvents";
-import ex, { EventEmitter } from "excalibur";
+import { EventEmitter } from "excalibur";
 import { ActorStats, Attack } from "model/ExtendedActor/contract";
 import EventsHandler from "./EventsHandler";
-import { AttackType, DamageType, ElementType } from "model/ExtendedActor/types/AttackType.enum";
 
 class PlayerEventsHandler extends EventsHandler {
     private player: Player;
@@ -16,8 +15,6 @@ class PlayerEventsHandler extends EventsHandler {
     }
 
     initialize() {
-        this.handleNpcAttack();
-        this.handleMonsterRewards();
         this.handleEquipItem();
         this.handleRemoveEquipment();
         this.updatePlayerInfoHud();
@@ -54,38 +51,6 @@ class PlayerEventsHandler extends EventsHandler {
         });
     }
 
-    handleNpcAttack() {
-         const subscription = this.levelEventHandler.on("npc-attack", ({ pos, range, damage, from}) => {
-            let diff = this.player.pos.sub(pos);
-            if (diff.distance() > range) {
-                subscription.close();
-                return;
-            }
-            const healthAfterDamage = this.player.receiveDamage(damage, from);
-            this.player.updateHealth(healthAfterDamage);
-        });
-    }
-
-    handleMonsterRewards() {
-        const subscription = this.levelEventHandler.on("npc-aggresive-died", ({ actor, rewards}) => {
-            if(this.player.name === actor.name) {
-                if(rewards.exp) {
-                    this.player.updateExp(rewards.exp);
-                    subscription.close();
-                }
-            }
-        });
-    }
-    handleAttackEvent(attackData:{ range: number, type: AttackType, element: ElementType,  damage: number, damageType: DamageType }) {
-        const data: Attack = {
-            from: this.player,
-            pos: this.player.pos,
-            direction: this.player.getDirection(),
-            ...attackData,
-        }
-        this.levelEventHandler.emit(`player-attack`, data);
-    }
-
     updateHealthOnHud(health: number) {
         this.gameHandler.emit(HudPlayerEvents.HUD_PLAYER_REMAINING_HP, {remainingHP: health});
     }
@@ -97,7 +62,9 @@ class PlayerEventsHandler extends EventsHandler {
     updatePlayerInfoHud() {
         const data = {
             nickname: this.player.name,
-            stats: this.player.getStats(),
+            stats: this.player.getStats().stats,
+            experience: this.player.getExperience().experience,
+            level: this.player.getExperience().level,
             equipment: this.player.getEquipment().equipment,
             equipmentSlots: this.player.getEquipment().equipmentSlots,
             totalHP: this.player.getMaxHealth(),

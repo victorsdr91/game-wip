@@ -1,7 +1,8 @@
-import { SpriteSheet, Animation, range, AnimationStrategy } from "excalibur";
+import { SpriteSheet, Animation, range, AnimationStrategy, Sprite } from "excalibur";
 import { PlayerResources } from "../../resources";
 import { AttackPlayerAnimations, PlayerAnimations } from "./contract";
-import { AnimationDirection, useAnimationInput } from "../ExtendedActor/contract";
+import { useAnimationInput } from "../ExtendedActor/contract";
+import { MovementDirection } from "services/systems/Movement/types/movement.enum";
 
 
 export class PlayerAnimation {
@@ -110,11 +111,11 @@ export class PlayerAnimation {
         return this.attackAnimations;
     }
 
-    public useAttackAnimation(direction: AnimationDirection, attackMode: number): Animation {
+    public useAttackAnimation(direction: MovementDirection, attackMode: number): Animation {
         return this.attackAnimations[direction][attackMode];
     }
 
-    public usePlayerAnimation({mode, direction}: useAnimationInput): Animation {
+    public usePlayerAnimation({mode, direction}: useAnimationInput): Animation | Sprite {
         return this.playerAnimations[mode][direction];
     }
     

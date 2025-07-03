@@ -1,81 +1,37 @@
 import { CollisionType, Engine, EventEmitter, Scene, Vector } from "excalibur";
-import { playerInfoType, worldInfoType } from "./contract";
+import { NpcInterface, playerInfoType, worldInfoType } from "./contract";
 import { Resources, worldLoader } from "./resources";
-import { PacificNpc } from "../../model/Npc/PacificNpc";
-import { AgressiveNpc } from "../../model/Npc/AgressiveNpc";
-import { Slime } from "../../model/Npc/Slime";
 import { Player } from "../../model/Player/Player";
 import { Hud } from "../../ui/Hud";
 import { PlayerProps } from "../../model/Player/contract";
 import { EventManager } from "model/EventManager/EventManager";
-
+import { CombatSystem } from "services/systems/Combat/CombatSystem";
+import { HealthSystem } from "services/systems/Health/HealthSystem";
+import { MovementSystem } from "services/systems/Movement/MovementSystem";
+import { Npc } from "model/Npc/Npc";
 
 export class TestLevel extends Scene {
     private _playerInfo: playerInfoType;
+    private _npcInfo: NpcInterface[];
     private hud: Hud;
     private player: Player | undefined;
-    private pacificNpcs: PacificNpc[];
-    private agressiveNpcs: AgressiveNpc[];
     private eventEmitter: EventEmitter;
     currentWorldPos: Vector = new Vector(0, 0);
-
     
     constructor (worldInfo: worldInfoType) {
         super();
         this._playerInfo = worldInfo.playerInfo;
-        this.pacificNpcs = new Array<PacificNpc>();
-        this.agressiveNpcs = new Array<AgressiveNpc>();
+        this._npcInfo = worldInfo.Npcs;
         this.eventEmitter = new EventEmitter();
         this.hud = new Hud({eventEmitter: this.eventEmitter});
-
-
-        worldInfo.pacificNPCs.forEach((npc) => {
-            this.pacificNpcs.push(
-                new PacificNpc({
-                    name: npc.name,
-                    pos: npc.pos,
-                    spriteSize: npc.spriteSize,
-                    sprite: npc.sprite,
-                    events: npc.events,
-                    collisionType: CollisionType.Fixed,
-                    stats: npc.stats,
-                    currentHealth: npc.currentHealth,
-                    maxHealth: npc.maxHealth,
-                    eventEmitter: this.events,
-                })
-            );
-        });
-         worldInfo.agressiveNPCs.forEach((npc) => {
-            let npcToPush: AgressiveNpc;
-             if(npc.name === "Slime") {
-                npcToPush = new Slime({
-                    name: npc.name,
-                    pos: npc.pos,
-                    spriteSize: npc.spriteSize,
-                    sprite: npc.sprite,
-                    collisionType: CollisionType.Active,
-                    events: npc.events,
-                    stats: npc.stats,
-                    currentHealth: npc.currentHealth,
-                    maxHealth: npc.maxHealth,
-                    rewards: npc.rewards || { exp: 0 },
-                    eventEmitter: this.events,
-                });
-                this.agressiveNpcs.push(npcToPush);
-            }
-        });
-
-        this.events.on('npc-agressive-died', (event: unknown) => {
-            const { npc } = event as { npc: AgressiveNpc };
-            setTimeout(() => { 
-                console.log(npc.name + "is regenerating");
-                this.add(npc);
-            }, 20000);
-        });
     }
 
     onInitialize(engine: Engine): void {
         EventManager.levelEventEmitter = this.eventEmitter;
+        this.loadSystems();
+        this.loadPlayer().then(() => {  this.loadHUD(); });
+        this.loadNpcs();
+        
         engine.start(worldLoader).then(() => {
             Resources.Level1Map.addToScene(this);
         });
@@ -87,9 +43,10 @@ export class TestLevel extends Scene {
         });
     }
 
-    onActivate(): void {
-        this.loadPlayer().then(() => {  this.loadHUD(); });
-        this.loadNpcs();
+    loadSystems(): void {
+        this.world.add(new CombatSystem(this.world));
+        this.world.add(new HealthSystem(this.world));
+        this.world.add(new MovementSystem(this.world));
     }
 
     private async loadPlayer(): Promise<void> {
@@ -100,9 +57,9 @@ export class TestLevel extends Scene {
             inventory: this._playerInfo.inventory,
             equipment: this._playerInfo.equipment,
             stats: this._playerInfo.stats,
-            eventEmitter: this.events,
-            currentHealth: this._playerInfo.currentHealth,
-            maxHealth: this._playerInfo.maxHealth,
+            currentHealth: this._playerInfo.health.current,
+            maxHealth: this._playerInfo.health.total,
+            skills: this._playerInfo.skills,
         };
 
         this.player = new Player(playerProps);
@@ -113,11 +70,21 @@ export class TestLevel extends Scene {
     }
 
     private loadNpcs(): void {
-        this.pacificNpcs.forEach((npc) => {
-            this.add(npc);
-        });
-        this.agressiveNpcs.forEach((npc) => {
-            this.add(npc);
+        this._npcInfo.forEach((npc) => {
+            const worldNpc = new Npc({
+                    name: npc.name,
+                    type: npc.type,
+                    pos: npc.pos,
+                    spriteSize: npc.spriteSize,
+                    sprite: npc.sprite,
+                    events: npc.events,
+                    collisionType: CollisionType.Fixed,
+                    stats: npc.stats,
+                    currentHealth: npc.health.current,
+                    maxHealth: npc.health.total,
+                    skills: npc.skills || []
+                });
+            this.add(worldNpc);
         });
     }
 

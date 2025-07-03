@@ -1,24 +1,22 @@
 import { Vector } from "excalibur";
 import { InventoryItem } from "model/Inventory/contract";
 import { playerInfoType } from "scenes/Test/contract";
+import { basicAreaConeSkill, basicAreaRangedSkill, basicAreaSkill, basicPhysicalSkill, basicRangedSkill } from "./skills";
 
 const playerItems: Map<number, InventoryItem> = new Map<number, InventoryItem>();
 playerItems.set(0, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
 playerItems.set(1, { itemId: 2, quantity: 20}); // Adding arrows with ID 2 and quantity 20
-playerItems.set(2, { itemId: 3, quantity: 1}); // Adding a sword with ID 1 and quantity 1
-playerItems.set(3, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
-playerItems.set(4, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
-playerItems.set(5, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
-playerItems.set(25, { itemId: 1, quantity: 1}); // Adding a sword with ID 1 and quantity 1
-
+playerItems.set(2, { itemId: 3, quantity: 1}); // Adding a shield with ID 3 and quantity 1
 
 
 export const playerInfo: playerInfoType = {
   nickname: "TrianMARC",
   position: new Vector(123, 485),
   zIndex: 10,
-  currentHealth: 128,
-  maxHealth: 128,
+  health: {
+    current: 128,
+    total: 128,
+  },
   progress: {
     exp: 0,
     expNextLevel: 100,
@@ -45,5 +43,6 @@ export const playerInfo: playerInfoType = {
     f_damage: 10,
     m_damage: 10,
     critical_rate: 3,
-  }
+  },
+  skills: [ basicPhysicalSkill, basicAreaRangedSkill, basicAreaSkill, basicRangedSkill, basicAreaConeSkill ],
 };

@@ -1,9 +1,7 @@
-import { Animation, CollisionType, Engine, Keys, Vector, GraphicsGroup, CollisionGroupManager } from "excalibur";
-import { Config } from "../../state/config/Config";
+import { Animation, CollisionType, Engine, Keys, Vector, GraphicsGroup, CollisionGroupManager, Sprite } from "excalibur";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
-import { AnimationDirection, AnimationMode } from "../ExtendedActor/contract";
 import { PlayerAnimation } from "./PlayerAnimations";
-import { PlayerProgressType, PlayerProps } from "./contract";
+import { PlayerProps } from "./contract";
 import { Inventory } from "model/Inventory/Inventory";
 import { PlayerEquipment } from "./PlayerEquipment";
 import { WereableItem } from "model/Item/WereableItem";
@@ -12,7 +10,11 @@ import { SlotType } from "./types/SlotType.enum";
 import { ItemGroup } from "model/Item/ItemGroup";
 import { ItemInterface } from "model/Item/interface/ItemInterface";
 import PlayerEventsHandler from "services/EventsHandler/PlayerEventsHandler";
-import { AttackType, DamageType, ElementType } from "model/ExtendedActor/types/AttackType.enum";
+import { MovementDirection, MovementMode } from "services/systems/Movement/types/movement.enum";
+import { MovementComponent } from "services/systems/Movement/components/MovementComponent";
+import { release } from "os";
+import { StatsEnum } from "services/systems/common/components/types/stats.enum";
+import { CombatComponent } from "services/systems/Combat/components/CombatComponent";
 
 export const PlayerCollisionGroup = CollisionGroupManager.create('player');
 
@@ -20,13 +22,14 @@ export class Player extends ExtendedActor {
   private playerAnimation: PlayerAnimation;
   private keyboardConfig: KeyboardConfig;
   private attackMode: number = 0;
-  private progress: PlayerProgressType;
   private inventory: Inventory;
   private deathMessageShown: boolean = false;
   private equipment: PlayerEquipment;
   private playerEventHandler: PlayerEventsHandler;
 
-  constructor({pos, name, currentHealth, maxHealth, progress, stats, inventory, equipment, eventEmitter}: PlayerProps) {
+  private combat: CombatComponent;
+
+  constructor({pos, name, currentHealth, maxHealth, progress, stats, inventory, equipment, skills}: PlayerProps) {
     super({
       name,
       pos: pos,
@@ -37,32 +40,37 @@ export class Player extends ExtendedActor {
       collisionType: CollisionType.Active,
       collisionGroup: PlayerCollisionGroup,
       stats,
-      eventEmitter,
     });
-    this.progress = progress;
-    this.playerAnimation = new PlayerAnimation(this.frameSpeed);
+    this.experience.experience = progress.exp;
+    this.playerAnimation = new PlayerAnimation(200);
     this.inventory = new Inventory(inventory);
     this.equipment = new PlayerEquipment({equipment});
 
     this.keyboardConfig = new KeyboardConfig(this.getKeyCallbackMap());
-    this.playerEventHandler = new PlayerEventsHandler({player: this, eventEmitter});
+    this.playerEventHandler = new PlayerEventsHandler({player: this, eventEmitter: this.events});
 
+    this.combat = new CombatComponent(skills);
+    this.addComponent(this.combat);
   }
 
   private getKeyCallbackMap(): KeyboardConfigProps  {
     const keyCallbackMap: KeyboardConfigProps = {
       movement: new Map<string, KeyCallback>(),
-      skills: new Map<string, KeyCallback>(),
+      skills: new Map<string, {press: KeyCallback, release: KeyCallback}>(),
       shortcuts: new Map<string, KeyCallback>()
     };
 
-    keyCallbackMap.movement.set("left", () => { this.move(AnimationDirection.LEFT, AnimationMode.WALK)});
-    keyCallbackMap.movement.set("right", () => { this.move(AnimationDirection.RIGHT, AnimationMode.WALK)});
-    keyCallbackMap.movement.set("up", () => { this.move(AnimationDirection.UP, AnimationMode.WALK)});
-    keyCallbackMap.movement.set("down", () => { this.move(AnimationDirection.DOWN, AnimationMode.WALK)});
-    keyCallbackMap.movement.set("run", () => { this.run() });
+    keyCallbackMap.movement.set("left", () => { this.move(MovementDirection.LEFT, MovementMode.WALK)});
+    keyCallbackMap.movement.set("right", () => { this.move(MovementDirection.RIGHT, MovementMode.WALK)});
+    keyCallbackMap.movement.set("up", () => { this.move(MovementDirection.UP, MovementMode.WALK)});
+    keyCallbackMap.movement.set("down", () => { this.move(MovementDirection.DOWN, MovementMode.WALK)});
+    keyCallbackMap.movement.set("run", () => { this.setMovementMode(MovementMode.RUN) });
 
-    keyCallbackMap.skills.set("first", () => { this.isAttacking = true; });
+    keyCallbackMap.skills.set("first", {press: () => { this.useSkill(0) }, release: () => { this.executeSkill() }});
+    keyCallbackMap.skills.set("second", {press: () => { this.useSkill(1) }, release: () => { this.executeSkill() }});
+    keyCallbackMap.skills.set("third", {press: () => { this.useSkill(2) }, release: () => { this.executeSkill() }});
+    keyCallbackMap.skills.set("fourth", {press: () => { this.useSkill(3) }, release: () => { this.executeSkill() }});
+    keyCallbackMap.skills.set("fifth", {press: () => { this.useSkill(4) }, release: () => { this.executeSkill() }});
 
     keyCallbackMap.shortcuts.set("bag", () => { this.playerEventHandler.toggleInventory() });
     keyCallbackMap.shortcuts.set("player", () => { this.playerEventHandler.toggleProfile() });
@@ -82,11 +90,24 @@ export class Player extends ExtendedActor {
     Object.values(attacks).forEach((attackDirection) => {
       attackDirection.forEach((attack) => {
         attack.events.on("loop", () => {
-          this.isAttacking = false;
-          this.playerBasicAttack();
+          this.combat.isInCombat = false;
         });
       });
     });
+  }
+
+  useSkill(skillIndex: number): void {
+    this.combat.isInCombat = true;
+    const skill = this.combat.skills[skillIndex];
+    if(skill) {
+      this.combat.currentSkill = {skill, isExecuted: false};
+    }
+  }
+
+  executeSkill(): void {
+    if(this.combat.currentSkill) {
+      this.combat.executeSkill();
+    }
   }
 
   loadEquipmentStats() {
@@ -112,15 +133,14 @@ export class Player extends ExtendedActor {
     this.playerEventHandler.updatePlayerInfoHud();
   }
 
-  
-
   public addEquipmentStats(item: ItemInterface): void {
     if(item instanceof WereableItem && item.getStats() && item.getSlot() !== SlotType.BULLET) {
       const itemStats = item.getStats();
       if(itemStats) {
         Object.keys(itemStats).forEach((statKey) => {
-          if(this.stats[statKey]) {
-            this.stats[statKey] += itemStats[statKey];
+          const currentStatValue = this.stats.getStat(statKey as StatsEnum);
+          if(currentStatValue) {
+            this.stats.setStat(statKey as StatsEnum, currentStatValue + itemStats[statKey]);
           }
         });
       }
@@ -133,78 +153,28 @@ export class Player extends ExtendedActor {
       const itemStats = item.getStats();
       if(itemStats) {
         Object.keys(itemStats).forEach((statKey) => {
-          if(this.stats[statKey]) {
-            this.stats[statKey] -= itemStats[statKey];
+          const currentStatValue = this.stats.getStat(statKey as StatsEnum);
+          if(currentStatValue) {
+            this.stats.setStat(statKey as StatsEnum, currentStatValue - itemStats[statKey]);
           }
         });
       }
     }
   }
-
-  public isLvlUp(exp: number): boolean {
-    return exp >= this.progress.expNextLevel;
-  }
   
-  public lvlUp() {
-    this.stats.level++;
-    const diffExp = this.progress.exp - this.progress.expNextLevel;
-    this.progress.exp = diffExp;
-    this.progress.expNextLevel += (this.progress.expNextLevel*1.5)+50;
-
-    this.playerEventHandler.updateStatsOnHud(this.stats);
-  }
-
-  private playerBasicAttack() {
-    if(++this.attackMode > 2) {
-      this.attackMode = 0;
-    }
-    this.playerEventHandler.handleAttackEvent({
-      range: 20, 
-      damage: this.calculatePhysicalDamage(),
-      type: AttackType.PHYSICAL,
-      element: ElementType.NORMAL,
-      damageType: DamageType.SINGLE
-    });
-  }
-
-  private calculatePhysicalDamage(): number {
-    if(this.target) {
-      const targetStats = this.target.getStats();
-      const levelDifference = this.stats.level - targetStats.level;
-      
-      if(levelDifference < 0) {
-        return (this.stats.f_attack * this.stats.f_damage * 0.5) + (1.5*this.stats.level) - (levelDifference * 2);
-      } else if(levelDifference > 0) {
-        return (this.stats.f_attack * this.stats.f_damage * 0.5) + (1.5*this.stats.level) + (levelDifference * 2);
-      }
-    }
-
-    return (this.stats.f_attack * this.stats.f_damage * 0.5) + (1.5*this.stats.level);
-  }
-
-  private run(): void {
-    this.isRunning = true;
-    this.movementMode = AnimationMode.RUN;
+  public updateHud(): void {
+    this.playerEventHandler.updatePlayerInfoHud();
   }
 
   onPreUpdate(engine: Engine, elapsedMs: number): void {
-    this.vel = Vector.Zero;
-    this.movementSpeed = this.isRunning ? this.originalSpeed * 2 : this.originalSpeed;
-    this.movementMode = AnimationMode.IDLE;
-
-    const runKey = Config.getControls().keyboard.movement.run as Keys;
-
-    if(this.isRunning && !engine.input.keyboard.isHeld(runKey)) {
-      this.isRunning = false;
-      this.movementMode = AnimationMode.WALK;
-    }
+    super.onPreUpdate(engine, elapsedMs);
 
     this.keyboardConfig.bindKeys(engine);
-    let animationGraphic = this.playerGraphic(this.playerAnimation.usePlayerAnimation({ mode: this.movementMode, direction: this.direction}));
+    let animationGraphic = this.playerGraphic(this.playerAnimation.usePlayerAnimation({ mode: this.movement.mode, direction: this.movement.direction}));
     
-    if(this.isAttacking) {
-      animationGraphic = this.playerGraphic(this.playerAnimation.useAttackAnimation(this.direction, this.attackMode || 0));
-    } else if(this.isDead) {
+    if(this.combat.isInCombat) {
+      animationGraphic = this.playerGraphic(this.playerAnimation.useAttackAnimation(this.movement.direction, this.attackMode || 0));
+    } else if(!this.health.isAlive()) {
       animationGraphic = this.playerGraphic(this.playerAnimation.useDieAnimation());
     }
 
@@ -212,13 +182,13 @@ export class Player extends ExtendedActor {
   }
 
   onPostUpdate(engine: Engine, elapsed: number): void {
-    if(this.isDead && !this.deathMessageShown) {
+    if(!this.health.isAlive() && !this.deathMessageShown) {
       this.playerEventHandler.sendPlayerDead(this.resetPlayer);
       this.deathMessageShown = true;
     }
   }
 
-  protected playerGraphic(animation: Animation): GraphicsGroup {
+  public playerGraphic(animation: Animation | Sprite): GraphicsGroup {
     const graphicsGroup = new GraphicsGroup({
       useAnchor: true,
       members: [
@@ -239,32 +209,22 @@ export class Player extends ExtendedActor {
   }
 
   public updateHealth(health: number): void {
-    this.setHealth(health);
-    this.playerEventHandler.updateHealthOnHud(this.getHealth());
+    this.health.health = health;
+    this.playerEventHandler.updateHealthOnHud(this.health.health);
   }
 
   public resetPlayer = () => {
-    this.pos = this.originalPosition;
-    this.isDead = false;
-    this.direction = AnimationDirection.DOWN;
+    this.pos = this.get(MovementComponent)?.originalPosition || new Vector(0, 0);
+    this.health.health = this.health.maxHealth;
+    this.movement.direction = MovementDirection.DOWN;
     this.deathMessageShown = false;
-    this.updateHealth(this.getMaxHealth());
   }
 
   public getEquipment(): PlayerEquipment {
     return this.equipment;
   }
 
-  public getProgress(): PlayerProgressType {
-    return this.progress;
-  }
-
   public getInventory(): Inventory {
     return this.inventory;
-  }
-
-  public updateExp(receivedExp: number): void {
-      this.progress.exp += receivedExp;
-      this.isLvlUp(this.progress.exp) && this.lvlUp();
   }
 }

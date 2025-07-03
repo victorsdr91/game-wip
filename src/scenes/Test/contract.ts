@@ -4,6 +4,8 @@ import { EquipmentPropsType, PlayerProgressType } from "../../model/Player/contr
 import { InventoryProps } from "model/Inventory/contract";
 import { ItemProps } from "model/Item/types/ItemTypes";
 import { EventMap } from "model/EventManager/contract";
+import { Skill } from "services/systems/Combat/types/skill.type";
+import { NpcType } from "model/Npc/contract";
 
 export interface playerInfoType {
     equipment?: EquipmentPropsType;
@@ -12,69 +14,26 @@ export interface playerInfoType {
     zIndex: number;
     inventory: InventoryProps;
     progress: PlayerProgressType;
-    currentHealth: number,
-    maxHealth: number,
+    health: HealthType;
     stats: ActorStats;
+    skills: Skill[];
 };
 
-export interface agressiveNpcType {
-    name: string;
-    pos: {
-        x: number;
-        y: number;
-        z?: number;
-    };
-    sprite: string;
-    spriteSize: {
-        width: number;
-        height: number;
-    };
-    stats: ActorStats;
-    currentHealth?: number;
-    maxHealth: number;
-    rewards: RewardType;
-    events?: EventMap;
-}
-
 export interface HealthType {
-    current: number;
+    current?: number;
     total: number;
 }
 
-export enum NPCTypes {
-    PACIFIC = "pacific",
-    AGRESSIVE = "agressive"
-}
 
-export interface NPC {
-    npcName: string;
-    type: NPCTypes;
-    pos: {
-        x: number,
-        y: number,
-        z?: number
-    };
-    currentHealth?: number;
-    maxHealth: number;
-    sprite: string;
-    events?: EventMap;
-    spriteSize: {
-        width: spriteSize;
-        height: spriteSize;
-    }
-    rewards?: RewardType;
-    stats: ActorStats;    
-}
-
-export interface PacificNpcType {
+export interface NpcInterface {
     name: string;
+    type: NpcType;
     pos: {
         x: number,
         y: number,
         z?: number
     };
-    currentHealth?: number;
-    maxHealth: number;
+    health: HealthType;
     sprite: string;
     events?: EventMap;
     spriteSize: {
@@ -82,8 +41,10 @@ export interface PacificNpcType {
         height: spriteSize;
     }
     rewards?: RewardType;
-    stats: ActorStats;    
+    stats: ActorStats;
+    skills: Skill[];
 }
+
   
 export enum spriteSize {
     medium = 32,
@@ -104,7 +65,6 @@ export interface ItemDrop {
 
 export interface worldInfoType {
     playerInfo: playerInfoType;
-    pacificNPCs: Array<PacificNpcType>;
-    agressiveNPCs: Array<agressiveNpcType>;
+    Npcs: Array<NpcInterface>;
 }
 

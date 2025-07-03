@@ -19,7 +19,7 @@ export class Game extends Engine {
       width: 1366,
       height: 768,
       pixelArt: true,
-      pointerScope: PointerScope.Canvas,
+      pointerScope: PointerScope.Document,
       displayMode: DisplayMode.FitScreen
     });
 
@@ -37,7 +37,7 @@ export class Game extends Engine {
   async setUpGame()  {
     console.log("Setting up game...");
     try {
-      navigator.keyboard.lock([...Object.values(keyboardConfig.movement), ...Object.values(keyboardConfig.shortcuts), ...Object.values(keyboardConfig.skills), "Escape"]);
+      //navigator.keyboard.lock([...Object.values(keyboardConfig.movement), ...Object.values(keyboardConfig.shortcuts), ...Object.values(keyboardConfig.skills), "Escape"]);
       Config.setControls(this.config.controls);
       ItemFactory.loadItems(ITEMS);
       const mainWorld = new TestLevel(this.worldInfo);

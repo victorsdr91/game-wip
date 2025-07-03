@@ -1,16 +1,20 @@
 import { loader } from "./resources";
-import { agressiveNpcType, PacificNpcType, spriteSize, worldInfoType } from "./scenes/Test/contract";
+import { NpcInterface, spriteSize, worldInfoType } from "./scenes/Test/contract";
 import { calculateExPixelConversion } from "./ui/utils/pixelRatioUtils";
 import { playerInfo } from "./mocks/player";
 import { Game } from "services/Game";
 import { pacificNpcMock } from "./mocks/pacificNpc";
+import { basicSlimeSkill } from "./mocks/skills";
+import { NpcType } from "model/Npc/contract";
 
-const generateMonster = (x: number, y: number): agressiveNpcType => {
+const generateMonster = (x: number, y: number): NpcInterface => {
   return { 
     name: "Slime",
+    type: NpcType.ENEMY,
     pos: {x, y, z: 9},
-    currentHealth: 128,
-    maxHealth: 128,
+    health: {
+      total: 128
+    },
     sprite: "monster_001",
     spriteSize: {
       width: spriteSize.small,
@@ -32,26 +36,27 @@ const generateMonster = (x: number, y: number): agressiveNpcType => {
       f_damage: 10,
       m_damage: 10,
       critical_rate: 2,
-    }
+    },
+    skills: [ basicSlimeSkill ],
   };
 };
 
-const agressiveNPCs = new Array<agressiveNpcType>();
+
+
+
+const Npcs =new Array<NpcInterface>();
 
 for(let i = 0; i < 5; i++) {
-  agressiveNPCs.push(generateMonster(
+  Npcs.push(generateMonster(
     491+Math.random()*132,
     203+Math.random()*258
   ));
 }
-
-const pacificNPCs =new Array<PacificNpcType>();
-pacificNPCs.push(pacificNpcMock);
+Npcs.push(pacificNpcMock);
 
 const worldInfo: worldInfoType = {
   playerInfo,
-  agressiveNPCs,
-  pacificNPCs,
+  Npcs
 };
 
 export const game = Game.getInstance();

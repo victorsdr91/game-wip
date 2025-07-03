@@ -8,9 +8,6 @@ import PlayerProfile from './components/PlayerHud/PlayerInformation/PlayerProfil
 import { InventoryProvider } from './clientState/providers/PlayerItemHandler/InventoryProvider';
 import Dialogue from './components/Dialogue/Dialogue';
 
-
-
-
 export const UI = () => {
   const [isPlayerInteracting, setIsPlayerInteracting] = useState<boolean>(false);
 
@@ -45,7 +42,7 @@ const ControlsHelp = () => (
   <div className="fixed bottom-1/8 right-1/5 text-white text-center p-2 bg-black opacity-55 rounded-sm">
       <div>Use <strong>W A S D</strong> to move around.</div>
       <div>Maintain pressed <strong>Left Shift</strong> to run.</div>
-      <div>Press <strong>1</strong> to attack.</div>
+      <div>Press <strong>1-5</strong> to attack.</div>
       <div>Press <strong>B</strong> to open de bag.</div>
       <div>Press <strong>C</strong> to open de player profile.</div>
   </div>

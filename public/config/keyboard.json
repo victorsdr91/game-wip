@@ -7,7 +7,13 @@
         "run": "ShiftLeft"
     },
     "skills": {
-        "first": "Digit1"
+        "first": "Digit1",
+        "second": "Digit2",
+        "third": "Digit3",
+        "fourth": "Digit4",
+        "fifth": "Digit5",
+        "sixth": "Digit6",
+        "seventh": "Digit7"
     },
     "shortcuts": {
         "bag": "KeyB",

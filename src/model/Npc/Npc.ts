@@ -1,9 +1,15 @@
-import { Color, Font, GraphicsGroup, ImageSource, Sprite, SpriteSheet, Text, TextAlign, Vector, Animation, range, AnimationStrategy, Graphic, Engine} from "excalibur";
+import { Color, Font, GraphicsGroup, ImageSource, Sprite, SpriteSheet, Text, TextAlign, Vector, Animation, range, AnimationStrategy, Graphic, Engine, CollisionGroupManager, CollisionGroup} from "excalibur";
 import { ExtendedActor } from "../ExtendedActor/ExtendedActor";
 import { spriteSize } from "../../scenes/Test/contract";
-import { NpcType } from "./contract";
+import { NpcProps, NpcType } from "./contract";
 import { Resources } from "../../scenes/Test/resources";
 import { EventMap } from "model/EventManager/contract";
+import { TauntComponent } from "services/systems/Combat/components/TauntComponent";
+import { Skill } from "services/systems/Combat/types/skill.type";
+import { CombatComponent } from "services/systems/Combat/components/CombatComponent";
+
+export const AlliesGroup = CollisionGroupManager.create('allies');
+export const EnemiesGroup = CollisionGroupManager.create('enemies');
 
 export interface npcAnimations {
   idle: { 
@@ -21,36 +27,39 @@ export interface npcAnimations {
   die?: Sprite | Animation,
 }
 
-export abstract class Npc extends ExtendedActor {
+export class Npc extends ExtendedActor {
     protected sprite: ImageSource;
     protected spriteSize: { width: spriteSize, height: spriteSize };
     protected animations: npcAnimations | undefined;
-    protected eventMap: EventMap;
+    protected _eventMap: EventMap;
+    private skills: Skill[] = [];
+    private _type: NpcType;
 
-    public hpGraphic: Text;
-    constructor({ name, pos, sprite, spriteSize, collisionType, collisionGroup, stats, currentHealth, maxHealth, eventEmitter, events}: NpcType) {
+    hpGraphic: Text;
+
+    constructor({ name, pos, sprite, type, spriteSize, collisionType,stats, currentHealth, maxHealth, events, skills }: NpcProps) {
       super({
         name,
         pos: new Vector(pos.x, pos.y),
         width: spriteSize.width,
         height: spriteSize.height,
         collisionType,
-        collisionGroup,
+        collisionGroup: type === NpcType.ENEMY ? EnemiesGroup : AlliesGroup,
         stats,
         currentHealth,
         maxHealth,
-        eventEmitter
       });
-
       this.z = pos.z || 9;
       this.hpGraphic = new Text({ text: `${this.getHealth()}`, font: new Font({size: 8, color: Color.Green, textAlign: TextAlign.Center})});
       this.sprite = Resources[sprite];
       this.spriteSize = spriteSize;
-      this.eventMap = events || [];
-  
+      this._eventMap = events || [];
+      this._type = type;
+      this.skills = skills || [];
     }
   
     onInitialize() {
+      this.addNpcComponents();
       const spriteSheet = SpriteSheet.fromImageSource({
         image: this.sprite,
         grid: {
@@ -91,6 +100,12 @@ export abstract class Npc extends ExtendedActor {
     onPreUpdate(engine: Engine, elapsed: number): void {
       if(this.animations) {
         this.useGraphic(this.animations.idle.down);
+        this.hpGraphic.text = `${this.getHealth()}`;
+        if( this.getHealth() <= 0 && this.animations.die) {
+          this.useGraphic(this.animations.die);
+          this.hpGraphic.color = Color.Red;
+        }
+        
       }
     }
 
@@ -106,6 +121,10 @@ export abstract class Npc extends ExtendedActor {
             graphic: this.nameTextGraphic,
             offset: new Vector(0, -20),
           },
+          {
+            graphic: this.hpGraphic,
+            offset: new Vector(0, -27),
+          },
         ]
       });
       graphicsGroup.width = 32;
@@ -120,5 +139,30 @@ export abstract class Npc extends ExtendedActor {
         const fromBottom = playerPos.y < this.pos.y && playerDirection === "down";
 
         return fromBottom || fromLeft || fromTop || fromRight;
+    }
+
+    get type(): NpcType {
+        return this._type;
+    }
+    get eventMap(): EventMap {
+        return this._eventMap;
+    }
+
+    addNpcComponents(): void {
+        switch (this._type) {
+            case NpcType.ENEMY:
+                const tauntComponent = new TauntComponent();
+                const combatComponent = new CombatComponent(this.skills);
+                this.addComponent(combatComponent);
+                this.addComponent(tauntComponent);
+                break;
+            case NpcType.NEUTRAL:
+                break;
+            case NpcType.MERCHANT:
+                break;
+            case NpcType.ALLY:
+            default:
+                break;
+        }
     }
 }
